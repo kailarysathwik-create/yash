@@ -162,9 +162,9 @@ export const tripAPI = {
       }
     },
 
-    session: async (sessionId) => {
+    session: async (accessToken) => {
       try {
-        const response = await apiClient.post('/auth/session', { session_id: sessionId });
+        const response = await apiClient.post('/auth/session', { access_token: accessToken });
         return response.data;
       } catch (error) {
         console.error('Failed to create session:', error.message);

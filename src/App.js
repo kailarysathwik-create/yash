@@ -11,17 +11,19 @@ import '@/App.css';
 
 function AppRouter() {
   const location = useLocation();
-  
-  // CRITICAL: Check for session_id synchronously during render to prevent race conditions
-  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-  if (location.hash?.includes('session_id=')) {
+
+  // Supabase OAuth returns access_token in the hash on /auth/callback
+  // This catches it no matter which route the hash lands on
+  if (location.hash?.includes('access_token=')) {
     return <AuthCallback />;
   }
-  
+
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
+      {/* Dedicated route for Supabase OAuth redirect */}
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/trip/:tripId" element={<ProtectedRoute><TripPlanner /></ProtectedRoute>} />

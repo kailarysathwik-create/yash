@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 
 const Login = () => {
   const handleGoogleLogin = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + '/dashboard';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+    // Redirect to /auth/callback — Supabase will append #access_token=... to this URL
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
   };
 
   return (

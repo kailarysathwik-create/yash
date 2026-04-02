@@ -16,21 +16,22 @@ const AuthCallback = () => {
 
     const processAuth = async () => {
       try {
-        // Extract session_id from hash
+        // Supabase returns the token in the URL hash after OAuth:
+        // /auth/callback#access_token=...&refresh_token=...&token_type=bearer
         const hash = window.location.hash;
         const params = new URLSearchParams(hash.substring(1));
-        const sessionId = params.get('session_id');
+        const accessToken = params.get('access_token');
 
-        if (!sessionId) {
-          console.error('No session_id found');
+        if (!accessToken) {
+          console.error('No access_token found in URL hash');
           navigate('/login');
           return;
         }
 
-        // Exchange session_id for session_token
+        // Send access_token to backend — backend will verify with Supabase and create a session
         const response = await axios.post(
           `${API}/auth/session`,
-          { session_id: sessionId },
+          { access_token: accessToken },
           { withCredentials: true }
         );
 
@@ -47,6 +48,8 @@ const AuthCallback = () => {
         }
       } catch (error) {
         console.error('Auth callback error:', error);
+        // Clear the hash to avoid infinite loop
+        window.history.replaceState(null, '', '/');
         navigate('/login');
       }
     };
