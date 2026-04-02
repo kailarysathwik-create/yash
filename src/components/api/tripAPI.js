@@ -1,0 +1,188 @@
+/**
+ * Trip API Client - Integrates with Y.A.S.H Backend
+ * Handles all API calls securely with credentials
+ */
+
+import axios from 'axios';
+
+// Get API URL from environment - ensure it's set in .env
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Create axios instance with default config
+const apiClient = axios.create({
+  baseURL: API,
+  withCredentials: true, // Important for cookie-based auth
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
+apiClient.interceptors.request.use(
+  (config) => {
+    // Auth headers are handled via cookies (withCredentials: true)
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 Unauthorized - user session expired
+    if (error.response?.status === 401) {
+      console.error('Session expired, please login again');
+      // Auth callback will handle redirect
+    }
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * Trip API Methods
+ */
+export const tripAPI = {
+  // Create a new trip
+  createTrip: async (tripDetails) => {
+    try {
+      const response = await apiClient.post('/trips/create', tripDetails);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create trip:', error.message);
+      throw error;
+    }
+  },
+
+  // Get trip details
+  getTrip: async (tripId) => {
+    try {
+      const response = await apiClient.get(`/trips/${tripId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch trip:', error.message);
+      throw error;
+    }
+  },
+
+  // Generate itinerary for a trip
+  generateItinerary: async (tripId) => {
+    try {
+      const response = await apiClient.post(`/trips/${tripId}/generate-itinerary`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to generate itinerary:', error.message);
+      throw error;
+    }
+  },
+
+  // Update itinerary
+  updateItinerary: async (tripId, itinerary) => {
+    try {
+      const response = await apiClient.put(`/trips/${tripId}/itinerary`, itinerary);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update itinerary:', error.message);
+      throw error;
+    }
+  },
+
+  // Update tourist details
+  updateTouristDetails: async (tripId, touristDetails) => {
+    try {
+      const response = await apiClient.post(
+        `/trips/${tripId}/tourist-details`,
+        touristDetails
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update tourist details:', error.message);
+      throw error;
+    }
+  },
+
+  // Save agency charges
+  saveAgencyCharges: async (tripId, agencyCharges) => {
+    try {
+      const response = await apiClient.post(
+        `/trips/${tripId}/agency-charges`,
+        { agency_charges: agencyCharges }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to save agency charges:', error.message);
+      throw error;
+    }
+  },
+
+  // Get payment info
+  getPaymentInfo: async (tripId) => {
+    try {
+      const response = await apiClient.get(`/trips/${tripId}/payment-info`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get payment info:', error.message);
+      throw error;
+    }
+  },
+
+  // Confirm payment
+  confirmPayment: async (tripId, transactionId) => {
+    try {
+      const response = await apiClient.post(
+        `/trips/${tripId}/confirm-payment`,
+        { transaction_id: transactionId }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to confirm payment:', error.message);
+      throw error;
+    }
+  },
+
+  // Auth endpoints (if using your own auth system)
+  auth: {
+    logout: async () => {
+      try {
+        const response = await apiClient.post('/auth/logout', {});
+        return response.data;
+      } catch (error) {
+        console.error('Failed to logout:', error.message);
+        throw error;
+      }
+    },
+
+    getMe: async () => {
+      try {
+        const response = await apiClient.get('/auth/me');
+        return response.data;
+      } catch (error) {
+        console.error('Failed to get user:', error.message);
+        throw error;
+      }
+    },
+
+    session: async (sessionId) => {
+      try {
+        const response = await apiClient.post('/auth/session', { session_id: sessionId });
+        return response.data;
+      } catch (error) {
+        console.error('Failed to create session:', error.message);
+        throw error;
+      }
+    },
+
+    onboarding: async (formData) => {
+      try {
+        const response = await apiClient.post('/onboarding', formData);
+        return response.data;
+      } catch (error) {
+        console.error('Failed to complete onboarding:', error.message);
+        throw error;
+      }
+    },
+  },
+};
+
+export default apiClient;

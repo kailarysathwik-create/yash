@@ -1,0 +1,24 @@
+<<<<<<< HEAD
+{
+  "builds": [
+    {
+      "src": "build/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/build/$1" }
+  ]
+=======
+{
+  "builds": [
+    {
+      "src": "build/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/build/$1" }
+  ]
+>>>>>>> 700dbfcf3697d15c97f489d75cc077a98bdad17d
+}
