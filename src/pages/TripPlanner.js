@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { ArrowRight, ArrowLeft, Edit2, Check, Loader2, MapPin, Plane, Home, User
 import RealTransportSearch from '@/components/RealTransportSearch';
 import RealStaySearch from '@/components/RealStaySearch';
 import UPIPayment from '@/components/UPIPayment';
-import { tripAPI } from '@/api/tripAPI'; // Use new API client
+import { tripAPI } from '@/api/tripAPI';
 
 const TripPlanner = () => {
   const { tripId } = useParams();
@@ -28,11 +28,7 @@ const TripPlanner = () => {
     additional_phones: []
   });
 
-  useEffect(() => {
-    loadTrip();
-  }, [tripId]);
-
-  const loadTrip = async () => {
+  const loadTrip = useCallback(async () => {
     try {
       const data = await tripAPI.getTrip(tripId);
       setTrip(data);
@@ -50,7 +46,7 @@ const TripPlanner = () => {
       }
 
       if (!data.itinerary) {
-        await generateItinerary();
+        await generateItinerary(data);
       }
     } catch (error) {
       console.error('Failed to load trip:', error);
@@ -59,9 +55,13 @@ const TripPlanner = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tripId, navigate, touristDetails.tourists.length]);
 
-  const generateItinerary = async () => {
+  useEffect(() => {
+    loadTrip();
+  }, [loadTrip]);
+
+  const generateItinerary = async (tripData = trip) => {
     setGenerating(true);
     try {
       const result = await tripAPI.generateItinerary(tripId);
@@ -203,7 +203,7 @@ const TripPlanner = () => {
               <div className="text-center py-12">
                 <p className="text-[#5A6B5D] mb-4">No itinerary generated yet</p>
                 <Button
-                  onClick={generateItinerary}
+                  onClick={() => generateItinerary()}
                   className="bg-[#7BA4A8] text-white hover:bg-[#658D91]"
                 >
                   Generate Itinerary

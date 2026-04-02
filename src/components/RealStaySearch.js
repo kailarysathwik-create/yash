@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
 const RealStaySearch = ({ tripDetails, onNext }) => {
   const [searchUrl, setSearchUrl] = useState('');
 
-  useEffect(() => {
-    generateSearchUrl();
-  }, [tripDetails]);
-
-  const generateSearchUrl = () => {
+  const generateSearchUrl = useCallback(() => {
     const { destination, start_date, num_days, num_people } = tripDetails;
     
     // Calculate check-out date
@@ -29,13 +25,16 @@ const RealStaySearch = ({ tripDetails, onNext }) => {
     const checkOut = formatDate(checkOutDate);
     
     // MakeMyTrip URL structure
-    // Example: https://www.makemytrip.com/hotels/hotel-listing/?checkin=01282025&checkout=01302025&city=CTGOI&country=IN&roomStayQualifier=2e0e&locusId=CTGOI&locusType=city
     const citySlug = destination.toLowerCase().replace(/\s+/g, '-');
     
     const url = `https://www.makemytrip.com/hotels/hotel-listing/?checkin=${checkIn}&checkout=${checkOut}&city=${citySlug}&roomStayQualifier=${num_people}e0e&searchText=${destination}`;
     
     setSearchUrl(url);
-  };
+  }, [tripDetails]);
+
+  useEffect(() => {
+    generateSearchUrl();
+  }, [generateSearchUrl]);
 
   return (
     <div className="space-y-6">

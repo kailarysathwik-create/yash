@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,15 +8,7 @@ const RealTransportSearch = ({ tripDetails, onNext }) => {
   const [showCabDialog, setShowCabDialog] = useState(false);
   const [cabChoice, setCabChoice] = useState('');
 
-  useEffect(() => {
-    if (tripDetails.transport_mode === 'car') {
-      setShowCabDialog(true);
-    } else {
-      generateSearchUrl();
-    }
-  }, [tripDetails]);
-
-  const generateSearchUrl = () => {
+  const generateSearchUrl = useCallback(() => {
     const { from_location, destination, start_date, num_people, transport_mode } = tripDetails;
     
     // Format date for URLs (YYYYMMDD or YYYY-MM-DD depending on platform)
@@ -26,13 +18,11 @@ const RealTransportSearch = ({ tripDetails, onNext }) => {
     
     if (transport_mode === 'flight') {
       // Ixigo flights URL structure
-      // Example: https://www.ixigo.com/search/result/flight/BOM-GOI/28012025/1/0/0/E
       const fromCode = getAirportCode(from_location);
       const toCode = getAirportCode(destination);
       url = `https://www.ixigo.com/search/result/flight/${fromCode}-${toCode}/${formattedDate}/${num_people}/0/0/E`;
     } else if (transport_mode === 'train') {
       // Ixigo trains URL structure  
-      // Example: https://www.ixigo.com/trains/mumbai-to-goa/28-jan-2025
       const fromSlug = from_location.toLowerCase().replace(/\s+/g, '-');
       const toSlug = destination.toLowerCase().replace(/\s+/g, '-');
       const dateFormatted = new Date(start_date).toLocaleDateString('en-GB', {
@@ -44,7 +34,7 @@ const RealTransportSearch = ({ tripDetails, onNext }) => {
     }
     
     setSearchUrl(url);
-  };
+  }, [tripDetails]);
 
   const getAirportCode = (city) => {
     const airportCodes = {
@@ -63,6 +53,14 @@ const RealTransportSearch = ({ tripDetails, onNext }) => {
     const cityLower = city.toLowerCase().trim();
     return airportCodes[cityLower] || 'DEL';
   };
+
+  useEffect(() => {
+    if (tripDetails.transport_mode === 'car') {
+      setShowCabDialog(true);
+    } else {
+      generateSearchUrl();
+    }
+  }, [tripDetails.transport_mode, generateSearchUrl]);
 
   const handleCabChoice = (choice) => {
     setCabChoice(choice);

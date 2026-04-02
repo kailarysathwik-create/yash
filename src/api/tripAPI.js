@@ -5,8 +5,8 @@
 
 import axios from 'axios';
 
-// Get API URL from environment - ensure it's set in .env
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Get API URL from environment with the Render URL as a fallback
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://trip-bkak.onrender.com/';
 const API = `${BACKEND_URL}/api`;
 
 // Create axios instance with default config
@@ -34,7 +34,6 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized - user session expired
     if (error.response?.status === 401) {
       console.error('Session expired, please login again');
-      // Auth callback will handle redirect
     }
     return Promise.reject(error);
   }
@@ -141,7 +140,7 @@ export const tripAPI = {
     }
   },
 
-  // Auth endpoints (if using your own auth system)
+  // Auth endpoints
   auth: {
     logout: async () => {
       try {
