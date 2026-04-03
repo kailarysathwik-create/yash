@@ -5,23 +5,24 @@
 @tailwind utilities;
 
 :root {
-  --background: #1a0b2e; /* Deep Hub Purple */
-  --foreground: #ffffff;
+  --background: #fcfaff; /* Airy Lavender White */
+  --foreground: #1a0b2e; /* Deep Hub Purple for text */
   --primary: #9370DB;
-  --secondary: rgba(255, 255, 255, 0.1);
-  --accent: #B19CD9;
-  --glass: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --card-radius: 2.5rem;
+  --secondary: rgba(147, 112, 219, 0.08);
+  --accent: #7c3aed;
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-tint: rgba(233, 213, 255, 0.25); /* Subtle Lavender Tint */
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --card-radius: 3rem;
 }
 
 @layer base {
   body {
-    @apply bg-[#1a0b2e] text-white font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#9370DB]/30;
+    @apply bg-[#fcfaff] text-[#1a0b2e] font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#9370DB]/20;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(147, 112, 219, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(177, 156, 217, 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, rgba(147, 112, 219, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(233, 213, 255, 0.4) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(243, 232, 255, 0.3) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(255, 255, 255, 1) 0px, transparent 50%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -29,16 +30,22 @@
 
 @layer components {
   .glass {
-    @apply backdrop-blur-2xl bg-white/10 border border-white/20;
+    @apply backdrop-blur-2xl bg-white/70 border border-white/50;
+    background-color: var(--glass-tint);
   }
   
   .glass-card {
-    @apply backdrop-blur-3xl bg-white/5 border border-white/10 shadow-2xl;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    @apply backdrop-blur-3xl border border-white/40 shadow-2xl;
+    background-color: var(--glass-tint);
+    box-shadow: 0 20px 40px -10px rgba(147, 112, 219, 0.1);
   }
 
   .glass-input {
-    @apply bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#9370DB]/50 focus:bg-white/10 transition-all rounded-2xl;
+    @apply bg-white/40 border-white/30 text-[#1a0b2e] placeholder:text-[#1a0b2e]/30 focus:border-[#9370DB]/50 focus:bg-white/60 transition-all rounded-[1.5rem];
+  }
+
+  .glass-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#1a0b2e] to-[#9370DB];
   }
 
   /* 3D Glassmorphism Utilities */
@@ -47,23 +54,19 @@
   }
 
   .card-3d {
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease;
+    transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.8s ease;
     transform-style: preserve-3d;
   }
 
   .card-3d:hover {
-    transform: translateY(-15px) rotateX(8deg) rotateY(-5deg) scale(1.02);
+    transform: translateY(-10px) rotateX(4deg) rotateY(-2deg) scale(1.02);
     box-shadow: 
-      0 30px 60px -12px rgba(0, 0, 0, 0.7),
-      0 0 40px rgba(147, 112, 219, 0.2);
+      0 40px 80px -15px rgba(147, 112, 219, 0.15),
+      0 0 30px rgba(233, 213, 255, 0.4);
   }
 
   .card-3d-inner {
-    transform: translateZ(50px);
-  }
-
-  .icy-aqua {
-    @apply bg-white/10 hover:bg-white/20 text-white;
+    transform: translateZ(40px);
   }
 
   /* Custom Hover Glow */
@@ -73,11 +76,17 @@
 
   .hover-glow::after {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-tr from-[#9370DB]/20 to-transparent opacity-0 transition-opacity duration-500;
+    @apply absolute inset-0 bg-gradient-to-tr from-white/40 to-transparent opacity-0 transition-opacity duration-700;
   }
 
   .hover-glow:hover::after {
     @apply opacity-100;
+  }
+
+  /* Taskbar Styling */
+  .taskbar-glass {
+    @apply backdrop-blur-xl bg-white/40 border border-white/50 shadow-2xl rounded-full;
+    background-color: rgba(255, 255, 255, 0.4);
   }
 
   /* Scrollbar */
@@ -90,25 +99,25 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+    @apply bg-[#9370DB]/10 rounded-full hover:bg-[#9370DB]/20 transition-colors;
   }
 }
 
 /* Animations */
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-20px) rotate(2deg); }
+  50% { transform: translateY(-15px) rotate(1deg); }
 }
 
 .animate-float {
-  animation: float 8s ease-in-out infinite;
+  animation: float 10s ease-in-out infinite;
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.1); }
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.05); }
 }
 
 .pulse-bg {
-  animation: pulse-slow 10s ease-in-out infinite;
+  animation: pulse-slow 12s ease-in-out infinite;
 }
