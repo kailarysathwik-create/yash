@@ -153,6 +153,29 @@ export const tripAPI = {
 
   // Auth endpoints
   auth: {
+    login: async (email) => {
+      try {
+        const response = await apiClient.post('/auth/login', { email });
+        return response.data;
+      } catch (error) {
+        console.error('Failed to login:', error.message);
+        throw error;
+      }
+    },
+
+    loginWithGoogle: async () => {
+      try {
+        const response = await apiClient.post('/auth/google', {});
+        if (response.data && response.data.url) {
+          window.location.href = response.data.url;
+        }
+        return response.data;
+      } catch (error) {
+        console.error('Failed to login with Google:', error.message);
+        throw error;
+      }
+    },
+
     logout: async () => {
       try {
         const response = await apiClient.post('/auth/logout', {});
