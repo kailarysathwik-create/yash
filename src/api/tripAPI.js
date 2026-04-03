@@ -65,6 +65,17 @@ export const tripAPI = {
     }
   },
 
+  // Get all trips for history
+  getTrips: async () => {
+    try {
+      const response = await apiClient.get('/trips');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch trip history:', error.message);
+      throw error;
+    }
+  },
+
   // Generate itinerary for a trip
   generateItinerary: async (tripId, bookingData = {}) => {
     try {

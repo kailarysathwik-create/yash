@@ -4,71 +4,71 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Snow White #F8FAFC */
-    --foreground: 222 47% 11%;
+    --background: 270 30% 98%; /* White Lavender #F8F7FF */
+    --foreground: 270 40% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 270 40% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 187 100% 42%; /* Icy Aqua #00E5FF */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 187 100% 42%;
-    --accent-foreground: 222 47% 11.2%;
+    --popover-foreground: 270 40% 15%;
+    --primary: 260 60% 65%; /* Soft Lavender #9370DB */
+    --primary-foreground: 270 30% 98%;
+    --secondary: 270 30% 94%;
+    --secondary-foreground: 270 40% 15%;
+    --muted: 270 30% 94%;
+    --muted-foreground: 270 15% 45%;
+    --accent: 260 60% 65%;
+    --accent-foreground: 270 40% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 187 100% 42%;
-    --radius: 1.5rem;
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 260 60% 65%;
+    --radius: 2rem;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm;
+    @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-xl;
   }
   
   .glass-card {
-    @apply bg-white/60 backdrop-blur-2xl border border-white/50 shadow-[0_10px_40px_-15px_rgba(0,188,212,0.15)];
+    @apply bg-white/50 backdrop-blur-[40px] border border-white/60 shadow-[0_15px_50px_-15px_rgba(147,112,219,0.15)];
   }
 
-  .icy-gradient {
-    background: linear-gradient(135deg, #00E5FF 0%, #ffffff 50%, #00E5FF 100%);
-    background-size: 200% 200%;
-    animation: icy-flow 10s ease infinite;
+  .lavender-gradient {
+    background: linear-gradient(135deg, #9370DB 0%, #ffffff 50%, #E6E6FA 100%);
+    background-size: 300% 300%;
+    animation: lavender-flow 15s ease infinite;
   }
 
-  /* 3D Card Utility */
+  /* Enhanced 3D Card Utility */
   .card-3d-wrapper {
-    perspective: 1000px;
+    perspective: 1200px;
   }
 
   .card-3d {
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
     transform-style: preserve-3d;
   }
 
   .card-3d:hover {
-    transform: rotateX(10deg) rotateY(10deg) translateY(-10px);
-    box-shadow: 0 20px 50px -10px rgba(0, 188, 212, 0.3);
+    transform: rotateX(8deg) rotateY(12deg) translateY(-15px) translateZ(20px);
+    box-shadow: 0 30px 60px -15px rgba(147,112,219,0.25);
   }
 
-  .text-icy-aqua {
-    @apply text-[#00BCD4];
-    text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+  .text-lavender {
+    @apply text-[#9370DB];
+    text-shadow: 0 2px 10px rgba(147,112,219,0.1);
   }
 
-  .bg-icy-aqua {
-    @apply bg-[#00BCD4] text-white;
-    box-shadow: 0 10px 25px -5px rgba(0, 188, 212, 0.4);
+  .bg-lavender {
+    @apply bg-[#9370DB] text-white;
+    box-shadow: 0 15px 35px -5px rgba(147,112,219,0.4);
   }
 }
 
-@keyframes icy-flow {
+@keyframes lavender-flow {
   0% { background-position: 0% 50% }
   50% { background-position: 100% 50% }
   100% { background-position: 0% 50% }
@@ -80,22 +80,22 @@ body {
   font-family: 'Outfit', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(0, 229, 255, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(0, 229, 255, 0.05) 0px, transparent 50%);
+    radial-gradient(at 10% 10%, rgba(147, 112, 219, 0.08) 0px, transparent 40%),
+    radial-gradient(at 90% 90%, rgba(230, 230, 250, 0.1) 0px, transparent 40%);
 }
 
-/* Custom Scrollbar for Icy Feel */
+/* Custom Scrollbar for Lavender Feel */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: #F8FAFC;
+  background: #F8F7FF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #00E5FF44;
-  border-radius: 10px;
-  border: 4px solid #F8FAFC;
+  background: #9370DB22;
+  border-radius: 12px;
+  border: 4px solid #F8F7FF;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #00E5FF;
+  background: #9370DB;
 }

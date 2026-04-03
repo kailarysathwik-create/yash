@@ -1,89 +1,80 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Waves, Globe, Sparkles, Navigation } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Globe, Waves, Sparkles } from 'lucide-react';
+import { tripAPI } from '@/api/tripAPI';
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const handleGoogleLogin = () => {
     const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+    if (!supabaseUrl) {
+      toast.error("Supabase URL not configured");
+      return;
+    }
+    
+    // Redirect to Supabase Google Auth
+    window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${window.location.origin}/auth/callback`;
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC] text-gray-900 font-['Outfit']">
-      {/* Animated Background Elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#00BCD4]/5 rounded-full blur-[120px] -mr-96 -mt-96 animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#00BCD4]/5 rounded-full blur-[100px] -ml-64 -mb-64" />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center max-w-4xl"
-        >
-          {/* Logo Handle */}
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-xl shadow-[#00BCD4]/10 mb-12"
-          >
-            <Waves className="w-6 h-6 text-[#00BCD4]" />
-            <span className="text-sm font-black uppercase tracking-[0.3em] text-gray-400">Yatra And Stay Hub</span>
-          </motion.div>
-  
-          {/* Main Heading */}
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] text-gray-900">
-            The Hub of <br />
-            <span className="text-[#00BCD4]">Smart Travel.</span>
-          </h1>
-  
-          <p className="text-lg md:text-xl font-medium text-gray-400 max-w-2xl mx-auto mb-16 leading-relaxed">
-            Experience the future of concierge planning. AI-routed transport, 3D itinerary visualization, and curated hub retreats.
-          </p>
-  
-          {/* CTA Section */}
-          <div className="flex flex-col items-center gap-6">
-            <Button
-              onClick={handleGoogleLogin}
-              className="bg-[#00BCD4] text-white hover:scale-105 transition-all rounded-full px-16 py-9 text-2xl font-black shadow-2xl shadow-[#00BCD4]/30 flex items-center gap-4 group"
-            >
-              <Globe className="w-8 h-8 group-hover:rotate-12 transition-transform" />
-              Access the Hub
-            </Button>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Official Google Authentication Required</p>
-          </div>
-  
-          {/* Features Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-            className="mt-24 grid grid-cols-3 gap-8 text-left"
-          >
-            {[
-              { icon: <Navigation className="w-5 h-5"/>, label: "AI Hub Routing" },
-              { icon: <Sparkles className="w-5 h-5"/>, label: "3D Concierge" },
-              { icon: <Waves className="w-5 h-5"/>, label: "Smart Retreats" }
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#00BCD4] shadow-sm group-hover:scale-110 transition-transform">
-                  {item.icon}
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest text-gray-400">{item.label}</span>
-              </div>
-            ))}
-          </motion.div>
-        </motion.div>
+    <div className="min-h-screen bg-[#F8F7FF] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10 opacity-30">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#9370DB]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#E6E6FA]/20 rounded-full blur-[120px]" />
       </div>
 
-       {/* Floating Wave Decor */}
-       <div className="fixed top-1/2 left-0 -translate-x-1/2 opacity-5 pointer-events-none">
-          <Waves className="w-[1200px] h-[1200px] text-[#00BCD4]" strokeWidth={0.5} />
-       </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full text-center"
+      >
+        <div className="flex justify-center mb-10">
+          <div className="w-20 h-20 bg-[#9370DB] rounded-[2rem] flex items-center justify-center shadow-2xl shadow-[#9370DB]/30 rotate-12">
+            <Waves className="w-10 h-10 text-white" />
+          </div>
+        </div>
+
+        <h1 className="text-5xl font-black text-gray-900 mb-4 tracking-tighter leading-none">
+          Yatra And Stay <span className="text-[#9370DB]">Hub</span>
+        </h1>
+        <p className="text-gray-400 font-medium mb-12 uppercase tracking-[0.3em] text-[10px]">
+          Luxury Travel Concierge • Lavender Edition
+        </p>
+
+        <div className="glass-card rounded-[3rem] p-10 border-white/60 shadow-2xl relative">
+          <div className="absolute -top-4 -right-4">
+            <Sparkles className="w-8 h-8 text-[#9370DB] animate-pulse" />
+          </div>
+          
+          <h2 className="text-xl font-bold text-gray-800 mb-8 tracking-tight">Access the Architecture</h2>
+          
+          <div className="space-y-6">
+            <Button
+              onClick={handleGoogleLogin}
+              className="w-full bg-[#9370DB] text-white hover:scale-105 transition-all rounded-full h-20 text-xl font-black shadow-xl shadow-[#9370DB]/20 flex items-center justify-center gap-4"
+            >
+              <Globe className="w-6 h-6" />
+              Sign in with Google
+            </Button>
+            
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-loose">
+              By accessing the hub, you agree to our <br/> 
+              <span className="text-[#9370DB] cursor-pointer">Protocol terms of service</span>
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Footer Branded Element */}
+      <div className="mt-20 flex items-center gap-3 opacity-20">
+        <div className="w-5 h-5 bg-[#9370DB] rounded-full" />
+        <span className="text-xs font-black tracking-[0.5em] text-gray-900 uppercase">Hub 3.0</span>
+      </div>
     </div>
   );
 };
