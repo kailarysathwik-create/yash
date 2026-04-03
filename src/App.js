@@ -9,6 +9,7 @@ import HistoryPage from '@/pages/History';
 import TripPlanner from '@/pages/TripPlanner';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Taskbar from '@/components/Taskbar';
+import Particles from '@/components/Particles';
 import '@/App.css';
 
 function AppRouter() {
@@ -41,7 +42,8 @@ function AppRouter() {
 
 function App() {
   return (
-    <div className="App">
+    <div className="App relative min-h-screen overflow-hidden">
+      <Particles />
       <BrowserRouter>
         <AppRouter />
       </BrowserRouter>

@@ -11,10 +11,10 @@ const RealTransportSearch = ({ options, onSelect }) => {
           <p className="text-[#1a0b2e]/40 font-bold uppercase tracking-widest text-[10px] mt-2">Optimal Routing Solutions</p>
         </div>
         <div className="hidden md:flex items-center gap-6">
-           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9370DB]">
+           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#A855F7]">
              <ShieldCheck className="w-4 h-4" /> Hub Verified
            </div>
-           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9370DB]">
+           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#A855F7]">
              <Zap className="w-4 h-4" /> Fast-Path
            </div>
         </div>
@@ -30,13 +30,13 @@ const RealTransportSearch = ({ options, onSelect }) => {
             onClick={() => onSelect(option)}
             className="card-3d glass-card rounded-[3rem] p-10 cursor-pointer group relative overflow-hidden"
           >
-            <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#9370DB]/5 rounded-full blur-[60px] group-hover:bg-[#9370DB]/15 transition-all duration-700" />
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#A855F7]/5 rounded-full blur-[60px] group-hover:bg-[#A855F7]/15 transition-all duration-700" />
             
             <div className="mb-10 relative z-10 flex items-center justify-between">
-              <div className="w-16 h-16 rounded-[2rem] bg-white/60 flex items-center justify-center group-hover:bg-[#9370DB] group-hover:shadow-xl group-hover:shadow-[#9370DB]/20 transition-all duration-500">
-                {option.type === 'flight' && <Plane className="w-8 h-8 text-[#9370DB] group-hover:text-white" />}
-                {option.type === 'train' && <Train className="w-8 h-8 text-[#9370DB] group-hover:text-white" />}
-                {(option.type === 'car' || option.type === 'taxi') && <Car className="w-8 h-8 text-[#9370DB] group-hover:text-white" />}
+              <div className="w-16 h-16 rounded-[2rem] bg-white/60 flex items-center justify-center group-hover:bg-[#A855F7] group-hover:shadow-xl group-hover:shadow-[#A855F7]/20 transition-all duration-500">
+                {option.type === 'flight' && <Plane className="w-8 h-8 text-[#A855F7] group-hover:text-white" />}
+                {option.type === 'train' && <Train className="w-8 h-8 text-[#A855F7] group-hover:text-white" />}
+                {(option.type === 'car' || option.type === 'taxi') && <Car className="w-8 h-8 text-[#A855F7] group-hover:text-white" />}
               </div>
               <span className="text-[10px] font-black text-[#1a0b2e]/30 uppercase tracking-[0.2em]">Tier {index + 1}</span>
             </div>
@@ -44,8 +44,8 @@ const RealTransportSearch = ({ options, onSelect }) => {
             <h3 className="text-3xl font-black text-[#1a0b2e] mb-2 group-hover:translate-x-2 transition-transform duration-500">{option.type} Protocol</h3>
             <p className="text-[#1a0b2e]/40 font-bold mb-10 min-h-[3rem]">{option.details}</p>
 
-            <div className="pt-8 border-t border-[#1a0b2e]/5 flex items-center justify-between group-hover:border-[#9370DB]/20 transition-colors">
-              <div className="text-3xl font-black text-[#9370DB] tracking-tighter">₹{option.price.toLocaleString()}</div>
+            <div className="pt-8 border-t border-[#1a0b2e]/5 flex items-center justify-between group-hover:border-[#A855F7]/20 transition-colors">
+              <div className="text-3xl font-black text-[#A855F7] tracking-tighter">₹{option.price.toLocaleString()}</div>
               <div className="w-12 h-12 rounded-full bg-[#1a0b2e] flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0 shadow-lg shadow-[#1a0b2e]/20">
                 <ArrowRight className="w-6 h-6" />
               </div>

@@ -13,7 +13,7 @@ const Taskbar = () => {
     try {
       await tripAPI.auth.logout();
       navigate('/login');
-      toast.success('Logged out from Lavender Hub');
+      toast.success('Logged out from Y.A.S.H');
     } catch (error) {
       toast.error('Logout failed');
     }
@@ -40,7 +40,7 @@ const Taskbar = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`relative flex items-center justify-center p-4 rounded-full transition-all duration-500 group ${
-                isActive ? 'bg-[#9370DB] text-white shadow-lg shadow-[#9370DB]/20' : 'text-[#1a0b2e]/60 hover:text-[#1a0b2e] hover:bg-white/40'
+                isActive ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20' : 'text-[#1a0b2e]/60 hover:text-[#1a0b2e] hover:bg-white/40'
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'animate-pulse' : ''}`} />
@@ -50,7 +50,7 @@ const Taskbar = () => {
               {isActive && (
                 <motion.div 
                   layoutId="active-pill"
-                  className="absolute inset-0 bg-[#9370DB] rounded-full -z-10"
+                  className="absolute inset-0 bg-[#A855F7] rounded-full -z-10"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}

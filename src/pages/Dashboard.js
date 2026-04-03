@@ -39,7 +39,7 @@ const Dashboard = () => {
       };
 
       const result = await tripAPI.createTrip(payload);
-      toast.success('Lavender Hub Deployment Initiated!');
+      toast.success('Yatra And Stay Hub Deployment Initiated!');
       setShowDialog(false);
       navigate(`/trip/${result.trip_id}`);
     } catch (error) {
@@ -51,7 +51,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen selection:bg-[#9370DB]/20 pb-32">
+    <div className="min-h-screen selection:bg-[#A855F7]/20 pb-32">
       {/* Brand Header */}
       <header className="px-8 py-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -59,11 +59,11 @@ const Dashboard = () => {
             <motion.div 
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.8 }}
-              className="w-12 h-12 bg-[#9370DB]/10 rounded-2xl flex items-center justify-center border border-[#9370DB]/20 shadow-inner"
+              className="w-12 h-12 bg-[#A855F7]/10 rounded-2xl flex items-center justify-center border border-[#A855F7]/20 shadow-inner"
             >
-              <Waves className="w-6 h-6 text-[#9370DB]" />
+              <Waves className="w-6 h-6 text-[#A855F7]" />
             </motion.div>
-            <span className="text-2xl font-black text-[#1a0b2e] tracking-tight">Lavender Hub</span>
+            <span className="text-2xl font-black text-[#A855F7] tracking-tight">Y.A.S.H</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="px-4 py-2 glass rounded-full flex items-center gap-2">
@@ -82,13 +82,13 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-2 px-6 py-2 glass rounded-full mb-10 border border-[#9370DB]/20">
-              <Sparkles className="w-4 h-4 text-[#9370DB]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#9370DB]">Premium Orchestration</span>
+            <div className="inline-flex items-center gap-2 px-6 py-2 glass rounded-full mb-10 border border-[#A855F7]/20">
+              <Sparkles className="w-4 h-4 text-[#A855F7]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A855F7]">Premium Orchestration</span>
             </div>
 
             <h1 className="text-6xl md:text-[8rem] font-black text-[#1a0b2e] mb-10 tracking-tighter leading-[0.85]">
-              Every Journey is <br /> <span className="glass-text">Redefined.</span>
+              Y.A.S.H <br /> <span className="glass-text">Platform</span>
             </h1>
             
             <p className="text-[#1a0b2e]/50 font-medium max-w-xl mx-auto mb-16 text-xl leading-relaxed">
@@ -97,7 +97,7 @@ const Dashboard = () => {
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
               <DialogTrigger asChild>
-                <Button className="bg-[#1a0b2e] text-white hover:bg-[#9370DB] hover:scale-105 transition-all duration-500 rounded-full px-16 py-10 text-xl font-black shadow-2xl shadow-[#9370DB]/20 group">
+                <Button className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full px-16 py-10 text-xl font-black shadow-2xl shadow-[#A855F7]/20 group">
                   <Navigation className="w-6 h-6 mr-4 group-hover:rotate-45 transition-transform" /> 
                   Begin New Deployment
                 </Button>
@@ -110,37 +110,37 @@ const Dashboard = () => {
                 <form onSubmit={handleSubmit} className="space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60">Source Origin</Label>
+                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Source Origin</Label>
                        <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Departure City" required />
                     </div>
                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60">Destination Node</Label>
+                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination Node</Label>
                        <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Hub Terminal" required />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-8">
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#9370DB]/60">Personnel</Label>
+                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Personnel</Label>
                        <Input type="number" min="1" value={formData.num_people} onChange={(e) => setFormData({ ...formData, num_people: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
                     </div>
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#9370DB]/60">Runtime (Days)</Label>
+                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Runtime (Days)</Label>
                        <Input type="number" min="1" max="30" value={formData.num_days} onChange={(e) => setFormData({ ...formData, num_days: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
                     </div>
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#9370DB]/60">Credits (₹)</Label>
+                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Credits (₹)</Label>
                        <Input type="number" min="0" value={formData.budget} onChange={(e) => setFormData({ ...formData, budget: e.target.value })} className="glass-input h-16 text-center text-xl font-black" placeholder="-" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60">Transit Protocol</Label>
+                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Transit Protocol</Label>
                     <div className="grid grid-cols-3 gap-6">
                       {['flight', 'train', 'car'].map((mode) => (
                         <button key={mode} type="button" onClick={() => setFormData({ ...formData, transport_mode: mode })}
                           className={`flex flex-col items-center gap-4 p-8 rounded-[2.5rem] border-2 transition-all duration-700 ${
-                            formData.transport_mode === mode ? 'border-[#9370DB] glass text-[#1a0b2e] scale-105 shadow-2xl shadow-[#9370DB]/20' : 'border-white/20 hover:border-[#9370DB]/30 text-[#1a0b2e]/20'
+                            formData.transport_mode === mode ? 'border-[#A855F7] glass text-[#1a0b2e] scale-105 shadow-2xl shadow-[#A855F7]/20' : 'border-white/20 hover:border-[#A855F7]/30 text-[#1a0b2e]/20'
                           }`}
                         >
                           {mode === 'flight' && <Plane className="w-8 h-8" />}
@@ -154,16 +154,16 @@ const Dashboard = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                      <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60">Commencement Date</Label>
+                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Commencement Date</Label>
                        <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold" required />
                      </div>
                      <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60">Ancillary Nodes</Label>
+                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Ancillary Nodes</Label>
                        <Input value={formData.places_to_cover} onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Intermediary Cities" />
                      </div>
                   </div>
 
-                  <Button type="submit" disabled={loading} className="w-full bg-[#1a0b2e] text-white hover:bg-[#9370DB] hover:scale-[1.02] transition-all duration-700 rounded-full h-20 font-black text-xl shadow-2xl shadow-[#1a0b2e]/20">
+                  <Button type="submit" disabled={loading} className="w-full bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-[1.02] transition-all duration-700 rounded-full h-20 font-black text-xl shadow-2xl shadow-[#1a0b2e]/20">
                     {loading ? 'Initiating Hub Sync...' : 'Confirm Vector Parameters'}
                   </Button>
                 </form>

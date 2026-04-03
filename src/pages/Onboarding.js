@@ -10,7 +10,7 @@ const Onboarding = () => {
   const steps = [
     { 
       title: "Handshake Protocol", 
-      desc: "Synchronizing with Lavender Hub secure terminal...", 
+      desc: "Synchronizing with Yatra And Stay Hub secure terminal...", 
       icon: ShieldCheck,
       color: "text-blue-400"
     },
@@ -30,7 +30,7 @@ const Onboarding = () => {
       title: "Protocol Ready", 
       desc: "Welcome to the elite sanctuary of travel.", 
       icon: Navigation,
-      color: "text-[#9370DB]"
+      color: "text-[#A855F7]"
     }
   ];
 
@@ -50,19 +50,19 @@ const Onboarding = () => {
   }, [navigate, steps.length]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#9370DB]/20">
+    <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#A855F7]/20">
       <div className="max-w-xl w-full text-center">
         <div className="mb-16 relative">
           <motion.div 
             animate={{ rotate: 360 }}
             transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            className="w-32 h-32 border-4 border-dashed border-[#9370DB]/20 rounded-full mx-auto flex items-center justify-center"
+            className="w-32 h-32 border-4 border-dashed border-[#A855F7]/20 rounded-full mx-auto flex items-center justify-center"
           >
-            <div className="w-24 h-24 border-4 border-dashed border-[#9370DB]/40 rounded-full flex items-center justify-center">
-               <LoaderCircle className="w-12 h-12 text-[#9370DB] animate-spin" />
+            <div className="w-24 h-24 border-4 border-dashed border-[#A855F7]/40 rounded-full flex items-center justify-center">
+               <LoaderCircle className="w-12 h-12 text-[#A855F7] animate-spin" />
             </div>
           </motion.div>
-          <div className="absolute inset-0 blur-3xl bg-[#9370DB]/10 rounded-full -z-10" />
+          <div className="absolute inset-0 blur-3xl bg-[#A855F7]/10 rounded-full -z-10" />
         </div>
 
         <div className="glass-card rounded-[3.5rem] p-12 relative overflow-hidden border-white/50 shadow-[0_50px_100px_-20px_rgba(147,112,219,0.15)]">
@@ -82,7 +82,7 @@ const Onboarding = () => {
               </div>
               
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#9370DB] mb-4">Step {step + 1} of 4</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#A855F7] mb-4">Step {step + 1} of 4</p>
                 <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-4">{steps[step].title}</h2>
                 <p className="text-[#1a0b2e]/50 font-medium text-lg leading-relaxed">{steps[step].desc}</p>
               </div>
@@ -94,7 +94,7 @@ const Onboarding = () => {
                     key={i}
                     className="h-1.5 rounded-full bg-[#1a0b2e]/5 overflow-hidden"
                     style={{ width: i === step ? '48px' : '16px' }}
-                    animate={{ width: i === step ? '48px' : '16px', backgroundColor: i <= step ? '#9370DB' : 'rgba(0,0,0,0.05)' }}
+                    animate={{ width: i === step ? '48px' : '16px', backgroundColor: i <= step ? '#A855F7' : 'rgba(0,0,0,0.05)' }}
                   />
                 ))}
               </div>
@@ -102,7 +102,7 @@ const Onboarding = () => {
           </AnimatePresence>
 
           <div className="absolute top-0 right-0 p-8 opacity-20">
-             <Sparkles className="w-6 h-6 text-[#9370DB]" />
+             <Sparkles className="w-6 h-6 text-[#A855F7]" />
           </div>
         </div>
 
@@ -112,11 +112,11 @@ const Onboarding = () => {
           transition={{ delay: 1 }}
           className="mt-12 text-[#1a0b2e]/20 text-[10px] font-black uppercase tracking-[0.3em]"
         >
-           Lavender Hub Orchestration Protocol v3.0
+           Yatra And Stay Hub Orchestration Protocol v3.0
         </motion.div>
       </div>
 
-      {/* Decorative BG - Airy Lavender */}
+      {/* Decorative BG - Airy Bright */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] left-[10%] w-[800px] h-[800px] bg-[#f3e8ff] rounded-full blur-[150px] pulse-bg opacity-40" />
         <div className="absolute bottom-[10%] right-[10%] w-[700px] h-[700px] bg-white rounded-full blur-[150px] animate-float opacity-30" />

@@ -5,47 +5,52 @@
 @tailwind utilities;
 
 :root {
-  --background: #fcfaff; /* Airy Lavender White */
-  --foreground: #1a0b2e; /* Deep Hub Purple for text */
-  --primary: #9370DB;
-  --secondary: rgba(147, 112, 219, 0.08);
-  --accent: #7c3aed;
-  --glass: rgba(255, 255, 255, 0.6);
-  --glass-tint: rgba(233, 213, 255, 0.25); /* Subtle Lavender Tint */
+  --background: #fcfaff; 
+  --foreground: #1a0b2e; 
+  --primary: #A855F7; /* Lively Lavender */
+  --secondary: rgba(168, 85, 247, 0.08);
+  --accent: #D946EF;
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-tint: rgba(255, 255, 255, 0.02); /* True clear glass */
   --glass-border: rgba(255, 255, 255, 0.5);
   --card-radius: 3rem;
 }
 
 @layer base {
   body {
-    @apply bg-[#fcfaff] text-[#1a0b2e] font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#9370DB]/20;
+    @apply bg-[#fcfaff] text-[#1a0b2e] font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#A855F7]/20;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(233, 213, 255, 0.4) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(243, 232, 255, 0.3) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.1) 0px, transparent 50%),
       radial-gradient(at 50% 100%, rgba(255, 255, 255, 1) 0px, transparent 50%);
     background-attachment: fixed;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 }
 
 @layer components {
   .glass {
-    @apply backdrop-blur-2xl bg-white/70 border border-white/50;
+    @apply backdrop-blur-2xl border border-white/50;
     background-color: var(--glass-tint);
   }
   
   .glass-card {
     @apply backdrop-blur-3xl border border-white/40 shadow-2xl;
     background-color: var(--glass-tint);
-    box-shadow: 0 20px 40px -10px rgba(147, 112, 219, 0.1);
+    box-shadow: 0 20px 40px -10px rgba(168, 85, 247, 0.1);
   }
 
   .glass-input {
-    @apply bg-white/40 border-white/30 text-[#1a0b2e] placeholder:text-[#1a0b2e]/30 focus:border-[#9370DB]/50 focus:bg-white/60 transition-all rounded-[1.5rem];
+    @apply bg-white/40 border-white/30 text-[#1a0b2e] placeholder:text-[#1a0b2e]/30 focus:border-[#A855F7]/50 focus:bg-white/60 transition-all rounded-[1.5rem];
+  }
+
+  .lively-text {
+    @apply text-[#A855F7] font-black tracking-tight;
   }
 
   .glass-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#1a0b2e] to-[#9370DB];
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#1a0b2e] to-[#A855F7];
   }
 
   /* 3D Glassmorphism Utilities */
@@ -61,49 +66,36 @@
   .card-3d:hover {
     transform: translateY(-10px) rotateX(4deg) rotateY(-2deg) scale(1.02);
     box-shadow: 
-      0 40px 80px -15px rgba(147, 112, 219, 0.15),
-      0 0 30px rgba(233, 213, 255, 0.4);
+      0 40px 80px -15px rgba(168, 85, 247, 0.15),
+      0 0 30px rgba(255, 255, 255, 0.4);
   }
 
   .card-3d-inner {
     transform: translateZ(40px);
   }
 
-  /* Custom Hover Glow */
-  .hover-glow {
-    @apply relative overflow-hidden;
-  }
-
-  .hover-glow::after {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-tr from-white/40 to-transparent opacity-0 transition-opacity duration-700;
-  }
-
-  .hover-glow:hover::after {
-    @apply opacity-100;
-  }
-
   /* Taskbar Styling */
   .taskbar-glass {
-    @apply backdrop-blur-xl bg-white/40 border border-white/50 shadow-2xl rounded-full;
-    background-color: rgba(255, 255, 255, 0.4);
+    @apply backdrop-blur-xl bg-white/20 border border-white/40 shadow-2xl rounded-full;
   }
 
-  /* Scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+  /* Particle Layer Styles */
+  .particle-container {
+    @apply fixed inset-0 pointer-events-none -z-10 overflow-hidden;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-[#9370DB]/10 rounded-full hover:bg-[#9370DB]/20 transition-colors;
+  .particle {
+    @apply absolute bg-white rounded-full opacity-60 blur-[1px];
+    animation: drift linear infinite;
   }
 }
 
 /* Animations */
+@keyframes drift {
+  from { transform: translateY(110vh) translateX(0); }
+  to { transform: translateY(-10vh) translateX(20px); }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0); }
   50% { transform: translateY(-15px) rotate(1deg); }

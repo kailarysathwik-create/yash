@@ -59,21 +59,21 @@ const TripPlanner = () => {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
        <div className="text-center">
-         <LoaderCircle className="w-12 h-12 text-[#9370DB] animate-spin mx-auto mb-4" />
+         <LoaderCircle className="w-12 h-12 text-[#A855F7] animate-spin mx-auto mb-4" />
          <p className="text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/30">Synchronizing Hub Data...</p>
        </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen pb-40 selection:bg-[#9370DB]/20">
+    <div className="min-h-screen pb-40 selection:bg-[#A855F7]/20">
       <main className="max-w-7xl mx-auto px-6 py-16">
         {/* Orchestration Header */}
         <header className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
               <div className="flex items-center gap-4 mb-4">
-                <span className="px-4 py-1.5 glass rounded-full text-[10px] font-black text-[#9370DB] uppercase tracking-widest border border-[#9370DB]/20">
+                <span className="px-4 py-1.5 glass rounded-full text-[10px] font-black text-[#A855F7] uppercase tracking-widest border border-[#A855F7]/20">
                   Mission: {trip.details.destination}
                 </span>
                 <span className="text-[#1a0b2e]/20 font-bold text-xs uppercase tracking-widest">Ref: {tripId.slice(0, 8)}</span>
@@ -85,28 +85,28 @@ const TripPlanner = () => {
               {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="flex items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-700 ${
-                    step >= s ? 'bg-[#9370DB] text-white shadow-lg shadow-[#9370DB]/20' : 'bg-white/40 text-[#1a0b2e]/20 border border-white/50'
+                    step >= s ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20' : 'bg-white/40 text-[#1a0b2e]/20 border border-white/50'
                   }`}>
                     {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                   </div>
-                  {s < 5 && <div className={`w-8 h-[2px] mx-1 rounded-full ${step > s ? 'bg-[#9370DB]' : 'bg-[#1a0b2e]/5'}`} />}
+                  {s < 5 && <div className={`w-8 h-[2px] mx-1 rounded-full ${step > s ? 'bg-[#A855F7]' : 'bg-[#1a0b2e]/5'}`} />}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="glass-card rounded-[3rem] p-10 flex flex-wrap items-center gap-12 border-white/50 shadow-xl shadow-[#9370DB]/5">
+          <div className="glass-card rounded-[3rem] p-10 flex flex-wrap items-center gap-12 border-white/50 shadow-xl shadow-[#A855F7]/5">
             <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl bg-[#9370DB]/10 flex items-center justify-center"><MapPin className="text-[#9370DB] w-6 h-6" /></div>
-               <div><p className="text-[10px] font-black uppercase text-[#9370DB]/60 tracking-widest mb-1">Vector</p><p className="font-bold text-[#1a0b2e]">{trip.details.from_location} → {trip.details.destination}</p></div>
+               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><MapPin className="text-[#A855F7] w-6 h-6" /></div>
+               <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Vector</p><p className="font-bold text-[#1a0b2e]">{trip.details.from_location} → {trip.details.destination}</p></div>
             </div>
             <div className="flex items-center gap-4 border-l border-[#1a0b2e]/5 pl-12">
-               <div className="w-12 h-12 rounded-2xl bg-[#9370DB]/10 flex items-center justify-center"><Calendar className="text-[#9370DB] w-6 h-6" /></div>
-               <div><p className="text-[10px] font-black uppercase text-[#9370DB]/60 tracking-widest mb-1">Commencement</p><p className="font-bold text-[#1a0b2e]">{trip.details.start_date} • {trip.details.num_days} Days</p></div>
+               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><Calendar className="text-[#A855F7] w-6 h-6" /></div>
+               <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Commencement</p><p className="font-bold text-[#1a0b2e]">{trip.details.start_date} • {trip.details.num_days} Days</p></div>
             </div>
             <div className="flex items-center gap-4 border-l border-[#1a0b2e]/5 pl-12">
-               <div className="w-12 h-12 rounded-2xl bg-[#9370DB]/10 flex items-center justify-center"><Users className="text-[#9370DB] w-6 h-6" /></div>
-               <div><p className="text-[10px] font-black uppercase text-[#9370DB]/60 tracking-widest mb-1">Personnel</p><p className="font-bold text-[#1a0b2e]">{trip.details.num_people} Explorer(s)</p></div>
+               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><Users className="text-[#A855F7] w-6 h-6" /></div>
+               <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Personnel</p><p className="font-bold text-[#1a0b2e]">{trip.details.num_people} Explorer(s)</p></div>
             </div>
           </div>
         </header>
@@ -119,11 +119,11 @@ const TripPlanner = () => {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="text-center py-20"
             >
-              <div className="max-w-2xl mx-auto glass-card rounded-[4rem] p-16 border-dashed border-2 border-[#9370DB]/20">
-                <Sparkles className="w-16 h-16 text-[#9370DB] mx-auto mb-10 animate-pulse" />
+              <div className="max-w-2xl mx-auto glass-card rounded-[4rem] p-16 border-dashed border-2 border-[#A855F7]/20">
+                <Sparkles className="w-16 h-16 text-[#A855F7] mx-auto mb-10 animate-pulse" />
                 <h2 className="text-4xl font-black text-[#1a0b2e] mb-6">AI Orchestration Ready</h2>
-                <p className="text-[#1a0b2e]/50 font-medium mb-12 text-lg">Lavender Hub AI is ready to compute the optimal transport matrix and luxury stay nodes for your deployment.</p>
-                <Button onClick={handleOrchestrate} disabled={orchestrating} className="bg-[#1a0b2e] text-white hover:bg-[#9370DB] hover:scale-105 transition-all duration-500 rounded-full h-20 px-12 font-black text-xl shadow-2xl shadow-[#9370DB]/20">
+                <p className="text-[#1a0b2e]/50 font-medium mb-12 text-lg">Yatra And Stay Hub AI is ready to compute the optimal transport matrix and luxury stay nodes for your deployment.</p>
+                <Button onClick={handleOrchestrate} disabled={orchestrating} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-20 px-12 font-black text-xl shadow-2xl shadow-[#A855F7]/20">
                   {orchestrating ? 'Synchronizing Protocols...' : 'Initialize AI Sync'}
                 </Button>
               </div>
@@ -159,32 +159,32 @@ const TripPlanner = () => {
                </div>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 card-3d-wrapper">
-                  <div className="card-3d glass-card rounded-[3rem] p-10 border-[#9370DB]/20">
-                     <p className="text-[10px] font-black uppercase text-[#9370DB] tracking-widest mb-6">Confirmed Transit</p>
+                  <div className="card-3d glass-card rounded-[3rem] p-10 border-[#A855F7]/20">
+                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Confirmed Transit</p>
                      <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">{selectedTransport?.type} Protocol</h3>
                      <p className="text-[#1a0b2e]/40 font-bold mb-8">Ref: {selectedTransport?.details}</p>
-                     <div className="text-4xl font-black text-[#9370DB]">₹{selectedTransport?.price.toLocaleString()}</div>
+                     <div className="text-4xl font-black text-[#A855F7]">₹{selectedTransport?.price.toLocaleString()}</div>
                   </div>
-                  <div className="card-3d glass-card rounded-[3rem] p-10 border-[#9370DB]/20">
-                     <p className="text-[10px] font-black uppercase text-[#9370DB] tracking-widest mb-6">Confirmed Sanctuary</p>
+                  <div className="card-3d glass-card rounded-[3rem] p-10 border-[#A855F7]/20">
+                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Confirmed Sanctuary</p>
                      <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">{selectedStay?.name}</h3>
                      <p className="text-[#1a0b2e]/40 font-bold mb-8">{selectedStay?.description}</p>
-                     <div className="text-4xl font-black text-[#9370DB]">₹{selectedStay?.price.toLocaleString()}</div>
+                     <div className="text-4xl font-black text-[#A855F7]">₹{selectedStay?.price.toLocaleString()}</div>
                   </div>
                </div>
 
                <div className="space-y-6">
                  <h3 className="text-2xl font-black text-[#1a0b2e] flex items-center gap-3">
-                   <ChevronRight className="text-[#9370DB]" /> AI Intelligence Narrative
+                   <ChevronRight className="text-[#A855F7]" /> AI Intelligence Narrative
                  </h3>
                  <div className="grid grid-cols-1 gap-6">
                     {itinerary.map((day, i) => (
                       <motion.div 
                         initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                        key={i} className="glass-card rounded-[2.5rem] p-10 border-white/50 hover:border-[#9370DB]/30 transition-all duration-500"
+                        key={i} className="glass-card rounded-[2.5rem] p-10 border-white/50 hover:border-[#A855F7]/30 transition-all duration-500"
                       >
                         <div className="flex items-center gap-6">
-                           <div className="w-16 h-16 rounded-3xl bg-[#9370DB] text-white flex items-center justify-center font-black text-xl shadow-xl shadow-[#9370DB]/20">D{day.day}</div>
+                           <div className="w-16 h-16 rounded-3xl bg-[#A855F7] text-white flex items-center justify-center font-black text-xl shadow-xl shadow-[#A855F7]/20">D{day.day}</div>
                            <div>
                              <h4 className="text-2xl font-black text-[#1a0b2e]">{day.title}</h4>
                              <p className="text-[#1a0b2e]/50 font-medium">{day.activities.join(' • ')}</p>
@@ -196,7 +196,7 @@ const TripPlanner = () => {
                </div>
 
                <div className="flex justify-center pt-20">
-                  <Button onClick={() => setStep(5)} className="bg-[#1a0b2e] text-white hover:bg-[#9370DB] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#9370DB]/30">
+                  <Button onClick={() => setStep(5)} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30">
                     Settle Deployment Credits
                   </Button>
                </div>

@@ -35,7 +35,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#9370DB]/20">
+    <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#A855F7]/20">
       <div className="max-w-md w-full">
         {/* Logo Section */}
         <motion.div 
@@ -43,10 +43,10 @@ const Login = () => {
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-12"
         >
-          <div className="w-20 h-20 bg-[#9370DB]/10 rounded-[2.5rem] flex items-center justify-center border border-[#9370DB]/20 mx-auto mb-6 shadow-inner">
-            <Waves className="w-10 h-10 text-[#9370DB]" />
+          <div className="w-20 h-20 bg-[#A855F7]/10 rounded-[2.5rem] flex items-center justify-center border border-[#A855F7]/20 mx-auto mb-6 shadow-inner">
+            <Waves className="w-10 h-10 text-[#A855F7]" />
           </div>
-          <h1 className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-2">Lavender Hub</h1>
+          <h1 className="text-4xl font-black text-[#A855F7] tracking-tight mb-2">Y.A.S.H</h1>
           <p className="text-[#1a0b2e]/40 text-[10px] font-black uppercase tracking-[0.4em]">Agency Protocol v3.0</p>
         </motion.div>
 
@@ -62,7 +62,7 @@ const Login = () => {
 
           <form onSubmit={handleLogin} className="space-y-8">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9370DB]/60 ml-1">Universal ID (Email)</Label>
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60 ml-1">Universal ID (Email)</Label>
               <Input
                 type="email"
                 placeholder="agent@lavender.hub"
@@ -76,7 +76,7 @@ const Login = () => {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-[#1a0b2e] text-white hover:bg-[#9370DB] hover:scale-[1.02] transition-all duration-700 rounded-full h-16 font-black text-lg shadow-xl shadow-[#1a0b2e]/10"
+              className="w-full bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-[1.02] transition-all duration-700 rounded-full h-16 font-black text-lg shadow-xl shadow-[#1a0b2e]/10"
             >
               {loading ? 'Handshaking...' : 'Initialize Access'}
             </Button>
@@ -90,7 +90,7 @@ const Login = () => {
           <Button 
             onClick={handleGoogleLogin}
             variant="outline"
-            className="w-full border-2 border-[#1a0b2e]/5 bg-white/40 hover:bg-white hover:border-[#9370DB]/30 transition-all duration-500 rounded-full h-16 font-black text-[#1a0b2e] flex items-center justify-center gap-3"
+            className="w-full border-2 border-[#1a0b2e]/5 bg-white/40 hover:bg-white hover:border-[#A855F7]/30 transition-all duration-500 rounded-full h-16 font-black text-[#1a0b2e] flex items-center justify-center gap-3"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -117,11 +117,11 @@ const Login = () => {
                <Navigation className="w-3 h-3" /> Meticulous Curation
              </div>
           </div>
-          <p className="text-[#1a0b2e]/20 text-[9px] font-bold tracking-widest">© 2026 LAVENDER HUB ORCHESTRATION. ALL RIGHTS RESERVED.</p>
+          <p className="text-[#A855F7]/20 text-[9px] font-bold tracking-widest">© 2026 YATRA AND STAY HUB ORCHESTRATION. ALL RIGHTS RESERVED.</p>
         </motion.div>
       </div>
 
-      {/* Background Decor - Airy Lavender */}
+      {/* Background Decor - Airy Bright */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 pointer-events-none overflow-hidden">
         <div className="absolute top-[20%] right-[10%] w-[600px] h-[600px] bg-[#f3e8ff] rounded-full blur-[140px] pulse-bg opacity-50" />
         <div className="absolute bottom-[10%] left-[10%] w-[700px] h-[700px] bg-white rounded-full blur-[150px] animate-float opacity-30" />
