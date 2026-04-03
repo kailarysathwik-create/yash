@@ -2,87 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 4%; /* Carbon Black #0A0A0A */
+    --foreground: 0 0% 98%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 45 70% 50%; /* Deep Gold #D4AF37 */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 45 70% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 45 70% 50%;
+    --radius: 1rem;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  
+  .glass-card {
+    @apply bg-black/40 backdrop-blur-2xl border border-[#D4AF37]/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
+  }
+
+  .text-gold-sparkle {
+    background: linear-gradient(
+      to right,
+      #BF953F,
+      #FCF6BA,
+      #B38728,
+      #FBF5B7,
+      #AA771C
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: sparkle 3s linear infinite;
+    background-size: 200% auto;
+  }
+
+  .bg-gold-sparkle {
+    background: linear-gradient(
+      135deg,
+      #BF953F 0%,
+      #FCF6BA 25%,
+      #B38728 50%,
+      #FBF5B7 75%,
+      #AA771C 100%
+    );
+    background-size: 200% 200%;
+    animation: sparkle-bg 5s ease infinite;
+  }
+}
+
+@keyframes sparkle {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes sparkle-bg {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
 body {
-    margin: 0;
-    font-family: 'Manrope', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-code {
-    font-family:
-        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+/* Custom Scrollbar for Luxury Feel */
+::-webkit-scrollbar {
+  width: 8px;
 }
-
-@layer base {
-    :root {
-        --background: 0 0% 0%; /* Black */
-        --foreground: 0 0% 98%; /* White */
-        --card: 0 0% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 45 70% 50%; /* Gold */
-        --primary-foreground: 0 0% 0%;
-        --secondary: 0 0% 14.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 14.9%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 14.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14.9%;
-        --input: 0 0% 14.9%;
-        --ring: 45 70% 50%; /* Gold */
-        --radius: 0.5rem;
-    }
-    .dark {
-        --background: 0 0% 0%;
-        --foreground: 0 0% 98%;
-        --primary: 45 70% 50%;
-        --primary-foreground: 0 0% 0%;
-        --border: 0 0% 14.9%;
-    }
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
 }
-
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 10px;
 }
-
-@layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
-    }
-
-    [data-debug-wrapper="true"] > * {
-        margin-left: inherit;
-        margin-right: inherit;
-        margin-top: inherit;
-        margin-bottom: inherit;
-        padding-left: inherit;
-        padding-right: inherit;
-        padding-top: inherit;
-        padding-bottom: inherit;
-        column-gap: inherit;
-        row-gap: inherit;
-        gap: inherit;
-        border-left-width: inherit;
-        border-right-width: inherit;
-        border-top-width: inherit;
-        border-bottom-width: inherit;
-        border-left-style: inherit;
-        border-right-style: inherit;
-        border-top-style: inherit;
-        border-bottom-style: inherit;
-        border-left-color: inherit;
-        border-right-color: inherit;
-        border-top-color: inherit;
-        border-bottom-color: inherit;
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: #AA771C;
 }

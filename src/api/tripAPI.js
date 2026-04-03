@@ -66,9 +66,9 @@ export const tripAPI = {
   },
 
   // Generate itinerary for a trip
-  generateItinerary: async (tripId) => {
+  generateItinerary: async (tripId, bookingData = {}) => {
     try {
-      const response = await apiClient.post(`/trips/${tripId}/generate-itinerary`);
+      const response = await apiClient.post(`/trips/${tripId}/generate-itinerary`, bookingData);
       return response.data;
     } catch (error) {
       console.error('Failed to generate itinerary:', error.message);

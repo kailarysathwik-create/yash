@@ -1,138 +1,147 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Car, Globe } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ExternalLink, Car, Globe, Train, Plane, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const RealTransportSearch = ({ tripDetails, onNext }) => {
-  const [searchUrl, setSearchUrl] = useState('');
-  const [showCabDialog, setShowCabDialog] = useState(false);
-  const [cabChoice, setCabChoice] = useState('');
+const RealTransportSearch = ({ tripDetails, bookedTransport, setBookedTransport, onNext }) => {
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
-  const generateSearchUrl = useCallback(() => {
+  const getSearchUrl = () => {
     const { from_location, destination, start_date, num_people, transport_mode } = tripDetails;
     const formattedDate = start_date.replace(/-/g, '');
-    let url = '';
     
     if (transport_mode === 'flight') {
       const fromCode = getAirportCode(from_location);
       const toCode = getAirportCode(destination);
-      url = `https://www.ixigo.com/search/result/flight/${fromCode}-${toCode}/${formattedDate}/${num_people}/0/0/E`;
+      return `https://www.ixigo.com/search/result/flight/${fromCode}-${toCode}/${formattedDate}/${num_people}/0/0/E`;
     } else if (transport_mode === 'train') {
       const fromSlug = from_location.toLowerCase().replace(/\s+/g, '-');
       const toSlug = destination.toLowerCase().replace(/\s+/g, '-');
       const dateFormatted = new Date(start_date).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
+        day: '2-digit', month: 'short', year: 'numeric'
       }).toLowerCase().replace(/\s+/g, '-');
-      url = `https://www.ixigo.com/trains/${fromSlug}-to-${toSlug}/${dateFormatted}`;
+      return `https://www.ixigo.com/trains/${fromSlug}-to-${toSlug}/${dateFormatted}`;
     }
-    setSearchUrl(url);
-  }, [tripDetails]);
+    return `https://www.google.com/search?q=cab+from+${from_location}+to+${destination}`;
+  };
 
   const getAirportCode = (city) => {
-    const airportCodes = {
-      'mumbai': 'BOM', 'delhi': 'DEL', 'bangalore': 'BLR', 'goa': 'GOI',
-      'kolkata': 'CCU', 'chennai': 'MAA', 'hyderabad': 'HYD', 'pune': 'PNQ',
-      'jaipur': 'JAI', 'ahmedabad': 'AMD'
-    };
-    return airportCodes[city.toLowerCase().trim()] || 'DEL';
+    const codes = { 'mumbai': 'BOM', 'delhi': 'DEL', 'bangalore': 'BLR', 'goa': 'GOI' };
+    return codes[city.toLowerCase().trim()] || 'DEL';
   };
 
-  useEffect(() => {
-    if (tripDetails.transport_mode === 'car') {
-      setShowCabDialog(true);
-    } else {
-      generateSearchUrl();
+  const handleConfirm = () => {
+    if (!bookedTransport.booking_id || !bookedTransport.provider) {
+      toast.error("Please enter booking details");
+      return;
     }
-  }, [tripDetails.transport_mode, generateSearchUrl]);
-
-  const handleCabChoice = (choice) => {
-    setCabChoice(choice);
-    setShowCabDialog(false);
-    if (choice === 'search') {
-      const url = `https://www.google.com/search?q=cab+from+${tripDetails.from_location}+to+${tripDetails.destination}`;
-      setSearchUrl(url);
-    }
+    onNext();
   };
-
-  if (showCabDialog) {
-    return (
-      <Dialog open={showCabDialog} onOpenChange={setShowCabDialog}>
-        <DialogContent className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-8 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-[#D4AF37] mb-4">
-              Luxury Transport Options
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Button
-              onClick={() => handleCabChoice('agency')}
-              className="w-full bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-lg py-8 text-lg font-bold"
-            >
-              <div className="text-center">
-                <p>Private VIP Chauffeur</p>
-                <p className="text-xs font-normal opacity-80 mt-1">Agency provided luxury transport</p>
-              </div>
-            </Button>
-            <Button
-              onClick={() => handleCabChoice('search')}
-              variant="outline"
-              className="w-full border-[#D4AF37]/20 hover:border-[#D4AF37] rounded-lg py-8 text-lg text-gray-400 hover:text-[#D4AF37]"
-            >
-              <div className="text-center">
-                <p>Search On-Demand</p>
-                <p className="text-xs font-normal opacity-70 mt-1">Find premium rentals online</p>
-              </div>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 shadow-2xl">
-        <h3 className="text-xl font-bold text-[#D4AF37] mb-6 flex items-center gap-2">
-          <Globe className="w-5 h-5" />
-          Transport Concierge
-        </h3>
-        
-        <div className="bg-black/40 rounded-xl p-6 mb-8 border border-[#D4AF37]/10 space-y-4 text-sm text-gray-300">
-          <div className="flex justify-between border-b border-[#D4AF37]/5 pb-2">
-            <span>Route:</span>
-            <span className="font-bold text-white">{tripDetails.from_location} → {tripDetails.destination}</span>
+    <div className="glass-card rounded-[2rem] p-8 md:p-12">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/20 flex items-center justify-center">
+          <Plane className="w-6 h-6 text-[#D4AF37]" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter">Transport Concierge</h2>
+          <p className="text-gray-500 text-sm">Secure your passage to {tripDetails.destination}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Left: Search & Recommendations */}
+        <div className="space-y-6">
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+            <h3 className="text-[#D4AF37] font-bold text-xs uppercase tracking-widest mb-4">Live Search</h3>
+            <p className="text-gray-400 text-sm mb-6">
+              We've prepared a direct link to book your {tripDetails.transport_mode} using your preferred date.
+            </p>
+            <a 
+              href={getSearchUrl()} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={() => setShowBookingForm(true)}
+            >
+              <Button className="w-full bg-gold-sparkle text-black rounded-xl h-14 font-bold shadow-lg">
+                Book on Ixigo <ExternalLink className="w-4 h-4 ml-2" />
+              </Button>
+            </a>
           </div>
-          <div className="flex justify-between border-b border-[#D4AF37]/5 pb-2">
-            <span>Departure:</span>
-            <span className="font-bold text-white">{new Date(tripDetails.start_date).toLocaleDateString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Mode:</span>
-            <span className="font-bold text-[#D4AF37] uppercase">{tripDetails.transport_mode}</span>
+
+          <div className="bg-black/20 rounded-2xl p-6 border border-white/5 space-y-3">
+             <div className="flex justify-between text-xs tracking-widest uppercase">
+               <span className="text-gray-500">Route</span>
+               <span className="text-white text-right font-bold">{tripDetails.from_location} → {tripDetails.destination}</span>
+             </div>
+             <div className="flex justify-between text-xs tracking-widest uppercase">
+               <span className="text-gray-500">Date</span>
+               <span className="text-white text-right font-bold">{tripDetails.start_date}</span>
+             </div>
           </div>
         </div>
 
-        <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="block">
-          <Button className="w-full bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-xl py-8 text-lg font-bold shadow-lg">
-            Search Premium Options
-            <ExternalLink className="w-5 h-5 ml-2" />
-          </Button>
-        </a>
-
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          Secure bookings via our global travel partners.
-        </p>
-      </div>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={onNext}
-          className="text-gray-400 hover:text-[#D4AF37] transition-colors font-medium border-b border-transparent hover:border-[#D4AF37] rounded-none px-0 bg-transparent hover:bg-transparent"
-        >
-          Options Reviewed - Continue to Stays
-        </Button>
+        {/* Right: Manual Booking Entry */}
+        <div className="space-y-6">
+          {(showBookingForm || bookedTransport.booking_id) ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6 border-l-2 border-[#D4AF37]/20 pl-8"
+            >
+              <h3 className="text-white font-bold text-lg mb-4">Enter Booking Details</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">
+                    {tripDetails.transport_mode === 'train' ? 'PNR or Train Name' : 'Flight Number'}
+                  </Label>
+                  <Input 
+                    value={bookedTransport.booking_id}
+                    onChange={(e) => setBookedTransport({...bookedTransport, booking_id: e.target.value})}
+                    placeholder={tripDetails.transport_mode === 'train' ? "e.g., 22446 or Kerala Exp" : "e.g., AI-101"}
+                    className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-[#D4AF37]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Service Provider</Label>
+                  <Input 
+                    value={bookedTransport.provider}
+                    onChange={(e) => setBookedTransport({...bookedTransport, provider: e.target.value})}
+                    placeholder="e.g., Indigo, Air India, IRCTC"
+                    className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-[#D4AF37]"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Arrival Time</Label>
+                    <Input 
+                      type="time"
+                      value={bookedTransport.arrival_time}
+                      onChange={(e) => setBookedTransport({...bookedTransport, arrival_time: e.target.value})}
+                      className="bg-white/5 border-white/10 h-12 rounded-xl"
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={handleConfirm}
+                  className="w-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37] hover:text-black rounded-xl h-14 mt-4 font-bold transition-all"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Transport
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+             <div className="h-full flex items-center justify-center border-2 border-dashed border-white/5 rounded-3xl p-12 text-center">
+               <p className="text-gray-600 text-sm italic">
+                 Click "Book on Ixigo" to open searching results. <br/> Then come back here to enter your booking info.
+               </p>
+             </div>
+          )}
+        </div>
       </div>
     </div>
   );
