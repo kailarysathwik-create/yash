@@ -20,7 +20,7 @@
 
 @layer base {
   body {
-    @apply bg-[#fcfaff] text-[#1a0b2e] font-['Plus_Jakarta_Sans', sans-serif] selection:bg-[#A855F7]/20;
+    @apply bg-[#fcfaff] text-[#1a0b2e] font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#A855F7]/20;
     background-image:
       radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
       radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.1) 0px, transparent 50%),
