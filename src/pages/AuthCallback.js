@@ -16,11 +16,22 @@ const AuthCallback = () => {
 
     const processAuth = async () => {
       try {
-        // Supabase returns the token in the URL hash after OAuth:
-        // /auth/callback#access_token=...&refresh_token=...&token_type=bearer
         const hash = window.location.hash;
+        console.log('Processing auth callback with hash:', hash ? 'Present' : 'Missing');
+        
+        // Clear hash IMMEDIATELY to prevent double processing/loops
+        window.history.replaceState(null, '', window.location.pathname);
+
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get('access_token');
+        const error = params.get('error');
+        const errorDescription = params.get('error_description');
+
+        if (error) {
+          console.error('Supabase Auth error:', error, errorDescription);
+          navigate('/login', { state: { error: errorDescription || error } });
+          return;
+        }
 
         if (!accessToken) {
           console.error('No access_token found in URL hash');
@@ -37,8 +48,7 @@ const AuthCallback = () => {
 
         const { user, needs_onboarding } = response.data;
 
-        // Clear hash from URL
-        window.history.replaceState(null, '', window.location.pathname);
+
 
         // Navigate to appropriate page
         if (needs_onboarding) {
@@ -47,10 +57,14 @@ const AuthCallback = () => {
           navigate('/dashboard', { state: { user }, replace: true });
         }
       } catch (error) {
-        console.error('Auth callback error:', error);
-        // Clear the hash to avoid infinite loop
+        console.error('Full auth callback error details:', error);
+        if (error.response) {
+          console.error('Backend response items:', error.response.data);
+          console.error('Backend status:', error.response.status);
+        }
+        // Clear the hash as a secondary safety measure
         window.history.replaceState(null, '', '/');
-        navigate('/login');
+        navigate('/login', { state: { error: 'Authentication failed. Please check backend connection.' } });
       }
     };
 
