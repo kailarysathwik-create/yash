@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, Phone, Globe } from 'lucide-react';
+import { Building2, Phone, Globe, Waves, Sparkles, CreditCard } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -32,122 +32,120 @@ const Onboarding = () => {
         { withCredentials: true }
       );
 
-      toast.success('Profile completed successfully!');
+      toast.success('Hub Profile Created!');
       navigate('/dashboard');
     } catch (error) {
       console.error('Onboarding error:', error);
-      toast.error('Failed to complete profile');
+      toast.error('Failed to complete hub profile');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 py-12 relative overflow-hidden font-['Outfit']">
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00BCD4]/5 rounded-full blur-[100px] -mr-64 -mt-64" />
+      
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-xl"
       >
-        <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 shadow-2xl">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-[#D4AF37] mb-2">
-              Complete Your Profile
+        <div className="glass-card rounded-[3rem] p-10 md:p-14 border-white/60 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 p-6 opacity-10">
+            <Waves className="w-20 h-20 text-[#00BCD4]" />
+          </div>
+
+          <div className="text-center mb-12">
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00BCD4]/10 rounded-full text-[#00BCD4] text-[9px] font-black uppercase tracking-widest mb-4">
+               <Sparkles className="w-3 h-3" /> Initializing Hub Access
+             </div>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-800 tracking-tight mb-3">
+              Define Your Hub
             </h2>
-            <p className="text-sm text-gray-400">
-              Tell us about your organization to get started with luxury planning
+            <p className="text-sm font-medium text-gray-400">
+              Setup your organization to begin smart itinerary planning.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Organization */}
-            <div>
-              <Label className="block text-sm font-medium text-gray-300 mb-1.5">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#D4AF37]" />
-                  Organization Name
-                </div>
-              </Label>
-              <Input
-                data-testid="organization-input"
-                type="text"
-                required
-                value={formData.organization}
-                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all duration-200 placeholder:text-gray-600"
-                placeholder="Your Travel Agency"
-              />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#00BCD4]">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4" /> Organization
+                  </div>
+                </Label>
+                <Input
+                  type="text"
+                  required
+                  value={formData.organization}
+                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                  className="bg-white/50 border-gray-100 h-14 rounded-2xl font-bold"
+                  placeholder="Yatra Hub Name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#00BCD4]">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" /> Hub Number
+                  </div>
+                </Label>
+                <Input
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="bg-white/50 border-gray-100 h-14 rounded-2xl font-bold"
+                  placeholder="+91"
+                />
+              </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <Label className="block text-sm font-medium text-gray-300 mb-1.5">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#00BCD4]">
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#D4AF37]" />
-                  Phone Number
+                  <Globe className="w-4 h-4" /> Hub URL <span className="text-gray-300 ml-1">(Optional)</span>
                 </div>
               </Label>
               <Input
-                data-testid="phone-input"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all duration-200 placeholder:text-gray-600"
-                placeholder="+91 9876543210"
-              />
-            </div>
-
-            {/* Website */}
-            <div>
-              <Label className="block text-sm font-medium text-gray-300 mb-1.5">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#D4AF37]" />
-                  Website <span className="text-gray-500">(Optional)</span>
-                </div>
-              </Label>
-              <Input
-                data-testid="website-input"
                 type="url"
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all duration-200 placeholder:text-gray-600"
-                placeholder="https://youragency.com"
+                className="bg-white/50 border-gray-100 h-14 rounded-2xl font-bold"
+                placeholder="https://yash-hub.com"
               />
             </div>
 
-            {/* Payment Setup Section */}
-            <div className="pt-4 border-t border-[#D4AF37]/10">
-              <h3 className="text-lg font-medium text-white mb-4">Payment Setup</h3>
-              <p className="text-sm text-gray-400 mb-4">
-                Add your UPI ID to receive payments directly.
-              </p>
-
-              {/* UPI ID */}
-              <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-300 mb-1.5">
-                  UPI ID
+            <div className="pt-8 border-t border-gray-50 bg-[#00BCD4]/5 -mx-10 md:-mx-14 px-10 md:px-14 pb-10">
+              <div className="flex items-center gap-3 mb-6">
+                 <CreditCard className="w-5 h-5 text-[#00BCD4]" />
+                 <h3 className="text-lg font-black text-gray-800 tracking-tight">Access Payments</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#00BCD4]">
+                  UPI Hub ID
                 </Label>
                 <Input
-                  data-testid="upi-id-input"
                   type="text"
                   required
                   value={formData.upi_id}
                   onChange={(e) => setFormData({ ...formData, upi_id: e.target.value })}
-                  className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all duration-200 placeholder:text-gray-600"
-                  placeholder="name@upi"
+                  className="bg-white/80 border-gray-100 h-14 rounded-2xl font-bold focus:border-[#00BCD4] shadow-sm"
+                  placeholder="hub@upi"
                 />
               </div>
             </div>
 
             <Button
-              data-testid="complete-profile-btn"
               type="submit"
               disabled={loading}
-              className="w-full bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-8 py-6 font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+              className="w-full bg-[#00BCD4] text-white hover:scale-[1.02] transition-all rounded-full h-16 font-black text-lg shadow-xl shadow-[#00BCD4]/20"
             >
-              {loading ? 'Saving...' : 'Complete Profile'}
+              {loading ? 'Processing Hub...' : 'Complete Hub Setup'}
             </Button>
           </form>
         </div>
