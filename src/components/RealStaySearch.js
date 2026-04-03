@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, Hotel, Plus, Trash2, CheckCircle2, Bed, Sparkles } from 'lucide-react';
+import { ExternalLink, Hotel, Plus, Trash2, CheckCircle2, Bed, Sparkles, MapPin, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const RealStaySearch = ({ tripDetails, bookedStays, setBookedStays, onNext, onBack }) => {
@@ -38,87 +38,100 @@ const RealStaySearch = ({ tripDetails, bookedStays, setBookedStays, onNext, onBa
   };
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-8 md:p-12 border-white/60 shadow-xl overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#9370DB]/5 rounded-full blur-3xl -mr-16 -mt-16" />
+    <div className="card-3d glass-card rounded-[3.5rem] p-10 md:p-16 border-white/20 shadow-2xl overflow-hidden relative text-white">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#9370DB]/10 rounded-full blur-[100px] -mr-32 -mt-32 pulse-bg" />
       
-      <div className="flex items-center gap-5 mb-12">
-        <div className="w-14 h-14 rounded-3xl bg-[#9370DB]/10 flex items-center justify-center shadow-inner">
-          <Bed className="w-7 h-7 text-[#9370DB]" />
+      <div className="flex items-center gap-6 mb-12 relative z-10">
+        <div className="w-16 h-16 rounded-[2rem] bg-white/10 flex items-center justify-center shadow-2xl border border-white/20 group-hover:bg-[#9370DB] transition-all duration-700">
+          <Hotel className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Stay Hub</h2>
-          <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Defining Hub Sanctuaries</p>
+          <h2 className="text-4xl font-black tracking-tight mb-2">Stay Hub</h2>
+          <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em]">Defining Hub Refuges</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="space-y-8">
-          <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 shadow-inner relative">
-            <h3 className="text-[#9370DB] font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
-               <Sparkles className="w-3 h-3" /> Hub Curated Retreats
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
+        <div className="space-y-10">
+          <div className="bg-white/5 p-10 rounded-[3rem] border border-white/10 relative group hover:border-[#9370DB]/30 transition-all duration-500">
+            <h3 className="text-[#9370DB] font-black text-[10px] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+               <Sparkles className="w-3 h-3" /> Hub AI Retreat Curation
             </h3>
-            <p className="text-gray-500 text-sm font-medium mb-10 leading-relaxed">
-              Explore retreat options for {tripDetails.destination}. <br/> Hub AI has synchronized your dates for a seamless stay.
+            <p className="text-white/40 text-sm font-medium mb-10 leading-relaxed italic">
+              Explore premium sanctuary options for {tripDetails.destination}. <br/> Hub AI has synchronized your operational timeline for a seamless stay.
             </p>
             <a href={getSearchUrl()} target="_blank" rel="noopener noreferrer" onClick={() => setShowForm(true)}>
-              <Button className="w-full bg-[#9370DB] text-white hover:scale-[1.02] transition-all rounded-2xl h-16 font-black shadow-xl shadow-[#9370DB]/20">
-                Explore Stays Hub <ExternalLink className="w-5 h-5 ml-2" />
+              <Button className="w-full bg-white text-[#1a0b2e] hover:bg-[#9370DB] hover:text-white hover:scale-[1.02] transition-all duration-500 rounded-2xl h-20 text-lg font-black shadow-2xl shadow-black/50">
+                Explore Stays Hub <ExternalLink className="w-5 h-5 ml-3" />
               </Button>
             </a>
           </div>
 
-          <div className="p-6 bg-white/20 rounded-2xl border border-white/40">
-             <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400 tracking-widest">
-               <span>Planned Duration</span>
-               <span className="text-[#9370DB] text-sm">{tripDetails.num_days} Days</span>
+          <div className="p-8 bg-white/5 rounded-[2.5rem] border border-white/10 flex items-center justify-between group hover:border-[#9370DB]/20 transition-all">
+             <div className="flex flex-col gap-1">
+               <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Operational Timeline</span>
+               <span className="text-white font-black text-xl">{tripDetails.num_days} Hub Days</span>
              </div>
+             <Calendar className="w-8 h-8 text-[#9370DB]/30" />
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {(showForm || bookedStays[0].hotel_name) ? (
-            <div className="space-y-8 border-l-4 border-[#9370DB]/20 pl-8 pb-4">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-gray-800 font-extrabold text-xl tracking-tight">Access Hub Stays</h3>
-                <Button size="sm" onClick={addStay} className="bg-[#9370DB]/10 text-[#9370DB] border border-[#9370DB]/10 hover:bg-[#9370DB]/20 rounded-xl px-4 font-bold">
-                  <Plus className="w-4 h-4 mr-1" /> Add Retreat
+            <div className="space-y-10 border-l-2 border-white/5 pl-10 pb-4">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <h3 className="text-white font-black text-3xl tracking-tight">Stay Manifest</h3>
+                <Button size="sm" onClick={addStay} className="bg-white/5 text-[#9370DB] border border-white/10 hover:bg-white/10 rounded-xl px-4 py-6 font-black uppercase text-[10px] tracking-widest shadow-xl">
+                  <Plus className="w-4 h-4 mr-2" /> Add Hub
                 </Button>
               </div>
 
-              <div className="space-y-5 max-h-[400px] overflow-y-auto pr-3 custom-scrollbar">
+              <div className="space-y-8 max-h-[450px] overflow-y-auto pr-4 custom-scrollbar">
                 <AnimatePresence>
                   {bookedStays.map((stay, idx) => (
                     <motion.div key={idx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="p-6 bg-white/30 rounded-3xl border border-white/50 space-y-4 relative group shadow-sm hover:shadow-md transition-all">
+                      className="p-8 bg-white/5 rounded-[3rem] border border-white/10 space-y-6 relative group hover:border-[#9370DB]/30 transition-all duration-500">
                       {bookedStays.length > 1 && (
-                        <button onClick={() => removeStay(idx)} className="absolute -top-2 -right-2 w-7 h-7 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 shadow-lg">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={() => removeStay(idx)} className="absolute -top-3 -right-3 w-10 h-10 bg-white text-red-600 hover:bg-red-600 hover:text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/10 shadow-2xl rotate-12">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       )}
                       
-                      <Input placeholder="Retreat / Hotel Name" value={stay.hotel_name} onChange={(e) => updateStay(idx, 'hotel_name', e.target.value)} className="bg-transparent border-b-2 border-gray-100 rounded-none h-10 px-0 focus:border-[#9370DB] font-bold text-gray-800" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input type="date" value={stay.check_in} onChange={(e) => updateStay(idx, 'check_in', e.target.value)} className="bg-transparent border-b-2 border-gray-100 rounded-none h-10 px-0 text-[10px] font-black text-[#9370DB]" />
-                        <Input type="date" value={stay.check_out} onChange={(e) => updateStay(idx, 'check_out', e.target.value)} className="bg-transparent border-b-2 border-gray-100 rounded-none h-10 px-0 text-[10px] font-black text-[#9370DB]" />
+                      <div className="space-y-2">
+                        <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Name of Sanctuary</Label>
+                        <Input placeholder="Resort or Hotel Name" value={stay.hotel_name} onChange={(e) => updateStay(idx, 'hotel_name', e.target.value)} className="glass-input h-14" />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Arrival</Label>
+                          <Input type="date" value={stay.check_in} onChange={(e) => updateStay(idx, 'check_in', e.target.value)} className="glass-input h-14 text-[10px] font-black text-[#9370DB]" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Departure</Label>
+                          <Input type="date" value={stay.check_out} onChange={(e) => updateStay(idx, 'check_out', e.target.value)} className="glass-input h-14 text-[10px] font-black text-[#9370DB]" />
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
               </div>
 
-              <div className="pt-8 border-t border-gray-100 flex gap-4">
-                <Button onClick={onBack} variant="ghost" className="text-gray-400 hover:text-[#9370DB] font-bold">Back</Button>
-                <Button onClick={onNext} className="flex-1 bg-gray-800 text-white rounded-2xl h-16 font-black shadow-xl shadow-gray-200 hover:scale-[1.02] transition-transform">
-                  <CheckCircle2 className="w-5 h-5 mr-3 text-[#9370DB]" /> Synchronize Hub Plan
+              <div className="pt-10 border-t border-white/5 flex gap-6">
+                <Button onClick={onBack} variant="ghost" className="text-white/20 hover:text-white font-black uppercase text-[10px] tracking-widest px-8">Back</Button>
+                <Button onClick={onNext} className="flex-1 bg-white text-[#1a0b2e] hover:bg-[#9370DB] hover:text-white hover:scale-[1.02] transition-all duration-500 rounded-full h-20 font-black text-xl shadow-2xl shadow-black/50">
+                  <CheckCircle2 className="w-6 h-6 mr-3 text-[#9370DB]" /> Finalize Protocol
                 </Button>
               </div>
             </div>
           ) : (
-             <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-[#9370DB]/20 rounded-[2.5rem] p-12 text-center bg-white/10">
-               <Hotel className="w-12 h-12 text-[#9370DB]/20 mb-4 animate-pulse" />
-               <p className="text-gray-400 text-xs font-bold leading-relaxed">
-                 Discover Hub Retreats... <br/>
-                 Click to open search options.
+             <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[4rem] p-20 text-center bg-white/5 group hover:border-[#9370DB]/30 transition-all duration-500">
+               <div className="w-24 h-24 rounded-[2.5rem] bg-white/5 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-700">
+                <Hotel className="w-10 h-10 text-white/10 group-hover:animate-bounce" />
+               </div>
+               <p className="text-white/20 text-[11px] font-black uppercase tracking-[0.4em] leading-loose max-w-[250px]">
+                 Discover Hub Refuges... <br/>
+                 <span className="text-[#9370DB]/40 font-bold block mt-4">Initiate Hub Search to continue</span>
                </p>
              </div>
           )}

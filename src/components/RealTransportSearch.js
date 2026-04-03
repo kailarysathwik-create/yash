@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { ExternalLink, Car, Globe, Train, Plane, CheckCircle2, Navigation, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Hub Fallback Dictionary (Static - move outside component)
+// Hub Fallback Dictionary
 const hubMapping = {
   'munnar': 'Kochi',
   'manali': 'Chandigarh',
@@ -17,7 +17,7 @@ const hubMapping = {
   'kasol': 'Chandigarh',
   'dharamshala': 'Pathankot',
   'mcledoganj': 'Pathankot',
-  'leh': 'Leh', // Leh has an airport
+  'leh': 'Leh',
   'ladakh': 'Leh',
   'hampi': 'Hospet',
   'ajanta': 'Aurangabad',
@@ -67,50 +67,48 @@ const RealTransportSearch = ({ tripDetails, bookedTransport, setBookedTransport,
   };
 
   const handleConfirm = () => {
-    if (!bookedTransport.booking_id) {
-      return;
-    }
+    if (!bookedTransport.booking_id) return;
     onNext();
   };
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-8 md:p-12 border-white/60 shadow-xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#9370DB]/5 rounded-full blur-3xl -mr-16 -mt-16" />
+    <div className="card-3d glass-card rounded-[3.5rem] p-10 md:p-16 border-white/20 shadow-2xl relative overflow-hidden text-white">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#9370DB]/10 rounded-full blur-[100px] -mr-32 -mt-32 pulse-bg" />
       
-      <div className="flex items-center gap-5 mb-10">
-        <div className="w-14 h-14 rounded-3xl bg-[#9370DB]/10 flex items-center justify-center shadow-inner">
-          <Plane className="w-7 h-7 text-[#9370DB]" />
+      <div className="flex items-center gap-6 mb-12 relative z-10">
+        <div className="w-16 h-16 rounded-[2rem] bg-white/10 flex items-center justify-center shadow-2xl border border-white/20 group-hover:bg-[#9370DB] transition-all duration-700">
+          <Plane className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Transport Hub</h2>
-          <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Securing Access Hub</p>
+          <h2 className="text-4xl font-black tracking-tight mb-2">Transport Hub</h2>
+          <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em]">Secure Protocol v3.0</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="space-y-8">
-          <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 shadow-inner relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#9370DB]/5 rounded-full blur-2xl" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
+        <div className="space-y-10">
+          <div className="bg-white/5 p-10 rounded-[3rem] border border-white/10 relative overflow-hidden group hover:border-[#9370DB]/30 transition-all duration-500">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#9370DB]/10 rounded-full blur-[80px]" />
             
-            <h3 className="text-[#9370DB] font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
-               <Sparkles className="w-3 h-3" /> Hub AI Routing
+            <h3 className="text-[#9370DB] font-black text-[10px] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+               <Sparkles className="w-3 h-3" /> Hub AI Smart Routing
             </h3>
             
             {isFallback && (
               <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="mb-6 p-4 bg-[#9370DB]/5 border border-[#9370DB]/20 rounded-2xl flex items-start gap-3"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-8 p-6 bg-white/5 border border-white/10 rounded-[2rem] flex items-start gap-4"
               >
-                <Navigation className="w-5 h-5 text-[#9370DB] shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#9370DB] font-bold leading-relaxed">
-                  Smart Routing: Direct transport to <span className="underline">{tripDetails.destination}</span> is limited. we are routing via the closest major Hub: <span className="text-[#9370DB] uppercase">{activeDestination}</span>.
+                <Navigation className="w-6 h-6 text-[#9370DB] shrink-0 mt-1" />
+                <p className="text-xs text-white/60 font-medium leading-relaxed">
+                  Smart Routing: Direct transport to <span className="text-white font-black underline decoration-[#9370DB] underline-offset-4">{tripDetails.destination}</span> is limited. We are routing via the major Hub: <span className="text-white font-black uppercase">{activeDestination}</span>.
                 </p>
               </motion.div>
             )}
 
-            <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
-               Access the Hub-curated Ixigo search. <br/> AI has pre-configured your source, destination, and personnel for a seamless booking.
+            <p className="text-white/40 text-sm font-medium mb-10 leading-relaxed italic">
+               Access the Hub-curated Ixigo search orchestration. AI has calibrated your source, destination, and personnel for a premium booking experience.
             </p>
             
             <a 
@@ -119,59 +117,63 @@ const RealTransportSearch = ({ tripDetails, bookedTransport, setBookedTransport,
               rel="noopener noreferrer"
               onClick={() => setShowBookingForm(true)}
             >
-              <Button className="w-full bg-[#9370DB] text-white hover:scale-[1.02] transition-all rounded-2xl h-16 font-black shadow-xl shadow-[#9370DB]/20">
-                Search via {activeDestination} Hub <ExternalLink className="w-5 h-5 ml-2" />
+              <Button className="w-full bg-white text-[#1a0b2e] hover:bg-[#9370DB] hover:text-white hover:scale-[1.02] transition-all duration-500 rounded-2xl h-20 text-lg font-black shadow-2xl shadow-black/50">
+                Search via {activeDestination} Hub <ExternalLink className="w-5 h-5 ml-3" />
               </Button>
             </a>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-             <div className="p-5 bg-white/30 rounded-2xl border border-white/50 text-center">
-               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Origin Point</p>
-               <p className="text-sm font-black text-gray-700">{tripDetails.from_location}</p>
+          <div className="grid grid-cols-2 gap-6">
+             <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 text-center">
+               <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mb-2">Origin Node</p>
+               <p className="text-base font-black text-white">{tripDetails.from_location}</p>
              </div>
-             <div className="p-5 bg-white/30 rounded-2xl border border-white/50 text-center">
-               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Hub Finish</p>
-               <p className="text-sm font-black text-gray-700">{activeDestination}</p>
+             <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 text-center">
+               <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mb-2">Target Node</p>
+               <p className="text-base font-black text-white">{activeDestination}</p>
              </div>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {(showBookingForm || bookedTransport.booking_id) ? (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 bg-white/20 p-8 rounded-[2rem] border-l-4 border-[#9370DB]">
-              <div className="space-y-2">
-                <h3 className="text-gray-800 font-black text-2xl tracking-tight">Deployment Verification</h3>
-                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Hub AI will sync with your Reference ID</p>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              className="space-y-10 bg-white/5 p-10 rounded-[3.5rem] border border-white/10 relative group"
+            >
+              <div className="space-y-3">
+                <h3 className="text-white font-black text-3xl tracking-tight">Deployment Verification</h3>
+                <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.3em]">Hub AI will synchronize via Reference ID</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9370DB]">Reference ID (PNR/Flight No)</Label>
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#9370DB]">Reference ID (PNR/Flight No)</Label>
                   <Input 
                     value={bookedTransport.booking_id} 
                     onChange={(e) => setBookedTransport({...bookedTransport, booking_id: e.target.value})} 
                     placeholder="Enter Reference ID" 
-                    className="bg-white/50 border-gray-100 h-16 rounded-2xl font-black text-lg focus:border-[#9370DB] shadow-sm text-gray-700" 
+                    className="glass-input h-20 text-center font-black text-2xl uppercase tracking-widest placeholder:text-white/10" 
                   />
-                  <p className="text-[9px] text-gray-400 font-medium">Service provider and and arrival details will be auto-synced by Hub Concierge.</p>
+                  <p className="text-[9px] text-white/20 font-bold italic leading-loose">Service provider and arrival time auto-synced by Hub Concierge protocol.</p>
                 </div>
                 
-                <div className="pt-4">
-                  <Button onClick={handleConfirm} className="w-full bg-gray-800 text-white hover:bg-black rounded-2xl h-16 font-black shadow-lg transition-transform active:scale-95">
-                    <CheckCircle2 className="w-5 h-5 mr-3 text-[#9370DB]" /> Synchronize Stay Hub
+                <div className="pt-6">
+                  <Button onClick={handleConfirm} className="w-full bg-[#9370DB] text-white hover:bg-[#B19CD9] hover:scale-105 transition-all duration-500 rounded-3xl h-20 font-black text-xl shadow-2xl shadow-[#9370DB]/30">
+                    <CheckCircle2 className="w-6 h-6 mr-3" /> Synchronize Stay Hub
                   </Button>
                 </div>
               </div>
             </motion.div>
           ) : (
-             <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-[#9370DB]/20 rounded-[2.5rem] p-12 text-center bg-white/10">
-               <div className="w-16 h-16 rounded-full bg-[#9370DB]/5 flex items-center justify-center mb-6 animate-pulse">
-                <Navigation className="w-7 h-7 text-[#9370DB]/30" />
+             <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[4rem] p-16 text-center bg-white/5 group hover:border-[#9370DB]/30 transition-all duration-500">
+               <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-700">
+                <Navigation className="w-10 h-10 text-white/10 group-hover:text-[#9370DB] transition-colors" />
                </div>
-               <p className="text-gray-400 text-xs font-bold leading-relaxed max-w-[200px]">
+               <p className="text-white/20 text-[11px] font-black uppercase tracking-[0.4em] leading-loose max-w-[250px]">
                  Waiting for Deployment Authorization... <br/>
-                 Initiate Ixigo Hub Search to proceed.
+                 <span className="text-[#9370DB]/40 font-bold block mt-4">Initiate Hub Search to continue</span>
                </p>
              </div>
           )}
