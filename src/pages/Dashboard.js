@@ -13,7 +13,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     from_location: '',
     destination: '',
@@ -56,19 +56,19 @@ const Dashboard = () => {
       <header className="px-8 py-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <motion.div 
+            <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.8 }}
-              className="w-12 h-12 bg-[#A855F7]/10 rounded-2xl flex items-center justify-center border border-[#A855F7]/20 shadow-inner"
+              className="w-12 h-12 bg-white/50 rounded-2xl flex items-center justify-center border border-[#A855F7]/20 shadow-inner p-1"
             >
-              <Waves className="w-6 h-6 text-[#A855F7]" />
+              <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-contain drop-shadow-md" />
             </motion.div>
             <span className="text-2xl font-black text-[#A855F7] tracking-tight">Y.A.S.H</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="px-4 py-2 glass rounded-full flex items-center gap-2">
-               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1a0b2e]/40">Hub Operational</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1a0b2e]/40">Hub Operational</span>
             </div>
           </div>
         </div>
@@ -77,8 +77,8 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto px-6">
         {/* Hero Deployment Area */}
         <section className="py-20 text-center relative">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
@@ -90,7 +90,7 @@ const Dashboard = () => {
             <h1 className="text-6xl md:text-[8rem] font-black text-[#1a0b2e] mb-10 tracking-tighter leading-[0.85]">
               Y.A.S.H <br /> <span className="glass-text">Platform</span>
             </h1>
-            
+
             <p className="text-[#1a0b2e]/50 font-medium max-w-xl mx-auto mb-16 text-xl leading-relaxed">
               Experience the pinnacle of travel agency orchestration. Airy, bright, and perfectly curated for the elite explorer.
             </p>
@@ -98,50 +98,49 @@ const Dashboard = () => {
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
               <DialogTrigger asChild>
                 <Button className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full px-16 py-10 text-xl font-black shadow-2xl shadow-[#A855F7]/20 group">
-                  <Navigation className="w-6 h-6 mr-4 group-hover:rotate-45 transition-transform" /> 
-                  Begin New Deployment
+                  <Navigation className="w-6 h-6 mr-4 group-hover:rotate-45 transition-transform" />
+                  Begin New Trip
                 </Button>
               </DialogTrigger>
               <DialogContent className="glass-card border-white/50 rounded-[3.5rem] p-12 max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_50px_100px_-20px_rgba(147,112,219,0.3)]">
                 <DialogHeader>
-                  <DialogTitle className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-10">Deployment Vector</DialogTitle>
+                  <DialogTitle className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-10">New Trip</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Source Origin</Label>
-                       <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Departure City" required />
+                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start</Label>
+                      <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Departure City" required />
                     </div>
                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination Node</Label>
-                       <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Hub Terminal" required />
+                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination</Label>
+                      <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Hub Terminal" required />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-8">
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Personnel</Label>
-                       <Input type="number" min="1" value={formData.num_people} onChange={(e) => setFormData({ ...formData, num_people: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">persons</Label>
+                      <Input type="number" min="1" value={formData.num_people} onChange={(e) => setFormData({ ...formData, num_people: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
                     </div>
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Runtime (Days)</Label>
-                       <Input type="number" min="1" max="30" value={formData.num_days} onChange={(e) => setFormData({ ...formData, num_days: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">No.Of Days</Label>
+                      <Input type="number" min="1" max="30" value={formData.num_days} onChange={(e) => setFormData({ ...formData, num_days: e.target.value })} className="glass-input h-16 text-center text-xl font-black" required />
                     </div>
                     <div className="space-y-3 text-center">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Credits (₹)</Label>
-                       <Input type="number" min="0" value={formData.budget} onChange={(e) => setFormData({ ...formData, budget: e.target.value })} className="glass-input h-16 text-center text-xl font-black" placeholder="-" />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60">Budget</Label>
+                      <Input type="number" min="0" value={formData.budget} onChange={(e) => setFormData({ ...formData, budget: e.target.value })} className="glass-input h-16 text-center text-xl font-black" placeholder="-" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Transit Protocol</Label>
+                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Transport</Label>
                     <div className="grid grid-cols-3 gap-6">
                       {['flight', 'train', 'car'].map((mode) => (
                         <button key={mode} type="button" onClick={() => setFormData({ ...formData, transport_mode: mode })}
-                          className={`flex flex-col items-center gap-4 p-8 rounded-[2.5rem] border-2 transition-all duration-700 ${
-                            formData.transport_mode === mode ? 'border-[#A855F7] glass text-[#1a0b2e] scale-105 shadow-2xl shadow-[#A855F7]/20' : 'border-white/20 hover:border-[#A855F7]/30 text-[#1a0b2e]/20'
-                          }`}
+                          className={`flex flex-col items-center gap-4 p-8 rounded-[2.5rem] border-2 transition-all duration-700 ${formData.transport_mode === mode ? 'border-[#A855F7] glass text-[#1a0b2e] scale-105 shadow-2xl shadow-[#A855F7]/20' : 'border-white/20 hover:border-[#A855F7]/30 text-[#1a0b2e]/20'
+                            }`}
                         >
                           {mode === 'flight' && <Plane className="w-8 h-8" />}
                           {mode === 'train' && <Train className="w-8 h-8" />}
@@ -153,14 +152,14 @@ const Dashboard = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Commencement Date</Label>
-                       <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold" required />
-                     </div>
-                     <div className="space-y-3">
-                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Ancillary Nodes</Label>
-                       <Input value={formData.places_to_cover} onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Intermediary Cities" />
-                     </div>
+                    <div className="space-y-3">
+                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start Date</Label>
+                      <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold" required />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Places To Cover</Label>
+                      <Input value={formData.places_to_cover} onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Intermediary Cities" />
+                    </div>
                   </div>
 
                   <Button type="submit" disabled={loading} className="w-full bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-[1.02] transition-all duration-700 rounded-full h-20 font-black text-xl shadow-2xl shadow-[#1a0b2e]/20">

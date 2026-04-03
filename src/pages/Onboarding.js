@@ -8,27 +8,27 @@ const Onboarding = () => {
   const [step, setStep] = useState(0);
 
   const steps = [
-    { 
-      title: "Handshake Protocol", 
-      desc: "Synchronizing with Yatra And Stay Hub secure terminal...", 
+    {
+      title: "Handshake Protocol",
+      desc: "Synchronizing with Yatra And Stay Hub secure terminal...",
       icon: ShieldCheck,
       color: "text-blue-400"
     },
-    { 
-      title: "Matrix Initialization", 
-      desc: "Allocating premium orchestration resources...", 
+    {
+      title: "Matrix Initialization",
+      desc: "Allocating premium orchestration resources...",
       icon: Zap,
       color: "text-yellow-400"
     },
-    { 
-      title: "Global Node Sync", 
-      desc: "Connecting to 128+ verified Hub terminals...", 
+    {
+      title: "Global Node Sync",
+      desc: "Connecting to 128+ verified Hub terminals...",
       icon: Globe,
       color: "text-green-400"
     },
-    { 
-      title: "Protocol Ready", 
-      desc: "Welcome to the elite sanctuary of travel.", 
+    {
+      title: "Protocol Ready",
+      desc: "Welcome to the elite sanctuary of travel.",
       icon: Navigation,
       color: "text-[#A855F7]"
     }
@@ -53,13 +53,13 @@ const Onboarding = () => {
     <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#A855F7]/20">
       <div className="max-w-xl w-full text-center">
         <div className="mb-16 relative">
-          <motion.div 
+          <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
             className="w-32 h-32 border-4 border-dashed border-[#A855F7]/20 rounded-full mx-auto flex items-center justify-center"
           >
             <div className="w-24 h-24 border-4 border-dashed border-[#A855F7]/40 rounded-full flex items-center justify-center">
-               <LoaderCircle className="w-12 h-12 text-[#A855F7] animate-spin" />
+              <LoaderCircle className="w-12 h-12 text-[#A855F7] animate-spin" />
             </div>
           </motion.div>
           <div className="absolute inset-0 blur-3xl bg-[#A855F7]/10 rounded-full -z-10" />
@@ -76,11 +76,11 @@ const Onboarding = () => {
               className="space-y-8"
             >
               <div className="flex justify-center">
-                 <div className="p-6 bg-white/40 rounded-[2.5rem] shadow-inner border border-white/50">
-                    {React.createElement(steps[step].icon, { className: `w-10 h-10 ${steps[step].color}` })}
-                 </div>
+                <div className="p-6 bg-white/40 rounded-[2.5rem] shadow-inner border border-white/50">
+                  {React.createElement(steps[step].icon, { className: `w-10 h-10 ${steps[step].color}` })}
+                </div>
               </div>
-              
+
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#A855F7] mb-4">Step {step + 1} of 4</p>
                 <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-4">{steps[step].title}</h2>
@@ -90,7 +90,7 @@ const Onboarding = () => {
               {/* Progress track */}
               <div className="flex gap-3 justify-center pt-6">
                 {steps.map((_, i) => (
-                  <motion.div 
+                  <motion.div
                     key={i}
                     className="h-1.5 rounded-full bg-[#1a0b2e]/5 overflow-hidden"
                     style={{ width: i === step ? '48px' : '16px' }}
@@ -102,17 +102,17 @@ const Onboarding = () => {
           </AnimatePresence>
 
           <div className="absolute top-0 right-0 p-8 opacity-20">
-             <Sparkles className="w-6 h-6 text-[#A855F7]" />
+            <Sparkles className="w-6 h-6 text-[#A855F7]" />
           </div>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
           className="mt-12 text-[#1a0b2e]/20 text-[10px] font-black uppercase tracking-[0.3em]"
         >
-           Yatra And Stay Hub Orchestration Protocol v3.0
+          Yatra And Stay Hub
         </motion.div>
       </div>
 

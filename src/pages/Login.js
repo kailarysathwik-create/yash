@@ -38,16 +38,16 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center p-6 selection:bg-[#A855F7]/20">
       <div className="max-w-md w-full">
         {/* Logo Section */}
-        <motion.div 
+        <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-12"
         >
-          <div className="w-20 h-20 bg-[#A855F7]/10 rounded-[2.5rem] flex items-center justify-center border border-[#A855F7]/20 mx-auto mb-6 shadow-inner">
-            <Waves className="w-10 h-10 text-[#A855F7]" />
+          <div className="w-24 h-24 bg-white/50 rounded-[2.5rem] p-3 flex items-center justify-center border border-white mx-auto mb-6 shadow-inner hover:scale-105 transition-transform duration-500">
+            <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
           <h1 className="text-4xl font-black text-[#A855F7] tracking-tight mb-2">Y.A.S.H</h1>
-          <p className="text-[#1a0b2e]/40 text-[10px] font-black uppercase tracking-[0.4em]">Agency Protocol v3.0</p>
+          <p className="text-[#1a0b2e]/40 text-[10px] font-black uppercase tracking-[0.4em]">Yatra And Stay Hub</p>
         </motion.div>
 
         <motion.div
@@ -56,16 +56,16 @@ const Login = () => {
           className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-[0_50px_100px_-20px_rgba(147,112,219,0.15)]"
         >
           <div className="mb-10 text-center">
-             <h2 className="text-2xl font-black text-[#1a0b2e] mb-2">Access Portal</h2>
-             <p className="text-[#1a0b2e]/40 text-sm font-medium">Synchronize your explorer credentials</p>
+            <h2 className="text-2xl font-black text-[#1a0b2e] mb-2">Access Hub</h2>
+            <p className="text-[#1a0b2e]/40 text-sm font-medium">Login To Y.A.S.H</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-8">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60 ml-1">Universal ID (Email)</Label>
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60 ml-1">Email login</Label>
               <Input
                 type="email"
-                placeholder="agent@lavender.hub"
+                placeholder="your email here"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="glass-input h-16 px-6 font-bold"
@@ -73,8 +73,8 @@ const Login = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading}
               className="w-full bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-[1.02] transition-all duration-700 rounded-full h-16 font-black text-lg shadow-xl shadow-[#1a0b2e]/10"
             >
@@ -87,7 +87,7 @@ const Login = () => {
             <div className="relative flex justify-center text-[10px]"><span className="px-4 bg-transparent text-[#1a0b2e]/20 font-black uppercase tracking-widest">OR Vector</span></div>
           </div>
 
-          <Button 
+          <Button
             onClick={handleGoogleLogin}
             variant="outline"
             className="w-full border-2 border-[#1a0b2e]/5 bg-white/40 hover:bg-white hover:border-[#A855F7]/30 transition-all duration-500 rounded-full h-16 font-black text-[#1a0b2e] flex items-center justify-center gap-3"
@@ -103,19 +103,19 @@ const Login = () => {
         </motion.div>
 
         {/* Footer info */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
           className="mt-12 text-center"
         >
           <div className="flex items-center justify-center gap-8 mb-4">
-             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
-               <MapPin className="w-3 h-3" /> 128 Global Nodes
-             </div>
-             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
-               <Navigation className="w-3 h-3" /> Meticulous Curation
-             </div>
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
+              <MapPin className="w-3 h-3" /> 128 Global Nodes
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
+              <Navigation className="w-3 h-3" /> Meticulous Curation
+            </div>
           </div>
           <p className="text-[#A855F7]/20 text-[9px] font-bold tracking-widest">© 2026 YATRA AND STAY HUB ORCHESTRATION. ALL RIGHTS RESERVED.</p>
         </motion.div>
