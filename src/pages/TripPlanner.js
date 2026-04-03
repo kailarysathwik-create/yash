@@ -147,40 +147,46 @@ const TripPlanner = () => {
               </div>
             ) : trip?.itinerary ? (
               <div className="space-y-4">
-                {trip.itinerary.days?.map((day, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="border border-[#D4AF37]/10 rounded-xl p-6 bg-black/30 hover:border-[#D4AF37]/40 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-[#D4AF37] mb-4">
-                          Day {day.day}: {day.title}
-                        </h3>
-                        <div className="space-y-3 text-sm text-gray-300">
-                          {day.places && day.places.length > 0 && (
-                            <p className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-[#D4AF37]" />
-                              {day.places.join(', ')}
-                            </p>
-                          )}
-                          {day.activities && day.activities.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {day.activities.map((act, i) => (
-                                <span key={i} className="bg-[#D4AF37]/10 text-[#D4AF37] px-3 py-1 rounded-full text-xs border border-[#D4AF37]/20">
-                                  {act}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                {trip.itinerary.days && Array.isArray(trip.itinerary.days) ? (
+                  trip.itinerary.days.map((day, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="border border-[#D4AF37]/10 rounded-xl p-6 bg-black/30 hover:border-[#D4AF37]/40 transition-colors"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-[#D4AF37] mb-4">
+                            Day {day.day}: {day.title}
+                          </h3>
+                          <div className="space-y-3 text-sm text-gray-300">
+                            {day.places && Array.isArray(day.places) && day.places.length > 0 && (
+                              <p className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-[#D4AF37]" />
+                                {day.places.join(', ')}
+                              </p>
+                            )}
+                            {day.activities && Array.isArray(day.activities) && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {day.activities.map((act, i) => (
+                                  <span key={i} className="bg-[#D4AF37]/10 text-[#D4AF37] px-3 py-1 rounded-full text-xs border border-[#D4AF37]/20">
+                                    {act}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 mb-4">Itinerary format is invalid</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12">
