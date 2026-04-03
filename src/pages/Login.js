@@ -12,17 +12,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1518132668962-699f644f0b95?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwbGFuZHNjYXBlJTIwbmF0dXJlJTIwdHJhdmVsfGVufDB8fHx8MTc3NDc0ODYwNnww&ixlib=rb-4.1.0&q=85)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F5F0]/60 via-[#F7F5F0]/80 to-[#F7F5F0]/95" />
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden bg-black text-white">
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         <motion.div
@@ -36,49 +26,49 @@ const Login = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-[#D96C4A] rounded-full mb-8 shadow-lg"
+            className="inline-flex items-center justify-center w-20 h-20 bg-[#D4AF37] rounded-full mb-8 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
           >
-            <Globe className="w-10 h-10 text-white" />
+            <Globe className="w-10 h-10 text-black" />
           </motion.div>
-
+ 
           {/* Heading */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-tight font-light text-[#1C2B23] mb-6">
-            <span className="font-bold">Y.A.S.H</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-tight font-light text-white mb-6">
+            <span className="font-bold text-[#D4AF37]">Y.A.S.H</span>
             <br />
-            <span className="text-2xl sm:text-3xl text-[#5A6B5D]">Yatra And Stay Hub</span>
+            <span className="text-2xl sm:text-3xl text-gray-400">Yatra And Stay Hub</span>
           </h1>
-
-          <p className="text-base sm:text-lg leading-relaxed text-[#5A6B5D] max-w-2xl mx-auto mb-12">
-            Create AI-powered travel itineraries tailored to your clients. From flights to stays, transport to tours — all in one seamless platform.
+ 
+          <p className="text-base sm:text-lg leading-relaxed text-gray-400 max-w-2xl mx-auto mb-12">
+            Experience the future of luxury travel planning. AI-powered itineraries, seamless bookings, and customized stays — all in one premium platform.
           </p>
-
+ 
           {/* CTA Button */}
           <Button
             data-testid="google-login-btn"
             onClick={handleGoogleLogin}
-            className="bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-10 py-6 text-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-10 py-6 text-lg font-bold transition-all duration-200 shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_25px_rgba(212,175,55,0.6)] hover:-translate-y-0.5 border-none"
           >
             Continue with Google
           </Button>
-
+ 
           {/* Trust Indicators */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="mt-16 flex items-center justify-center gap-8 text-sm text-[#5A6B5D]"
+            className="mt-16 flex items-center justify-center gap-8 text-sm text-gray-500"
           >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#7BA4A8] rounded-full" />
+              <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
               <span>AI-Powered</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#7BA4A8] rounded-full" />
-              <span>Customizable</span>
+              <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
+              <span>Premium Luxury</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#7BA4A8] rounded-full" />
-              <span>Instant Bookings</span>
+              <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
+              <span>Global Concierge</span>
             </div>
           </motion.div>
         </motion.div>

@@ -69,19 +69,7 @@ const TripPlanner = () => {
     if (tripId) {
       loadTrip();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripId]);
-
-  const updateItinerary = async (updatedItinerary) => {
-    try {
-      await tripAPI.updateItinerary(tripId, updatedItinerary);
-      setTrip(prev => ({ ...prev, itinerary: updatedItinerary }));
-      toast.success('Itinerary updated!');
-    } catch (error) {
-      console.error('Failed to update itinerary:', error);
-      toast.error('Failed to update itinerary');
-    }
-  };
+  }, [tripId, navigate]);
 
   const saveTouristDetails = async () => {
     try {
@@ -112,10 +100,10 @@ const TripPlanner = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F5F0]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#E8E6E1] border-t-[#D96C4A]" />
-          <p className="mt-4 text-[#5A6B5D]">Loading trip details...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#D4AF37]/20 border-t-[#D4AF37]" />
+          <p className="mt-4 text-gray-400">Loading trip details...</p>
         </div>
       </div>
     );
@@ -123,30 +111,30 @@ const TripPlanner = () => {
 
   if (step === 1) {
     return (
-      <div className="min-h-screen bg-[#F7F5F0] py-12">
+      <div className="min-h-screen bg-black py-12">
         <div className="max-w-4xl mx-auto px-4">
           <Button
             onClick={() => navigate('/dashboard')}
             variant="ghost"
-            className="mb-6"
+            className="mb-6 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
 
-          <div className="bg-white border border-[#E8E6E1] rounded-3xl p-8 shadow-lg mb-8">
+          <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 shadow-2xl mb-8">
             <div className="flex items-start justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-medium text-[#1C2B23] mb-2">
+                <h1 className="text-3xl font-bold text-[#D4AF37] mb-2 uppercase tracking-tight">
                   {trip?.details.from_location} → {trip?.details.destination}
                 </h1>
-                <p className="text-[#5A6B5D]">
+                <p className="text-gray-400">
                   {trip?.details.num_days} days • {trip?.details.num_people} people • {trip?.details.transport_mode}
                 </p>
               </div>
               <Button
                 onClick={() => setStep(2)}
-                className="bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-8 py-3"
+                className="bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-8 py-3 font-bold shadow-lg"
               >
                 Continue <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -154,8 +142,8 @@ const TripPlanner = () => {
 
             {generating ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-[#D96C4A]" />
-                <span className="ml-3 text-[#5A6B5D]">Generating itinerary...</span>
+                <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37]" />
+                <span className="ml-3 text-gray-400">Generating luxury itinerary...</span>
               </div>
             ) : trip?.itinerary ? (
               <div className="space-y-4">
@@ -165,21 +153,28 @@ const TripPlanner = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="border border-[#E8E6E1] rounded-lg p-4 hover:border-[#7BA4A8] transition-colors"
+                    className="border border-[#D4AF37]/10 rounded-xl p-6 bg-black/30 hover:border-[#D4AF37]/40 transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-lg font-medium text-[#1C2B23] mb-2">
+                        <h3 className="text-lg font-bold text-[#D4AF37] mb-4">
                           Day {day.day}: {day.title}
                         </h3>
-                        <div className="space-y-2 text-sm text-[#5A6B5D]">
+                        <div className="space-y-3 text-sm text-gray-300">
                           {day.places && day.places.length > 0 && (
-                            <p><MapPin className="w-4 h-4 inline mr-2" />
+                            <p className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-[#D4AF37]" />
                               {day.places.join(', ')}
                             </p>
                           )}
                           {day.activities && day.activities.length > 0 && (
-                            <p>📍 {day.activities.join(', ')}</p>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {day.activities.map((act, i) => (
+                                <span key={i} className="bg-[#D4AF37]/10 text-[#D4AF37] px-3 py-1 rounded-full text-xs border border-[#D4AF37]/20">
+                                  {act}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -189,7 +184,7 @@ const TripPlanner = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-[#5A6B5D] mb-4">No itinerary generated yet</p>
+                <p className="text-gray-500 mb-4">No itinerary generated yet</p>
               </div>
             )}
           </div>
@@ -200,44 +195,46 @@ const TripPlanner = () => {
 
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-[#F7F5F0] py-12">
+      <div className="min-h-screen bg-black py-12">
         <div className="max-w-2xl mx-auto px-4">
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <Button onClick={() => setStep(1)} variant="ghost">
+              <Button onClick={() => setStep(1)} variant="ghost" className="text-gray-400 hover:text-white">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
-              <span className="text-[#5A6B5D] text-sm">Step 2 of 5</span>
+              <span className="text-gray-500 text-sm">Step 2 of 5</span>
             </div>
           </div>
 
-          <div className="bg-white border border-[#E8E6E1] rounded-3xl p-8 shadow-lg">
-            <h2 className="text-2xl font-medium text-[#1C2B23] mb-6">Tourist Details</h2>
+          <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-2xl font-bold text-[#D4AF37] mb-6">Tourist Details</h2>
             <div className="space-y-6">
-              <div className="pb-6 border-b border-[#E8E6E1]">
-                <h3 className="text-lg font-medium text-[#1C2B23] mb-4">Primary Contact</h3>
+              <div className="pb-6 border-b border-[#D4AF37]/10">
+                <h3 className="text-lg font-medium text-white mb-4">Primary Contact</h3>
                 <div className="grid grid-cols-1 gap-4">
                   <Input
                     type="email"
                     value={touristDetails.contact_email}
                     onChange={(e) => setTouristDetails({ ...touristDetails, contact_email: e.target.value })}
                     placeholder="primary@email.com"
+                    className="bg-black/50 border-[#D4AF37]/20 text-white"
                   />
                   <Input
                     type="tel"
                     value={touristDetails.contact_phone}
                     onChange={(e) => setTouristDetails({ ...touristDetails, contact_phone: e.target.value })}
                     placeholder="+91 9876543210"
+                    className="bg-black/50 border-[#D4AF37]/20 text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-medium text-[#1C2B23] mb-4">Tourists</h3>
+                <h3 className="text-lg font-medium text-white mb-4">Tourists</h3>
                 <div className="space-y-4">
                   {touristDetails.tourists.map((tourist, idx) => (
-                    <div key={idx} className="p-4 border border-[#E8E6E1] rounded-lg">
-                      <span className="font-medium text-[#1C2B23]">Tourist {idx + 1}</span>
+                    <div key={idx} className="p-4 border border-[#D4AF37]/10 rounded-xl bg-black/20">
+                      <span className="font-medium text-[#D4AF37]">Tourist {idx + 1}</span>
                       <div className="grid grid-cols-2 gap-3 mt-3">
                         <input
                           type="text"
@@ -248,7 +245,7 @@ const TripPlanner = () => {
                             setTouristDetails({ ...touristDetails, tourists: updated });
                           }}
                           placeholder="Full Name"
-                          className="px-3 py-2 border border-[#E8E6E1] rounded text-sm"
+                          className="px-3 py-2 bg-black/50 border border-[#D4AF37]/20 rounded-lg text-sm text-white"
                         />
                         <input
                           type="number"
@@ -259,7 +256,7 @@ const TripPlanner = () => {
                             setTouristDetails({ ...touristDetails, tourists: updated });
                           }}
                           placeholder="Age"
-                          className="px-3 py-2 border border-[#E8E6E1] rounded text-sm"
+                          className="px-3 py-2 bg-black/50 border border-[#D4AF37]/20 rounded-lg text-sm text-white"
                         />
                       </div>
                     </div>
@@ -270,7 +267,7 @@ const TripPlanner = () => {
 
             <Button
               onClick={saveTouristDetails}
-              className="w-full mt-8 bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-8 py-6 font-medium"
+              className="w-full mt-8 bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-8 py-6 font-bold shadow-lg"
             >
               Save & Continue <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -280,81 +277,51 @@ const TripPlanner = () => {
     );
   }
 
-  if (step === 3) {
+  // Steps 3, 4, 5 follow same pattern
+  if (step >= 3) {
     return (
-      <div className="min-h-screen bg-[#F7F5F0] py-12">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="mb-8">
+      <div className="min-h-screen bg-black py-12">
+        <div className="max-w-4xl mx-auto px-4">
+           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <Button onClick={() => setStep(2)} variant="ghost">
+              <Button onClick={() => setStep(step - 1)} variant="ghost" className="text-gray-400">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
-              <span className="text-[#5A6B5D] text-sm">Step 3 of 5</span>
+              <span className="text-gray-500 text-sm">Step {step} of 5</span>
             </div>
           </div>
-          <RealTransportSearch tripDetails={trip.details} onNext={() => setStep(4)} />
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 4) {
-    return (
-      <div className="min-h-screen bg-[#F7F5F0] py-12">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <Button onClick={() => setStep(3)} variant="ghost">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          
+          {step === 3 && <RealTransportSearch tripDetails={trip.details} onNext={() => setStep(4)} />}
+          {step === 4 && <RealStaySearch tripDetails={trip.details} onNext={() => setStep(5)} />}
+          {step === 5 && (
+            <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 shadow-2xl">
+              <h2 className="text-2xl font-bold text-[#D4AF37] mb-6">Agency Service Charges</h2>
+              <Input
+                type="number"
+                min="0"
+                value={agencyCharges}
+                onChange={(e) => setAgencyCharges(e.target.value)}
+                placeholder="e.g., 5000"
+                className="mb-6 bg-black/50 border-[#D4AF37]/20 text-white"
+              />
+              <Button
+                onClick={saveAgencyChargesData}
+                className="w-full bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-8 py-6 font-bold mb-6 shadow-lg"
+              >
+                Proceed to Payment
               </Button>
-              <span className="text-[#5A6B5D] text-sm">Step 4 of 5</span>
+              {agencyCharges && (
+                <div className="mt-8 border-t border-[#D4AF37]/10 pt-8">
+                  <UPIPayment
+                    tripId={tripId}
+                    onSuccess={() => {
+                      toast.success('Trip booked successfully!');
+                      navigate('/dashboard');
+                    }}
+                  />
+                </div>
+              )}
             </div>
-          </div>
-          <RealStaySearch tripDetails={trip.details} onNext={() => setStep(5)} />
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 5) {
-    return (
-      <div className="min-h-screen bg-[#F7F5F0] py-12">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <Button onClick={() => setStep(4)} variant="ghost">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back
-              </Button>
-              <span className="text-[#5A6B5D] text-sm">Step 5 of 5</span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-[#E8E6E1] rounded-3xl p-8 shadow-lg mb-8">
-            <h2 className="text-2xl font-medium text-[#1C2B23] mb-6">Agency Service Charges</h2>
-            <Input
-              type="number"
-              min="0"
-              value={agencyCharges}
-              onChange={(e) => setAgencyCharges(e.target.value)}
-              placeholder="e.g., 5000"
-              className="mb-6"
-            />
-            <Button
-              onClick={saveAgencyChargesData}
-              className="w-full bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-8 py-6 font-medium mb-6"
-            >
-              Proceed to Payment
-            </Button>
-          </div>
-
-          {agencyCharges && (
-            <UPIPayment
-              tripId={tripId}
-              onSuccess={() => {
-                toast.success('Trip booked successfully!');
-                navigate('/dashboard');
-              }}
-            />
           )}
         </div>
       </div>

@@ -63,20 +63,20 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0]">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#F7F5F0]/80 backdrop-blur-xl border-b border-[#E8E6E1]">
+      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-[#D4AF37]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#D96C4A] rounded-full flex items-center justify-center">
-              <Globe className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+              <Globe className="w-5 h-5 text-black" />
             </div>
-            <span className="text-xl font-medium text-[#1C2B23]">Y.A.S.H</span>
+            <span className="text-xl font-bold text-[#D4AF37]">Y.A.S.H</span>
           </div>
           <Button
             data-testid="logout-btn"
             onClick={handleLogout}
-            className="text-[#5A6B5D] hover:text-[#1C2B23] hover:bg-[#E8E6E1]/50 rounded-full px-4 py-2 transition-all duration-200"
+            className="text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 rounded-full px-4 py-2 transition-all duration-200"
             variant="ghost"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -87,15 +87,7 @@ const Dashboard = () => {
 
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1518132668962-699f644f0b95?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwbGFuZHNjYXBlJTIwbmF0dXJlJTIwdHJhdmVsfGVufDB8fHx8MTc3NDc0ODYwNnww&ixlib=rb-4.1.0&q=85)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F5F0]/60 to-[#F7F5F0]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -103,12 +95,12 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-tight font-light text-[#1C2B23] mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-tight font-light text-white mb-6">
               Create Unforgettable
               <br />
-              <span className="font-medium">Travel Experiences</span>
+              <span className="font-bold text-[#D4AF37]">Travel Experiences</span>
             </h1>
-            <p className="text-base leading-relaxed text-[#5A6B5D] max-w-2xl mx-auto mb-12">
+            <p className="text-base leading-relaxed text-gray-400 max-w-2xl mx-auto mb-12">
               Design AI-powered itineraries for your clients in minutes. Let our intelligent system handle the details.
             </p>
 
@@ -116,14 +108,14 @@ const Dashboard = () => {
               <DialogTrigger asChild>
                 <Button
                   data-testid="book-trip-btn"
-                  className="bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-10 py-6 text-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  className="bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-10 py-6 text-lg font-bold transition-all duration-200 shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:-translate-y-0.5 border-none"
                 >
                   Book a Trip
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-white border border-[#E8E6E1] rounded-3xl p-8 max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="bg-[#121212] border border-[#D4AF37]/20 rounded-3xl p-8 max-w-2xl max-h-[90vh] overflow-y-auto text-white">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl sm:text-3xl tracking-tight font-medium text-[#1C2B23]">
+                  <DialogTitle className="text-2xl sm:text-3xl tracking-tight font-medium text-white">
                     Trip Details
                   </DialogTitle>
                 </DialogHeader>
@@ -131,9 +123,9 @@ const Dashboard = () => {
                 <form onSubmit={handleSubmit} className="space-y-6 mt-6">
                   {/* From Location */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-[#7BA4A8]" />
+                        <MapPin className="w-4 h-4 text-[#D4AF37]" />
                         From
                       </div>
                     </Label>
@@ -143,16 +135,16 @@ const Dashboard = () => {
                       required
                       value={formData.from_location}
                       onChange={(e) => setFormData({ ...formData, from_location: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       placeholder="e.g., Mumbai, Delhi, Bangalore"
                     />
                   </div>
 
                   {/* Destination */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-[#D96C4A]" />
+                        <MapPin className="w-4 h-4 text-[#D4AF37]" />
                         To (Destination)
                       </div>
                     </Label>
@@ -162,22 +154,22 @@ const Dashboard = () => {
                       required
                       value={formData.destination}
                       onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       placeholder="e.g., Goa, Manali, Kashmir"
                     />
                   </div>
 
                   {/* Places to Cover */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
-                      Places to Cover on the Way <span className="text-[#5A6B5D]/70">(Optional)</span>
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Places to Cover on the Way <span className="text-gray-500">(Optional)</span>
                     </Label>
                     <Input
                       data-testid="places-to-cover-input"
                       type="text"
                       value={formData.places_to_cover}
                       onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       placeholder="e.g., Pune, Lonavala (comma separated)"
                     />
                   </div>
@@ -186,9 +178,9 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-4">
                     {/* Number of People */}
                     <div>
-                      <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                      <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                         <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-[#7BA4A8]" />
+                          <Users className="w-4 h-4 text-[#D4AF37]" />
                           People
                         </div>
                       </Label>
@@ -199,15 +191,15 @@ const Dashboard = () => {
                         required
                         value={formData.num_people}
                         onChange={(e) => setFormData({ ...formData, num_people: e.target.value })}
-                        className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                        className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       />
                     </div>
 
                     {/* Number of Days */}
                     <div>
-                      <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                      <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-[#7BA4A8]" />
+                          <Calendar className="w-4 h-4 text-[#D4AF37]" />
                           Days
                         </div>
                       </Label>
@@ -219,17 +211,17 @@ const Dashboard = () => {
                         required
                         value={formData.num_days}
                         onChange={(e) => setFormData({ ...formData, num_days: e.target.value })}
-                        className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                        className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       />
                     </div>
                   </div>
 
                   {/* Budget */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <IndianRupee className="w-4 h-4 text-[#7BA4A8]" />
-                        Budget <span className="text-[#5A6B5D]/70">(Optional)</span>
+                        <IndianRupee className="w-4 h-4 text-[#D4AF37]" />
+                        Budget <span className="text-gray-500">(Optional)</span>
                       </div>
                     </Label>
                     <Input
@@ -238,14 +230,14 @@ const Dashboard = () => {
                       min="0"
                       value={formData.budget}
                       onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       placeholder="Total budget in INR (₹)"
                     />
                   </div>
 
                   {/* Transport Mode */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-2">
+                    <Label className="block text-sm font-medium text-gray-300 mb-2">
                       Transport Mode
                     </Label>
                     <div className="grid grid-cols-3 gap-3">
@@ -257,8 +249,8 @@ const Dashboard = () => {
                           onClick={() => setFormData({ ...formData, transport_mode: mode })}
                           className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all duration-200 ${
                             formData.transport_mode === mode
-                              ? 'border-[#D96C4A] bg-[#D96C4A]/5'
-                              : 'border-[#E8E6E1] hover:border-[#7BA4A8]'
+                              ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
+                              : 'border-white/10 text-gray-500 hover:border-[#D4AF37]/50'
                           }`}
                         >
                           {mode === 'flight' && <Plane className="w-5 h-5" />}
@@ -272,7 +264,7 @@ const Dashboard = () => {
 
                   {/* Start Date */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
                       Start Date
                     </Label>
                     <Input
@@ -281,21 +273,21 @@ const Dashboard = () => {
                       required
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20"
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                     />
                   </div>
 
                   {/* Preferences */}
                   <div>
-                    <Label className="block text-sm font-medium text-[#1C2B23] mb-1.5">
-                      Preferences <span className="text-[#5A6B5D]/70">(Optional)</span>
+                    <Label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Preferences <span className="text-gray-500">(Optional)</span>
                     </Label>
                     <Textarea
                       data-testid="preferences-input"
                       value={formData.preferences}
                       onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
-                      className="bg-white border border-[#E8E6E1] rounded-lg px-4 py-3 text-[#1C2B23] focus:border-[#7BA4A8] focus:ring-2 focus:ring-[#7BA4A8]/20 min-h-[80px]"
-                      placeholder="e.g., cultural sites, adventure activities, family-friendly..."
+                      className="bg-black/50 border border-[#D4AF37]/20 rounded-lg px-4 py-3 text-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 min-h-[80px]"
+                      placeholder="e.g., cultural sites, adventure activities..."
                     />
                   </div>
 
@@ -303,7 +295,7 @@ const Dashboard = () => {
                     data-testid="create-trip-btn"
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#D96C4A] text-white hover:bg-[#C55B39] rounded-full px-8 py-6 font-medium transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50"
+                    className="w-full bg-[#D4AF37] text-black hover:bg-[#FFD700] rounded-full px-8 py-6 font-bold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50"
                   >
                     {loading ? 'Creating...' : 'Create Trip'}
                   </Button>
@@ -328,11 +320,11 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="bg-white border border-[#E8E6E1] rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#D96C4A]/30 transition-all duration-300"
+                className="bg-[#121212] border border-[#D4AF37]/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#D4AF37]/40 transition-all duration-300"
               >
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-medium text-[#1C2B23] mb-2">{feature.title}</h3>
-                <p className="text-sm text-[#5A6B5D]">{feature.description}</p>
+                <h3 className="text-xl font-medium text-white mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-400">{feature.description}</p>
               </motion.div>
             ))}
           </div>
