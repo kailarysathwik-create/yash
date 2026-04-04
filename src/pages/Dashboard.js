@@ -57,13 +57,11 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <motion.div
-              whileHover={{ rotate: 180 }}
               transition={{ duration: 0.8 }}
-              className="w-12 h-12 bg-white/50 rounded-2xl flex items-center justify-center border border-[#A855F7]/20 shadow-inner p-1"
+              className="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center border-4 border-white shadow-xl overflow-hidden"
             >
-              <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-contain drop-shadow-md" />
+              <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
             </motion.div>
-            <span className="text-2xl font-black text-[#A855F7] tracking-tight">Y.A.S.H</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="px-4 py-2 glass rounded-full flex items-center gap-2">
