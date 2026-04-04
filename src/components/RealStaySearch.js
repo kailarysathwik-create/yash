@@ -5,6 +5,7 @@ import { Home, Star, MapPin, CheckCircle2, Shield, Wifi, Coffee, Car, Waves, Dum
 const RealStaySearch = ({ options, onSelect }) => {
   const [sortBy, setSortBy] = useState('price'); // 'price' | 'rating'
   const [expandedCard, setExpandedCard] = useState(null);
+  const [bookingOverlay, setBookingOverlay] = useState(null);
 
   // Sort options
   const sorted = [...options].sort((a, b) => {
@@ -165,7 +166,7 @@ const RealStaySearch = ({ options, onSelect }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelect({ ...option, price: totalPrice, nights: totalNights > 0 ? totalNights : 1 });
+                      setBookingOverlay({ ...option, price: totalPrice, nights: totalNights > 0 ? totalNights : 1 });
                     }}
                     className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#1a0b2e] text-white rounded-2xl font-black text-xs uppercase tracking-widest opacity-80 group-hover:opacity-100 group-hover:bg-[#A855F7] transition-all duration-500 shadow-lg"
                   >
@@ -227,9 +228,63 @@ const RealStaySearch = ({ options, onSelect }) => {
           <div className="w-20 h-20 bg-[#A855F7]/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <Home className="w-10 h-10 text-[#A855F7]" />
           </div>
-          <p className="text-[#1a0b2e]/40 font-bold">Loading available properties...</p>
+          <p className="text-[#1a0b2e]/40 font-bold">Scanning live properties...</p>
         </div>
       )}
+
+      {/* DEEP BOOKING OVERLAY */}
+      <AnimatePresence>
+        {bookingOverlay && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a0b2e]/70 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto"
+            >
+              <button 
+                onClick={(e) => { e.stopPropagation(); setBookingOverlay(null); }} 
+                className="absolute top-8 right-8 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition text-[#1a0b2e] font-black"
+              >X</button>
+              
+              <div className="w-16 h-16 bg-[#A855F7]/10 text-[#A855F7] rounded-3xl flex items-center justify-center mb-6">
+                <Home className="w-8 h-8" />
+              </div>
+              
+              <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">Review Reservation</h3>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a0b2e]/40 mb-8">Confirm details and pricing rules</p>
+              
+              <div className="glass-card rounded-[2rem] p-6 mb-8 border-dashed border-2 border-[#1a0b2e]/10">
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Property</span>
+                    <span className="font-black text-[#1a0b2e] text-right max-w-[60%]">{bookingOverlay.name}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Check-in</span>
+                    <span className="font-black text-[#1a0b2e]">Day {bookingOverlay.check_in_day || 1}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Check-out</span>
+                    <span className="font-black text-[#1a0b2e]">Day {bookingOverlay.check_out_day || 2}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Duration</span>
+                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.nights} Night{bookingOverlay.nights !== 1 ? 's' : ''}</span>
+                 </div>
+                 <div className="flex justify-between items-center pt-4 border-t border-[#1a0b2e]/10">
+                    <span className="font-bold text-[#1a0b2e]">Total Price</span>
+                    <span className="font-black text-[#A855F7] text-2xl">₹{bookingOverlay.price.toLocaleString()}</span>
+                 </div>
+              </div>
+              
+              <button onClick={() => onSelect(bookingOverlay)} className="w-full bg-[#1a0b2e] flex items-center justify-center hover:bg-[#A855F7] text-white h-16 rounded-2xl font-black text-lg transition-all">
+                Confirm & Add to Manifest
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

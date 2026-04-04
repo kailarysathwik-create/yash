@@ -4,30 +4,48 @@ import { Plane, Train, Car, ArrowRight, Clock, MapPin, IndianRupee, Users, Chevr
 import { Button } from '@/components/ui/button';
 
 const RealTransportSearch = ({ options, onSelect }) => {
+  const [activeTab, setActiveTab] = useState('onward');
+  const [selections, setSelections] = useState({ onward: null, return: null });
   const [cabMode, setCabMode] = useState(null); // 'agency' or 'self'
   const [agencyCabCharge, setAgencyCabCharge] = useState('');
+  const [bookingOverlay, setBookingOverlay] = useState(null); // { option, type }
 
-  // Detect transport type from first option
-  const transportType = options?.[0]?.type?.toLowerCase() || 'train';
+  // Detect transport type from first onward option
+  const onwardOptions = options?.onward || [];
+  const returnOptions = options?.return || [];
+  const transportType = onwardOptions[0]?.type?.toLowerCase() || 'train';
   const isCab = transportType === 'car' || transportType === 'taxi' || transportType === 'cab';
 
   const handleCabSelect = (option) => {
     if (cabMode === 'agency' && agencyCabCharge) {
-      onSelect({ ...option, cab_mode: 'agency', agency_charge: parseFloat(agencyCabCharge) });
+      onSelect({ onward: option, return: null, cab_mode: 'agency', agency_charge: parseFloat(agencyCabCharge) });
     } else if (cabMode === 'self') {
-      onSelect({ ...option, cab_mode: 'self', agency_charge: 0 });
+      onSelect({ onward: option, return: null, cab_mode: 'self', agency_charge: 0 });
+    }
+  };
+
+  const confirmBooking = () => {
+    if (!bookingOverlay) return;
+    setSelections(prev => ({ ...prev, [bookingOverlay.type]: bookingOverlay.option }));
+    setBookingOverlay(null);
+    if (bookingOverlay.type === 'onward' && returnOptions.length > 0) {
+      setActiveTab('return');
+    }
+  };
+
+  const handleFinalContinue = () => {
+    if (selections.onward) {
+      onSelect({ onward: selections.onward, return: selections.return, cab_mode: null, agency_charge: 0 });
     }
   };
 
   // ─── TRAIN CARD (IRCTC Style) ───
-  const TrainCard = ({ option, index }) => (
+  const TrainCard = ({ option, index, type }) => {
+    const isSelected = selections[type]?.option_id === option.option_id;
+    return (
     <motion.div
-      key={index}
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08 }}
-      onClick={() => onSelect(option)}
-      className="glass-card rounded-[2rem] p-0 cursor-pointer group hover:border-[#A855F7]/30 transition-all duration-500 overflow-hidden"
+      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }}
+      className={`glass-card rounded-[2rem] p-0 group transition-all duration-500 overflow-hidden ${isSelected ? 'border-[#A855F7] shadow-lg shadow-[#A855F7]/20 border-2' : 'hover:border-[#A855F7]/30 border-white/50'}`}
     >
       <div className="bg-[#A855F7]/5 px-8 py-4 flex items-center justify-between border-b border-[#A855F7]/10">
         <div className="flex items-center gap-3">
@@ -35,71 +53,49 @@ const RealTransportSearch = ({ options, onSelect }) => {
           <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Indian Railways'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">
-            {option.class || 'SL'}
-          </span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">{option.class || 'SL'}</span>
           {option.seats_hint && (
-            <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-              option.seats_hint?.toLowerCase().includes('avail') ? 'bg-green-100 text-green-600' :
-              option.seats_hint?.toLowerCase().includes('rac') ? 'bg-yellow-100 text-yellow-600' :
-              'bg-red-100 text-red-500'
-            }`}>{option.seats_hint}</span>
+            <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${option.seats_hint?.toLowerCase().includes('avail') ? 'bg-green-100 text-green-600' : option.seats_hint?.toLowerCase().includes('rac') ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-500'}`}>{option.seats_hint}</span>
           )}
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="p-8">
         <div className="flex items-center justify-between mb-6">
-          {/* Departure */}
           <div className="text-center">
             <p className="text-2xl font-black text-[#1a0b2e]">{option.departure_time?.split(' ')[1] || '06:00'}</p>
             <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase tracking-wider mt-1">{option.from_location}</p>
             <p className="text-[9px] text-[#1a0b2e]/30 mt-0.5">{option.departure_time?.split(' ')[0] || ''}</p>
           </div>
-
-          {/* Duration Arrow */}
           <div className="flex-1 px-6 flex flex-col items-center">
-            <p className="text-[9px] font-black text-[#A855F7]/60 uppercase tracking-widest mb-2">
-              {option.duration || 'Direct'}
-            </p>
+            <p className="text-[9px] font-black text-[#A855F7]/60 uppercase tracking-widest mb-2">{option.duration || 'Direct'}</p>
             <div className="w-full flex items-center">
               <div className="flex-1 h-[2px] bg-gradient-to-r from-[#A855F7]/20 to-[#A855F7]/60" />
               <ArrowRight className="w-4 h-4 text-[#A855F7] mx-1 shrink-0" />
             </div>
           </div>
-
-          {/* Arrival */}
           <div className="text-center">
             <p className="text-2xl font-black text-[#1a0b2e]">{option.arrival_time?.split(' ')[1] || '14:00'}</p>
             <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase tracking-wider mt-1">{option.to_location}</p>
             <p className="text-[9px] text-[#1a0b2e]/30 mt-0.5">{option.arrival_time?.split(' ')[0] || ''}</p>
           </div>
         </div>
-
-        {/* Bottom Bar */}
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
           <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-bold text-[#1a0b2e]/30 uppercase">per person</span>
-            <div className="w-10 h-10 rounded-full bg-[#A855F7]/10 flex items-center justify-center group-hover:bg-[#A855F7] group-hover:text-white transition-all duration-500">
-              <ArrowRight className="w-5 h-5 text-[#A855F7] group-hover:text-white" />
-            </div>
-          </div>
+          <Button onClick={() => setBookingOverlay({ option, type })} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
+             {isSelected ? 'Selected' : 'Book Now'}
+          </Button>
         </div>
       </div>
     </motion.div>
-  );
+  )};
 
   // ─── FLIGHT CARD ───
-  const FlightCard = ({ option, index }) => (
+  const FlightCard = ({ option, index, type }) => {
+    const isSelected = selections[type]?.option_id === option.option_id;
+    return (
     <motion.div
-      key={index}
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08 }}
-      onClick={() => onSelect(option)}
-      className="glass-card rounded-[2rem] p-0 cursor-pointer group hover:border-[#A855F7]/30 transition-all duration-500 overflow-hidden"
+      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }}
+      className={`glass-card rounded-[2rem] p-0 group transition-all duration-500 overflow-hidden ${isSelected ? 'border-[#A855F7] shadow-lg shadow-[#A855F7]/20 border-2' : 'hover:border-[#A855F7]/30 border-white/50'}`}
     >
       <div className="bg-[#A855F7]/5 px-8 py-4 flex items-center justify-between border-b border-[#A855F7]/10">
         <div className="flex items-center gap-3">
@@ -107,51 +103,37 @@ const RealTransportSearch = ({ options, onSelect }) => {
           <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Airline'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">
-            {option.class || 'Economy'}
-          </span>
-          {option.seats_hint && (
-            <span className="text-[9px] font-bold text-[#A855F7]/60 bg-[#A855F7]/10 px-3 py-1 rounded-full">{option.seats_hint}</span>
-          )}
+          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">{option.class || 'Economy'}</span>
+          {option.seats_hint && <span className="text-[9px] font-bold text-[#A855F7]/60 bg-[#A855F7]/10 px-3 py-1 rounded-full">{option.seats_hint}</span>}
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="text-center">
             <p className="text-2xl font-black text-[#1a0b2e]">{option.departure_time?.split(' ')[1] || '08:00'}</p>
             <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase tracking-wider mt-1">{option.from_location}</p>
           </div>
-
           <div className="flex-1 px-6 flex flex-col items-center">
-            <p className="text-[9px] font-black text-[#A855F7]/60 uppercase tracking-widest mb-2">
-              {option.duration || 'Non-stop'}
-            </p>
+            <p className="text-[9px] font-black text-[#A855F7]/60 uppercase tracking-widest mb-2">{option.duration || 'Non-stop'}</p>
             <div className="w-full flex items-center">
               <div className="flex-1 h-[2px] bg-gradient-to-r from-[#A855F7]/20 to-[#A855F7]/60" />
               <Plane className="w-4 h-4 text-[#A855F7] mx-1 shrink-0 -rotate-45" />
             </div>
           </div>
-
           <div className="text-center">
             <p className="text-2xl font-black text-[#1a0b2e]">{option.arrival_time?.split(' ')[1] || '10:30'}</p>
             <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase tracking-wider mt-1">{option.to_location}</p>
           </div>
         </div>
-
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
           <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-bold text-[#1a0b2e]/30 uppercase">per person</span>
-            <div className="w-10 h-10 rounded-full bg-[#A855F7]/10 flex items-center justify-center group-hover:bg-[#A855F7] transition-all duration-500">
-              <ArrowRight className="w-5 h-5 text-[#A855F7] group-hover:text-white" />
-            </div>
-          </div>
+          <Button onClick={() => setBookingOverlay({ option, type })} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
+             {isSelected ? 'Selected' : 'Book Now'}
+          </Button>
         </div>
       </div>
     </motion.div>
-  );
+  )};
 
   // ─── CAB SECTION ───
   if (isCab) {
@@ -162,7 +144,6 @@ const RealTransportSearch = ({ options, onSelect }) => {
           <p className="text-[#1a0b2e]/40 font-bold uppercase tracking-widest text-[10px] mt-2">Select your cab arrangement</p>
         </div>
 
-        {/* Cab Mode Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -211,17 +192,14 @@ const RealTransportSearch = ({ options, onSelect }) => {
           </motion.div>
         </div>
 
-        {/* Available options list (if agency) */}
-        {cabMode === 'agency' && options.length > 0 && (
+        {cabMode === 'agency' && onwardOptions.length > 0 && (
           <div className="space-y-6">
             <h3 className="text-xl font-black text-[#1a0b2e]">Available Options</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {options.map((option, index) => (
+              {onwardOptions.map((option, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.08 }}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }}
                   onClick={() => handleCabSelect(option)}
                   className="glass-card rounded-[2rem] p-8 cursor-pointer group hover:border-[#A855F7]/30 transition-all duration-500"
                 >
@@ -242,11 +220,10 @@ const RealTransportSearch = ({ options, onSelect }) => {
           </div>
         )}
 
-        {/* Self arranged - just proceed */}
         {cabMode === 'self' && (
           <div className="flex justify-center">
             <Button
-              onClick={() => onSelect({ type: 'car', cab_mode: 'self', price: 0, provider: 'Self Arranged', agency_charge: 0 })}
+              onClick={() => onSelect({ onward: { type: 'car', cab_mode: 'self', price: 0, provider: 'Self Arranged', agency_charge: 0 } })}
               className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-20 px-16 font-black text-xl shadow-2xl shadow-[#A855F7]/20"
             >
               Continue Without Cab Booking
@@ -258,43 +235,125 @@ const RealTransportSearch = ({ options, onSelect }) => {
   }
 
   // ─── TRAIN / FLIGHT LIST ───
+  const activeList = activeTab === 'onward' ? onwardOptions : returnOptions;
+
   return (
-    <div className="space-y-8 py-10">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 py-10 relative">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">
-            {transportType === 'train' ? 'Available Trains' : 'Available Flights'}
+            {transportType === 'train' ? 'Live Train Booking' : 'Live Flight Booking'}
           </h2>
           <p className="text-[#1a0b2e]/40 font-bold uppercase tracking-widest text-[10px] mt-2">
-            {options.length} option{options.length !== 1 ? 's' : ''} found • Select to book
+            Secure your transit manifest
           </p>
         </div>
-        <div className="hidden md:flex items-center gap-6">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#A855F7]">
-            <ShieldCheck className="w-4 h-4" /> Verified
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#A855F7]">
-            <Zap className="w-4 h-4" /> Best Price
-          </div>
+        <div className="flex items-center bg-white/50 backdrop-blur border border-white/50 p-2 rounded-full">
+          <button
+            onClick={() => setActiveTab('onward')}
+            className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 ${activeTab === 'onward' ? 'bg-[#A855F7] text-white shadow-lg' : 'text-[#1a0b2e]/60 hover:text-[#1a0b2e]'}`}
+          >
+            Onward
+          </button>
+          <button
+            onClick={() => setActiveTab('return')}
+            disabled={returnOptions.length === 0}
+            className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 ${activeTab === 'return' ? 'bg-[#A855F7] text-white shadow-lg' : 'text-[#1a0b2e]/60 hover:text-[#1a0b2e]'} ${returnOptions.length === 0 && 'opacity-30 cursor-not-allowed'}`}
+          >
+            Return
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {options.map((option, index) => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-24">
+        {activeList.map((option, index) => (
           transportType === 'train'
-            ? <TrainCard key={index} option={option} index={index} />
-            : <FlightCard key={index} option={option} index={index} />
+            ? <TrainCard key={index} option={option} index={index} type={activeTab} />
+            : <FlightCard key={index} option={option} index={index} type={activeTab} />
         ))}
       </div>
 
-      {options.length === 0 && (
+      {activeList.length === 0 && (
         <div className="text-center py-20">
           <div className="w-20 h-20 bg-[#A855F7]/10 rounded-full flex items-center justify-center mx-auto mb-6">
             {transportType === 'train' ? <Train className="w-10 h-10 text-[#A855F7]" /> : <Plane className="w-10 h-10 text-[#A855F7]" />}
           </div>
-          <p className="text-[#1a0b2e]/40 font-bold">Loading available options...</p>
+          <p className="text-[#1a0b2e]/40 font-bold">Scanning live network...</p>
         </div>
       )}
+
+      {/* STICKY CONTINUE FOOTER */}
+      <AnimatePresence>
+        {selections.onward && (
+          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }} className="fixed bottom-10 left-0 right-0 z-40 flex justify-center pointer-events-none">
+            <div className="glass-card shadow-2xl rounded-full p-3 pl-8 flex items-center gap-6 pointer-events-auto border-[#A855F7]/30 border-2 bg-white/90 backdrop-blur-xl">
+               <div>
+                  <p className="text-[10px] font-black tracking-widest text-[#A855F7] uppercase">Onward Selected</p>
+                  <p className="font-bold text-[#1a0b2e] text-sm">{selections.onward.provider}</p>
+               </div>
+               {selections.return && (
+                 <div className="pl-4 border-l border-[#1a0b2e]/10">
+                    <p className="text-[10px] font-black tracking-widest text-[#A855F7] uppercase">Return Selected</p>
+                    <p className="font-bold text-[#1a0b2e] text-sm">{selections.return.provider}</p>
+                 </div>
+               )}
+               <Button onClick={handleFinalContinue} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] h-14 px-10 rounded-full font-black text-sm uppercase tracking-widest transition-all">
+                  Book & Continue To Stays
+               </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* DEEP BOOKING OVERLAY */}
+      <AnimatePresence>
+        {bookingOverlay && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a0b2e]/70 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative"
+            >
+              <button 
+                onClick={() => setBookingOverlay(null)} 
+                className="absolute top-8 right-8 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition text-[#1a0b2e] font-black"
+              >X</button>
+              
+              <div className="w-16 h-16 bg-[#A855F7]/10 text-[#A855F7] rounded-3xl flex items-center justify-center mb-6">
+                {transportType === 'train' ? <Train className="w-8 h-8" /> : <Plane className="w-8 h-8" />}
+              </div>
+              
+              <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">Review Reservation</h3>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a0b2e]/40 mb-8">Confirm passenger and pricing rules</p>
+              
+              <div className="glass-card rounded-[2rem] p-6 mb-8 border-dashed border-2 border-[#1a0b2e]/10">
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Carrier</span>
+                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.provider}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Class</span>
+                    <span className="font-black text-white bg-[#A855F7] px-3 py-1 rounded-full text-[10px] tracking-widest">{bookingOverlay.option.class}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-[#1a0b2e]/50">Route</span>
+                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.from_location} → {bookingOverlay.option.to_location}</span>
+                 </div>
+                 <div className="flex justify-between items-center pt-4 border-t border-[#1a0b2e]/10">
+                    <span className="font-bold text-[#1a0b2e]">Total Price</span>
+                    <span className="font-black text-[#A855F7] text-2xl">₹{bookingOverlay.option.price.toLocaleString()}</span>
+                 </div>
+              </div>
+              
+              <Button onClick={confirmBooking} className="w-full bg-[#1a0b2e] hover:bg-[#A855F7] text-white h-16 rounded-2xl font-black text-lg transition-all">
+                Confirm & Add to Manifest
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
