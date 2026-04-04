@@ -237,6 +237,17 @@ export const tripAPI = {
       }
     },
   },
+
+  // Send manifest notification
+  sendManifest: async (manifestData) => {
+    try {
+      const response = await apiClient.post('/trip/send-manifest', manifestData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to dispatch manifest:', error.message);
+      throw error;
+    }
+  },
 };
 
 export default apiClient;

@@ -69,7 +69,7 @@ const TripPlanner = () => {
     try {
       const emails = passengers.map(p => p.email).filter(Boolean);
       const phones = passengers.map(p => p.phone).filter(Boolean);
-      await apiClient.post('/trip/send-manifest', {
+      await tripAPI.sendManifest({
         manifest,
         emails,
         phones,
@@ -92,8 +92,9 @@ const TripPlanner = () => {
         setTransportOptions(response.transports || { onward: [], return: [] });
         setStayOptions(response.stays || []);
         setItinerary(response.itinerary || []);
-        // Initialize passengers array
-        setPassengers(Array.from({ length: response.trip_details?.num_people || 1 }).map(() => ({ name: '', id: '', phone: '', email: '' })));
+        // Initialize passengers array from trip data
+        const travelerCount = data.details?.num_people || 1;
+        setPassengers(Array.from({ length: travelerCount }).map(() => ({ name: '', id: '', phone: '', email: '' })));
         setStep(2); // Move immediately to Transport
       } catch (error) {
         toast.error('Failed to synchronize and orchestrate trip data');
