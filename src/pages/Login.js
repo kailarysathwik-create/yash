@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { Waves, Sparkles, MapPin, Navigation } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
-import { supabase } from '@/lib/supabaseClient';
+import { tripAPI } from '../api/tripAPI';
+import { supabase } from '../lib/supabaseClient';
 
 const Login = () => {
   const navigate = useNavigate();

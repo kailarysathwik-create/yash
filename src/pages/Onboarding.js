@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, LoaderCircle, ShieldCheck, Zap, Globe, Navigation, Building2, Phone, Link, CreditCard, ArrowRight } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
+import { tripAPI } from '../api/tripAPI';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 
 const Onboarding = () => {
   const navigate = useNavigate();

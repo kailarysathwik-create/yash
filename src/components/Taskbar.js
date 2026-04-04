@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Navigation, History, LogOut, Sparkles } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
+import { tripAPI } from '../api/tripAPI';
 import { toast } from 'sonner';
-import { useUI } from '@/context/UIContext';
+import { useUI } from '../context/UIContext';
 
 const Taskbar = () => {
   const navigate = useNavigate();

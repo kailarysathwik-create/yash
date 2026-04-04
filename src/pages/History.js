@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, Sparkles } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
+import { tripAPI } from '../api/tripAPI';
 
 const HistoryPage = () => {
   const navigate = useNavigate();

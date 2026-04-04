@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { tripAPI } from '@/api/tripAPI';
-import RealTransportSearch from '@/components/RealTransportSearch';
-import RealStaySearch from '@/components/RealStaySearch';
-import UPIPayment from '@/components/UPIPayment';
-import { Button } from '@/components/ui/button';
+import { tripAPI } from '../api/tripAPI';
+import RealTransportSearch from '../components/RealTransportSearch';
+import RealStaySearch from '../components/RealStaySearch';
+import UPIPayment from '../components/UPIPayment';
+import { Button } from '../components/ui/button';
 import { MapPin, Calendar, Users, Sparkles, Navigation, CheckCircle2, ChevronRight, LoaderCircle, Globe } from 'lucide-react';
 
 const TripPlanner = () => {
