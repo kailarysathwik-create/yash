@@ -128,10 +128,10 @@ const UPIPayment = ({ amount, tripId, onComplete, onTransactionIdChange }) => {
 
               <Button 
                 onClick={handleVerify}
-                disabled={!transactionId || processing}
+                disabled={processing}
                 className="w-full h-20 bg-[#1a0b2e] hover:bg-[#A855F7] text-white rounded-full font-black text-xl shadow-2xl shadow-[#A855F7]/20 transition-all group"
               >
-                {processing ? 'Verifying Node...' : 'Verify Settlement'}
+                {processing ? 'Verifying Node...' : (transactionId ? 'Verify Settlement' : 'Settle Offline (Skip)')}
                 {!processing && <ArrowRight className="ml-4 w-6 h-6 group-hover:translate-x-2 transition-transform" />}
               </Button>
             </motion.div>

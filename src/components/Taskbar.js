@@ -34,8 +34,8 @@ const Taskbar = () => {
         animate={{ 
           y: 0, 
           opacity: 1,
-          x: isTaskbarSlid ? "-140%" : "-50%",
-          scale: isTaskbarSlid ? 0.8 : 1
+          x: isTaskbarSlid ? "-250%" : "-50%",
+          scale: isTaskbarSlid ? 0.6 : 1
         }}
         transition={{ type: "spring", stiffness: 200, damping: 30 }}
         className="taskbar-glass flex items-center gap-2 p-2 px-4 border border-white/50 pointer-events-auto origin-bottom-left"

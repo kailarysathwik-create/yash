@@ -75,7 +75,16 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">{option.class || 'SL'}</span>
           {option.seats_hint && (
-            <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${option.seats_hint?.toLowerCase().includes('avail') ? 'bg-green-100 text-green-600' : option.seats_hint?.toLowerCase().includes('rac') ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-500'}`}>{option.seats_hint}</span>
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${
+              option.seats_hint.toLowerCase().includes('avail') ? 'bg-green-100 text-green-600' : 
+              option.seats_hint.toLowerCase().includes('wl') ? 'bg-red-100 text-red-500' : 
+              'bg-yellow-100 text-yellow-600'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                option.seats_hint.toLowerCase().includes('avail') ? 'bg-green-500' : 'bg-red-500'
+              }`} />
+              <span className="text-[9px] font-black uppercase tracking-widest">{option.seats_hint}</span>
+            </div>
           )}
         </div>
       </div>

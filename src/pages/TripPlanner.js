@@ -20,21 +20,37 @@ const TripPlanner = () => {
   const [transportOptions, setTransportOptions] = useState({ onward: [], return: [] });
   const [stayOptions, setStayOptions] = useState([]);
   const [selectedTransport, setSelectedTransport] = useState({ onward: null, return: null, cab_mode: null, agency_charge: 0 });
-  const [selectedStay, setSelectedStay] = useState(null);
+  const [selectedStays, setSelectedStays] = useState([]);
   const [itinerary, setItinerary] = useState([]);
   const [orchestrating, setOrchestrating] = useState(false);
   const [manualAgencyCharge, setManualAgencyCharge] = useState(0);
   const [passengers, setPassengers] = useState([]);
+  const [primaryContact, setPrimaryContact] = useState({ phone: '', name: '' });
+  const [secondaryContact, setSecondaryContact] = useState({ phone: '', email: '' });
   const [transactionId, setTransactionId] = useState('');
+
+  const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
+  const remainingNights = (trip?.details?.num_days || 0) - bookedNights;
+
+  const maskAadhar = (val) => {
+    if (!val) return 'N/A';
+    if (val.length < 4) return val;
+    return `XXXX-XXXX-${val.slice(-4)}`;
+  };
 
   const generateManifest = () => {
     let manifest = `--- Y.A.S.H TRIP MANIFEST ---\n`;
     manifest += `Generated: ${new Date().toLocaleString()}\n`;
     manifest += `Trip ID: ${tripId}\n\n`;
     
+    manifest += `[PRIMARY CONTACT]\n`;
+    manifest += `Name: ${primaryContact.name || 'N/A'}\n`;
+    manifest += `Phone: ${primaryContact.phone || 'N/A'}\n`;
+    manifest += `Contact Email: ${secondaryContact.email || 'N/A'}\n\n`;
+
     manifest += `[PASSENGERS]\n`;
     passengers.forEach((p, i) => {
-      manifest += `${i+1}. ${p.name || 'Anonymous'} | ID: ${p.id || 'N/A'} | Phone: ${p.phone || 'N/A'} | Email: ${p.email || 'N/A'}\n`;
+      manifest += `${i+1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Proof (Aadhar): ${maskAadhar(p.proof)}\n`;
     });
     
     manifest += `\n[TRANSPORT]\n`;
@@ -43,13 +59,16 @@ const TripPlanner = () => {
       manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type}) | Price: ₹${selectedTransport.return?.price}\n`;
     }
     
-    manifest += `\n[STAY]\n`;
-    manifest += `${selectedStay?.name} | Nights: ${selectedStay?.nights} | Total: ₹${selectedStay?.price}\n`;
+    manifest += `\n[STAYS]\n`;
+    selectedStays.forEach((s, i) => {
+      manifest += `${i+1}. ${s.name} | Nights: ${s.nights} | Total: ₹${s.price}\n`;
+    });
     
     manifest += `\n[FINANCIALS]\n`;
     manifest += `Agency Charge: ₹${manualAgencyCharge}\n`;
-    manifest += `Transaction ID: ${transactionId}\n`;
-    manifest += `TOTAL PAID: ₹${((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + (selectedStay?.price || 0) + manualAgencyCharge).toLocaleString()}\n`;
+    manifest += `Transaction ID: ${transactionId || 'OFFLINE'}\n`;
+    const totalStayPrice = selectedStays.reduce((acc, s) => acc + (s.price || 0), 0);
+    manifest += `TOTAL PAID: ₹${((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + totalStayPrice + manualAgencyCharge).toLocaleString()}\n`;
     
     return manifest;
   };
@@ -94,7 +113,7 @@ const TripPlanner = () => {
         setItinerary(response.itinerary || []);
         // Initialize passengers array from trip data
         const travelerCount = data.details?.num_people || 1;
-        setPassengers(Array.from({ length: travelerCount }).map(() => ({ name: '', id: '', phone: '', email: '' })));
+        setPassengers(Array.from({ length: travelerCount }).map(() => ({ name: '', age: '', gender: '', proof: '' })));
         setStep(2); // Move immediately to Transport
       } catch (error) {
         toast.error('Failed to synchronize and orchestrate trip data');
@@ -196,10 +215,23 @@ const TripPlanner = () => {
           )}
 
           {step === 3 && (
-            <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-[#1a0b2e]">Nights Booked: {bookedNights} / {trip.details.num_days}</h3>
+                {bookedNights > 0 && (
+                   <Button onClick={() => setStep(4)} className="bg-[#A855F7] text-white rounded-full">Continue to Itinerary</Button>
+                )}
+              </div>
               <RealStaySearch
                 options={stayOptions}
-                onSelect={(opt) => { setSelectedStay(opt); setStep(4); }}
+                onSelect={(opt) => { 
+                  setSelectedStays(prev => [...prev, opt]);
+                  if (bookedNights + opt.nights >= trip.details.num_days) {
+                    setStep(4);
+                  } else {
+                    toast.info(`Added ${opt.name}. ${trip.details.num_days - (bookedNights + opt.nights)} nights remaining.`);
+                  }
+                }}
               />
             </motion.div>
           )}
@@ -246,49 +278,103 @@ const TripPlanner = () => {
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">Explorer Matrix</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {passengers.map((p, idx) => (
-                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
-                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
-                    <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-8">
+                {/* Primary Contacts Section */}
+                <div className="glass-card rounded-[2.5rem] p-10 border-[#A855F7]/20 border-2">
+                  <h3 className="text-xl font-black text-[#1a0b2e] mb-8">Primary Contact Terminal</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Leader Name</label>
                       <input 
                         type="text" 
-                        placeholder="Full Name" 
-                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" 
-                        value={p.name}
-                        onChange={(e) => {
-                          const newP = [...passengers];
-                          newP[idx].name = e.target.value;
-                          setPassengers(newP);
-                        }}
+                        placeholder="Enter Name"
+                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
+                        value={primaryContact.name}
+                        onChange={(e) => setPrimaryContact({...primaryContact, name: e.target.value})}
                       />
-                      <div className="grid grid-cols-2 gap-4">
-                        <input 
-                          type="text" 
-                          placeholder="Phone (Opt)" 
-                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
-                          value={p.phone}
-                          onChange={(e) => {
-                            const newP = [...passengers];
-                            newP[idx].phone = e.target.value;
-                            setPassengers(newP);
-                          }}
-                        />
-                        <input 
-                          type="email" 
-                          placeholder="Email (Opt)" 
-                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
-                          value={p.email}
-                          onChange={(e) => {
-                            const newP = [...passengers];
-                            newP[idx].email = e.target.value;
-                            setPassengers(newP);
-                          }}
-                        />
-                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Primary Phone (Req)</label>
+                      <input 
+                        type="text" 
+                        placeholder="+91 XXXX"
+                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
+                        value={primaryContact.phone}
+                        onChange={(e) => setPrimaryContact({...primaryContact, phone: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Agency Email (Opt)</label>
+                      <input 
+                        type="email" 
+                        placeholder="email@agency.com"
+                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
+                        value={secondaryContact.email}
+                        onChange={(e) => setSecondaryContact({...secondaryContact, email: e.target.value})}
+                      />
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Explorer Matrix */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {passengers.map((p, idx) => (
+                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
+                      <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
+                      <div className="space-y-4">
+                        <input 
+                          type="text" 
+                          placeholder="Full Name" 
+                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" 
+                          value={p.name}
+                          onChange={(e) => {
+                            const newP = [...passengers];
+                            newP[idx].name = e.target.value;
+                            setPassengers(newP);
+                          }}
+                        />
+                        <div className="grid grid-cols-3 gap-4">
+                          <input 
+                            type="number" 
+                            placeholder="Age" 
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                            value={p.age}
+                            onChange={(e) => {
+                              const newP = [...passengers];
+                              newP[idx].age = e.target.value;
+                              setPassengers(newP);
+                            }}
+                          />
+                          <select 
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none" 
+                            value={p.gender}
+                            onChange={(e) => {
+                              const newP = [...passengers];
+                              newP[idx].gender = e.target.value;
+                              setPassengers(newP);
+                            }}
+                          >
+                            <option value="">Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          <input 
+                            type="text" 
+                            placeholder="Aadhar ID" 
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                            value={p.proof}
+                            onChange={(e) => {
+                              const newP = [...passengers];
+                              newP[idx].proof = e.target.value;
+                              setPassengers(newP);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="flex justify-center pt-20">
                 <Button onClick={() => setStep(6)} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30">
@@ -324,9 +410,15 @@ const TripPlanner = () => {
                     </div>
                   )}
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
-                    <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Stay</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">{selectedStay?.name}</h3>
-                    <div className="text-3xl font-black text-[#A855F7]">₹{(selectedStay?.price || 0).toLocaleString()}</div>
+                    <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Stays</p>
+                    <div className="space-y-2">
+                       {selectedStays.map((s, idx) => (
+                         <div key={idx} className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-white/50">
+                            <span className="font-bold text-[#1a0b2e] text-sm">{s.name}</span>
+                            <span className="font-black text-[#A855F7] text-sm">₹{s.price.toLocaleString()}</span>
+                         </div>
+                       ))}
+                    </div>
                   </div>
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20 bg-[#A855F7]/5">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Platform Fee & Taxes</p>
@@ -346,11 +438,16 @@ const TripPlanner = () => {
               </div>
 
               <UPIPayment
-                amount={Math.round((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + (selectedStay?.price || 0) + manualAgencyCharge)}
+                amount={Math.round((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge)}
                 tripId={tripId}
                 onTransactionIdChange={(val) => setTransactionId(val)}
-                onComplete={() => {
+                onComplete={async () => {
                   toast.success('Mission Complete: Credits Settled.');
+                  // Finalizing in Supabase with all passenger data
+                  await tripAPI.confirmPayment(tripId, {
+                    transaction_id: transactionId,
+                    passengers: passengers
+                  });
                   downloadManifest();
                   navigate('/dashboard');
                 }}
