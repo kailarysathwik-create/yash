@@ -15,9 +15,10 @@ import '@/App.css';
 function AppRouter() {
   const location = useLocation();
 
-  // Supabase OAuth returns access_token in the hash on /auth/callback
-  // This catches it no matter which route the hash lands on
-  if (location.hash?.includes('access_token=')) {
+  // Supabase OAuth returns tokens in the hash (implicit) or query ?code= (PKCE)
+  // This catches it no matter which route the token lands on
+  const searchParams = new URLSearchParams(location.search);
+  if (location.hash?.includes('access_token=') || searchParams.has('code')) {
     return <AuthCallback />;
   }
 

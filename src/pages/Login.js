@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Waves, Sparkles, MapPin, Navigation } from 'lucide-react';
 import { tripAPI } from '@/api/tripAPI';
+import { supabase } from '@/lib/supabaseClient';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,8 +29,19 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await tripAPI.auth.loginWithGoogle();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        console.error('Google OAuth error:', error);
+        toast.error('Google login failed: ' + error.message);
+      }
+      // Supabase JS client automatically redirects to Google
     } catch (error) {
+      console.error('Google login exception:', error);
       toast.error('Identity provider handshake failed');
     }
   };
