@@ -29,15 +29,23 @@ const RealTransportSearch = ({ options, onSelect }) => {
       onClick={() => onSelect(option)}
       className="glass-card rounded-[2rem] p-0 cursor-pointer group hover:border-[#A855F7]/30 transition-all duration-500 overflow-hidden"
     >
-      {/* Train Header Bar */}
       <div className="bg-[#A855F7]/5 px-8 py-4 flex items-center justify-between border-b border-[#A855F7]/10">
         <div className="flex items-center gap-3">
           <Train className="w-5 h-5 text-[#A855F7]" />
           <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Indian Railways'}</span>
         </div>
-        <span className="text-[9px] font-black uppercase tracking-widest text-[#A855F7]/60 bg-[#A855F7]/10 px-3 py-1 rounded-full">
-          {option.type || 'Train'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">
+            {option.class || 'SL'}
+          </span>
+          {option.seats_hint && (
+            <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
+              option.seats_hint?.toLowerCase().includes('avail') ? 'bg-green-100 text-green-600' :
+              option.seats_hint?.toLowerCase().includes('rac') ? 'bg-yellow-100 text-yellow-600' :
+              'bg-red-100 text-red-500'
+            }`}>{option.seats_hint}</span>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
@@ -93,17 +101,18 @@ const RealTransportSearch = ({ options, onSelect }) => {
       onClick={() => onSelect(option)}
       className="glass-card rounded-[2rem] p-0 cursor-pointer group hover:border-[#A855F7]/30 transition-all duration-500 overflow-hidden"
     >
-      {/* Airline Header */}
       <div className="bg-[#A855F7]/5 px-8 py-4 flex items-center justify-between border-b border-[#A855F7]/10">
         <div className="flex items-center gap-3">
           <Plane className="w-5 h-5 text-[#A855F7]" />
           <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Airline'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Star className="w-3 h-3 text-[#A855F7]" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-[#A855F7]/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">
             {option.class || 'Economy'}
           </span>
+          {option.seats_hint && (
+            <span className="text-[9px] font-bold text-[#A855F7]/60 bg-[#A855F7]/10 px-3 py-1 rounded-full">{option.seats_hint}</span>
+          )}
         </div>
       </div>
 

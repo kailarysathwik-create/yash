@@ -100,7 +100,7 @@ const Dashboard = () => {
                   Begin New Trip
                 </Button>
               </DialogTrigger>
-              <DialogContent className="glass-card border-white/50 rounded-[3.5rem] p-12 max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_50px_100px_-20px_rgba(147,112,219,0.3)]">
+              <DialogContent className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-[3.5rem] p-12 max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_8px_60px_-10px_rgba(168,85,247,0.15),0_0_0_1px_rgba(255,255,255,0.6),inset_0_1px_0_rgba(255,255,255,0.8)] before:absolute before:inset-0 before:rounded-[3.5rem] before:bg-gradient-to-br before:from-pink-200/10 before:via-transparent before:to-purple-200/10 before:pointer-events-none relative">
                 <DialogHeader>
                   <DialogTitle className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-10">New Trip</DialogTitle>
                 </DialogHeader>
