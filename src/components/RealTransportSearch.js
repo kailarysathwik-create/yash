@@ -1,3 +1,6 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plane, Train, Car, MapPin, Navigation, IndianRupee, Clock, ArrowRight, CheckCircle2, Star, Users, Briefcase, ShieldCheck, ExternalLink, Info, LoaderCircle, Sparkles, Plus, Minus, Phone, Mail, X, History, Trash2, Edit2, Save, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useUI } from '../context/UIContext';
 
