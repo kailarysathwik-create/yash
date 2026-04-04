@@ -54,7 +54,9 @@ const Onboarding = () => {
       toast.success('Protocol established. Welcome to Y.A.S.H');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Matrix connection failed. Try again.');
+      const msg = error.response?.data?.msg || error.response?.data?.detail || error.message;
+      console.error('Onboarding error response:', error.response?.data);
+      toast.error(`Failed: ${msg}`);
       console.error(error);
     } finally {
       setLoading(false);
