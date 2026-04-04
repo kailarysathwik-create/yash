@@ -109,11 +109,11 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start</Label>
-                      <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Departure City" required />
+                      <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/30 placeholder:font-medium" placeholder="Departure City" required />
                     </div>
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination</Label>
-                      <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Hub Terminal" required />
+                      <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/30 placeholder:font-medium" placeholder="Destination City" required />
                     </div>
                   </div>
 
@@ -152,11 +152,11 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start Date</Label>
-                      <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold" required />
+                      <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold text-[#A855F7]/70" required />
                     </div>
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Places To Cover</Label>
-                      <Input value={formData.places_to_cover} onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })} className="glass-input h-16 px-6 font-bold" placeholder="Intermediary Cities" />
+                      <Input value={formData.places_to_cover} onChange={(e) => setFormData({ ...formData, places_to_cover: e.target.value })} className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/30 placeholder:font-medium" placeholder="Optional cities" />
                     </div>
                   </div>
 

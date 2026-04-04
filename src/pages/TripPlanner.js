@@ -211,26 +211,34 @@ const TripPlanner = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Transport</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-2">{selectedTransport?.type}</h3>
+                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-1">{selectedTransport?.provider || selectedTransport?.type}</h3>
+                    <p className="text-[10px] text-[#1a0b2e]/40 font-bold mb-4">{selectedTransport?.cab_mode === 'self' ? 'Self Arranged' : ''}</p>
                     <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport?.price || 0).toLocaleString()}</div>
                   </div>
+                  {selectedTransport?.cab_mode === 'agency' && selectedTransport?.agency_charge > 0 && (
+                    <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
+                      <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Cab Charge</p>
+                      <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">Agency Cab</h3>
+                      <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport?.agency_charge || 0).toLocaleString()}</div>
+                    </div>
+                  )}
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Stay</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-2">{selectedStay?.name}</h3>
+                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">{selectedStay?.name}</h3>
                     <div className="text-3xl font-black text-[#A855F7]">₹{(selectedStay?.price || 0).toLocaleString()}</div>
                   </div>
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20 bg-[#A855F7]/5">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Platform Fee & Taxes</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-2">Agency Charges (10%)</h3>
+                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">Agency Charges (10%)</h3>
                     <div className="text-3xl font-black text-[#A855F7]">
-                      ₹{Math.round(((selectedTransport?.price || 0) + (selectedStay?.price || 0)) * 0.10).toLocaleString()}
+                      ₹{Math.round(((selectedTransport?.price || 0) + (selectedTransport?.agency_charge || 0) + (selectedStay?.price || 0)) * 0.10).toLocaleString()}
                     </div>
                   </div>
                 </div>
               </div>
 
               <UPIPayment
-                amount={Math.round(((selectedTransport?.price || 0) + (selectedStay?.price || 0)) * 1.10)}
+                amount={Math.round(((selectedTransport?.price || 0) + (selectedTransport?.agency_charge || 0) + (selectedStay?.price || 0)) * 1.10)}
                 tripId={tripId}
                 onComplete={() => {
                   toast.success('Mission Complete: Credits Settled.');
