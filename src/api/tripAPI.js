@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 // Get API URL from environment with the Render URL as a fallback
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://trip-bkak.onrender.com/';
+const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'https://trip-bkak.onrender.com').replace(/\/$/, '');
 const API = `${BACKEND_URL}/api`;
 
 // Create axios instance with default config

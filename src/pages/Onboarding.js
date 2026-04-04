@@ -175,7 +175,7 @@ const Onboarding = () => {
                          required
                          type="text" 
                          placeholder="agency@upi" 
-                         className="w-full h-16 bg-white/80 border-2 border-[#A855F7]/20 focus:border-[#A855F7] rounded-[2rem] pl-16 pr-8 font-black text-[#A855F7] transition-all outline-none uppercase"
+                         className="w-full h-16 bg-white/80 border-2 border-[#A855F7]/20 focus:border-[#A855F7] rounded-[2rem] pl-16 pr-8 font-black text-[#A855F7] transition-all outline-none"
                          value={formData.upi_id}
                          onChange={(e) => setFormData({...formData, upi_id: e.target.value.toLowerCase()})}
                       />
