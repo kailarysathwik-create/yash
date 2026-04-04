@@ -87,6 +87,27 @@ export const tripAPI = {
     }
   },
 
+  // Orchestrate the entire trip securely in parallel
+  orchestrateTrip: async (tripId) => {
+    try {
+      // Execute all three generation schemas in parallel for minimal latency
+      const [transportRes, stayRes, itineraryRes] = await Promise.all([
+        apiClient.post(`/trips/${tripId}/generate-transport`, {}),
+        apiClient.post(`/trips/${tripId}/generate-stays`, {}),
+        apiClient.post(`/trips/${tripId}/generate-itinerary`, {})
+      ]);
+
+      return {
+        transports: transportRes.data.transport_options || [],
+        stays: stayRes.data.stay_options || [],
+        itinerary: itineraryRes.data.itinerary || []
+      };
+    } catch (error) {
+      console.error('Hub Orchestration Failed:', error.message);
+      throw error;
+    }
+  },
+
   // Update itinerary
   updateItinerary: async (tripId, itinerary) => {
     try {
