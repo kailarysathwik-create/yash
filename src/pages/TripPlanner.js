@@ -377,8 +377,29 @@ const TripPlanner = () => {
                 </div>
               </div>
               <div className="flex justify-center pt-20">
-                <Button onClick={() => setStep(6)} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30">
-                  Next: Settle Credits & Checkout
+                <Button 
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      await tripAPI.updateTouristDetails(tripId, {
+                        tourists: passengers,
+                        contact_phone: primaryContact.phone,
+                        contact_email: secondaryContact.email,
+                        secondary_phone: secondaryContact.phone,
+                        agency_charges: manualAgencyCharge
+                      });
+                      toast.success('Explorer Matrix Synchronized');
+                      setStep(6);
+                    } catch (err) {
+                      toast.error('Matrix Sync Failed');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }} 
+                  disabled={loading}
+                  className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30"
+                >
+                  {loading ? 'Synchronizing...' : 'Next: Settle Credits & Checkout'}
                 </Button>
               </div>
             </motion.div>
@@ -451,8 +472,8 @@ const TripPlanner = () => {
                     total_amount: totalAmount,
                     agency_charge: manualAgencyCharge,
                     primary_phone: primaryContact.phone,
-                    email: secondaryContact.email,
-                    secondary_phone: secondaryContact.phone // Note: check if phone exists in secondaryContact
+                    email: secondaryContact.email || '',
+                    secondary_phone: secondaryContact.phone || ''
                   });
                   downloadManifest();
                   navigate('/dashboard');
