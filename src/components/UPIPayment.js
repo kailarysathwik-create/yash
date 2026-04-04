@@ -17,8 +17,8 @@ const UPIPayment = ({ amount, tripId, onComplete, onTransactionIdChange }) => {
   useEffect(() => {
     const fetchAgencyData = async () => {
       try {
-        const user = await tripAPI.auth.getMe();
-        const agencyUpi = user.upi_id || 'yash@okaxis'; // Fallback just in case
+        const response = await tripAPI.auth.getMe();
+        const agencyUpi = response.user.upi_id || 'yash@okaxis'; // Correctly accessing nested user object
         setUpiId(agencyUpi);
         
         // UPI URI format: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=TRIP_ID
