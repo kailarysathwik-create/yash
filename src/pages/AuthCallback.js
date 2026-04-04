@@ -80,14 +80,8 @@ const AuthCallback = () => {
           navigate('/dashboard', { state: { user }, replace: true });
         }
       } catch (error) {
-        console.error('Full auth callback error details:', error);
-        if (error.response) {
-          console.error('Backend response:', error.response.data);
-          console.error('Backend status:', error.response.status);
-        }
-        // Clear the URL as a safety measure
-        window.history.replaceState(null, '', '/');
-        navigate('/login', { state: { error: 'Authentication failed. Please try again.' } });
+        const errorMessage = error.response?.data?.msg || error.response?.data?.detail || 'Authentication failed. Please try again.';
+        navigate('/login', { state: { error: errorMessage } });
       }
     };
 
