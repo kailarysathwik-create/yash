@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { Plane, Train, Car, Navigation, Sparkles, Waves } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
+import { tripAPI } from '../api/tripAPI';
 
 const Dashboard = () => {
   const navigate = useNavigate();

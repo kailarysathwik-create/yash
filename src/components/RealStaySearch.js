@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Star, MapPin, CheckCircle2, Shield, Wifi, Coffee, Car, Waves, Dumbbell, Utensils, Phone, Mail, Calendar, ArrowRight, IndianRupee, Users, Filter, SortAsc } from 'lucide-react';
-import { useUI } from '@/context/UIContext';
-import { Button } from '@/components/ui/button';
+import { useUI } from '../context/UIContext';
+import { Button } from './ui/button';
 
 const RealStaySearch = ({ options, onSelect }) => {
   const { setTaskbarSlid } = useUI();

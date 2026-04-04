@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { useUI } from '@/context/UIContext';
+import { Button } from './ui/button';
+import { useUI } from '../context/UIContext';
 
 const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const { setTaskbarSlid } = useUI();

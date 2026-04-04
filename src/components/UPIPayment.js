@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button';
 import { ShieldCheck, Wallet, CheckCircle2, LoaderCircle, ArrowRight, CreditCard, Copy } from 'lucide-react';
-import { tripAPI } from '@/api/tripAPI';
+import { tripAPI } from '../api/tripAPI';
 import QRCode from 'qrcode';
 
 const UPIPayment = ({ amount, tripId, onComplete, onTransactionIdChange }) => {
