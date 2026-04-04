@@ -4,10 +4,13 @@ import { motion } from 'framer-motion';
 import { Navigation, History, LogOut, Sparkles } from 'lucide-react';
 import { tripAPI } from '@/api/tripAPI';
 import { toast } from 'sonner';
+import { useUI } from '@/context/UIContext';
 
 const Taskbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { isTaskbarSlid } = useUI();
 
   const handleLogout = async () => {
     try {
@@ -25,11 +28,17 @@ const Taskbar = () => {
   ];
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-full max-w-fit px-6">
+    <div className="fixed bottom-8 left-1/2 z-[100] w-full max-w-fit px-6 pointer-events-none">
       <motion.nav 
         initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="taskbar-glass flex items-center gap-2 p-2 px-4 border border-white/50"
+        animate={{ 
+          y: 0, 
+          opacity: 1,
+          x: isTaskbarSlid ? "-140%" : "-50%",
+          scale: isTaskbarSlid ? 0.8 : 1
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 30 }}
+        className="taskbar-glass flex items-center gap-2 p-2 px-4 border border-white/50 pointer-events-auto origin-bottom-left"
       >
         {menuItems.map((item) => {
           const Icon = item.icon;

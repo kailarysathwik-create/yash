@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plane, Train, Car, ArrowRight, Clock, MapPin, IndianRupee, Users, ChevronDown, ShieldCheck, Zap, Star, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useUI } from '@/context/UIContext';
 
-const RealTransportSearch = ({ options, onSelect }) => {
+const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
+  const { setTaskbarSlid } = useUI();
   const [activeTab, setActiveTab] = useState('onward');
   const [selections, setSelections] = useState({ onward: null, return: null });
   const [cabMode, setCabMode] = useState(null); // 'agency' or 'self'
   const [agencyCabCharge, setAgencyCabCharge] = useState('');
   const [bookingOverlay, setBookingOverlay] = useState(null); // { option, type }
+  const [editPeople, setEditPeople] = useState(initialPeople);
 
   // Detect transport type from first onward option
   const onwardOptions = options?.onward || [];
@@ -24,13 +24,30 @@ const RealTransportSearch = ({ options, onSelect }) => {
     }
   };
 
+  const handleBookingClick = (option, type) => {
+    setBookingOverlay({ option, type });
+    setEditPeople(initialPeople);
+    setTaskbarSlid(true);
+  };
+
   const confirmBooking = () => {
     if (!bookingOverlay) return;
-    setSelections(prev => ({ ...prev, [bookingOverlay.type]: bookingOverlay.option }));
+    const finalOption = { 
+      ...bookingOverlay.option, 
+      num_people: editPeople, 
+      total_price: bookingOverlay.option.price * editPeople 
+    };
+    setSelections(prev => ({ ...prev, [bookingOverlay.type]: finalOption }));
     setBookingOverlay(null);
+    setTaskbarSlid(false);
     if (bookingOverlay.type === 'onward' && returnOptions.length > 0) {
       setActiveTab('return');
     }
+  };
+
+  const closeOverlay = () => {
+    setBookingOverlay(null);
+    setTaskbarSlid(false);
   };
 
   const handleFinalContinue = () => {
@@ -81,7 +98,7 @@ const RealTransportSearch = ({ options, onSelect }) => {
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
           <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <Button onClick={() => setBookingOverlay({ option, type })} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
+          <Button onClick={() => handleBookingClick(option, type)} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
              {isSelected ? 'Selected' : 'Book Now'}
           </Button>
         </div>
@@ -127,7 +144,7 @@ const RealTransportSearch = ({ options, onSelect }) => {
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
           <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <Button onClick={() => setBookingOverlay({ option, type })} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
+          <Button onClick={() => handleBookingClick(option, type)} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
              {isSelected ? 'Selected' : 'Book Now'}
           </Button>
         </div>
@@ -317,7 +334,7 @@ const RealTransportSearch = ({ options, onSelect }) => {
               className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative"
             >
               <button 
-                onClick={() => setBookingOverlay(null)} 
+                onClick={closeOverlay} 
                 className="absolute top-8 right-8 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition text-[#1a0b2e] font-black"
               >X</button>
               
@@ -328,26 +345,39 @@ const RealTransportSearch = ({ options, onSelect }) => {
               <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">Review Reservation</h3>
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a0b2e]/40 mb-8">Confirm passenger and pricing rules</p>
               
-              <div className="glass-card rounded-[2rem] p-6 mb-8 border-dashed border-2 border-[#1a0b2e]/10">
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Carrier</span>
-                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.provider}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Class</span>
-                    <span className="font-black text-white bg-[#A855F7] px-3 py-1 rounded-full text-[10px] tracking-widest">{bookingOverlay.option.class}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Route</span>
-                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.from_location} → {bookingOverlay.option.to_location}</span>
-                 </div>
-                 <div className="flex justify-between items-center pt-4 border-t border-[#1a0b2e]/10">
-                    <span className="font-bold text-[#1a0b2e]">Total Price</span>
-                    <span className="font-black text-[#A855F7] text-2xl">₹{bookingOverlay.option.price.toLocaleString()}</span>
-                 </div>
+              <div className="space-y-4 mb-8">
+                <div className="glass-card rounded-[2rem] p-6 border-dashed border-2 border-[#1a0b2e]/10">
+                   <div className="flex justify-between items-center mb-4">
+                      <span className="font-bold text-[#1a0b2e]/50">Carrier</span>
+                      <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.provider}</span>
+                   </div>
+                   <div className="flex justify-between items-center mb-4">
+                      <span className="font-bold text-[#1a0b2e]/50">Route</span>
+                      <span className="font-black text-[#1a0b2e]">{bookingOverlay.option.from_location} → {bookingOverlay.option.to_location}</span>
+                   </div>
+                   <div className="flex justify-between items-center mb-4 border-t border-[#1a0b2e]/10 pt-4">
+                      <span className="font-bold text-[#1a0b2e]/50">Base Price (Per Person)</span>
+                      <span className="font-black text-[#1a0b2e]">₹{bookingOverlay.option.price.toLocaleString()}</span>
+                   </div>
+                </div>
+
+                <div className="glass-card rounded-[2rem] p-6 bg-[#A855F7]/5 border-2 border-[#A855F7]/20">
+                   <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest">Number of Travelers</span>
+                      <div className="flex items-center gap-4 bg-white rounded-full p-1 border border-[#A855F7]/20">
+                         <button onClick={() => setEditPeople(Math.max(1, editPeople - 1))} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold">-</button>
+                         <span className="font-black text-[#1a0b2e] w-4 text-center">{editPeople}</span>
+                         <button onClick={() => setEditPeople(editPeople + 1)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold">+</button>
+                      </div>
+                   </div>
+                   <div className="flex justify-between items-center pt-4 border-t border-[#A855F7]/10">
+                      <span className="font-black text-[#1a0b2e]">Total Segment Price</span>
+                      <span className="font-black text-[#A855F7] text-3xl">₹{(bookingOverlay.option.price * editPeople).toLocaleString()}</span>
+                   </div>
+                </div>
               </div>
               
-              <Button onClick={confirmBooking} className="w-full bg-[#1a0b2e] hover:bg-[#A855F7] text-white h-16 rounded-2xl font-black text-lg transition-all">
+              <Button onClick={confirmBooking} className="w-full bg-[#1a0b2e] hover:bg-[#A855F7] text-white h-20 rounded-[2rem] font-black text-xl transition-all shadow-xl shadow-[#A855F7]/20">
                 Confirm & Add to Manifest
               </Button>
             </motion.div>

@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Star, MapPin, CheckCircle2, Shield, Wifi, Coffee, Car, Waves, Dumbbell, Utensils, Phone, Mail, Calendar, ArrowRight, IndianRupee, Users, Filter, SortAsc } from 'lucide-react';
+import { useUI } from '@/context/UIContext';
+import { Button } from '@/components/ui/button';
 
 const RealStaySearch = ({ options, onSelect }) => {
+  const { setTaskbarSlid } = useUI();
   const [sortBy, setSortBy] = useState('price'); // 'price' | 'rating'
   const [expandedCard, setExpandedCard] = useState(null);
   const [bookingOverlay, setBookingOverlay] = useState(null);
+  const [editNights, setEditNights] = useState(1);
 
   // Sort options
   const sorted = [...options].sort((a, b) => {
@@ -166,7 +170,10 @@ const RealStaySearch = ({ options, onSelect }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      const totalNights = (option.check_out_day || 2) - (option.check_in_day || 1);
+                      setEditNights(totalNights > 0 ? totalNights : 1);
                       setBookingOverlay({ ...option, price: totalPrice, nights: totalNights > 0 ? totalNights : 1 });
+                      setTaskbarSlid(true);
                     }}
                     className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#1a0b2e] text-white rounded-2xl font-black text-xs uppercase tracking-widest opacity-80 group-hover:opacity-100 group-hover:bg-[#A855F7] transition-all duration-500 shadow-lg"
                   >
@@ -244,7 +251,11 @@ const RealStaySearch = ({ options, onSelect }) => {
               className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto"
             >
               <button 
-                onClick={(e) => { e.stopPropagation(); setBookingOverlay(null); }} 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setBookingOverlay(null); 
+                  setTaskbarSlid(false);
+                }} 
                 className="absolute top-8 right-8 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition text-[#1a0b2e] font-black"
               >X</button>
               
@@ -255,32 +266,43 @@ const RealStaySearch = ({ options, onSelect }) => {
               <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">Review Reservation</h3>
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a0b2e]/40 mb-8">Confirm details and pricing rules</p>
               
-              <div className="glass-card rounded-[2rem] p-6 mb-8 border-dashed border-2 border-[#1a0b2e]/10">
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Property</span>
-                    <span className="font-black text-[#1a0b2e] text-right max-w-[60%]">{bookingOverlay.name}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Check-in</span>
-                    <span className="font-black text-[#1a0b2e]">Day {bookingOverlay.check_in_day || 1}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Check-out</span>
-                    <span className="font-black text-[#1a0b2e]">Day {bookingOverlay.check_out_day || 2}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-[#1a0b2e]/50">Duration</span>
-                    <span className="font-black text-[#1a0b2e]">{bookingOverlay.nights} Night{bookingOverlay.nights !== 1 ? 's' : ''}</span>
-                 </div>
-                 <div className="flex justify-between items-center pt-4 border-t border-[#1a0b2e]/10">
-                    <span className="font-bold text-[#1a0b2e]">Total Price</span>
-                    <span className="font-black text-[#A855F7] text-2xl">₹{bookingOverlay.price.toLocaleString()}</span>
-                 </div>
+              <div className="space-y-4 mb-8">
+                <div className="glass-card rounded-[2rem] p-6 border-dashed border-2 border-[#1a0b2e]/10">
+                   <div className="flex justify-between items-center mb-4">
+                      <span className="font-bold text-[#1a0b2e]/50">Property</span>
+                      <span className="font-black text-[#1a0b2e] text-right max-w-[60%]">{bookingOverlay.name}</span>
+                   </div>
+                   <div className="flex justify-between items-center mb-4 border-t border-[#1a0b2e]/10 pt-4">
+                      <span className="font-bold text-[#1a0b2e]/50">Rate (Per Night)</span>
+                      <span className="font-black text-[#1a0b2e]">₹{bookingOverlay.price_per_night.toLocaleString()}</span>
+                   </div>
+                </div>
+
+                <div className="glass-card rounded-[2rem] p-6 bg-[#A855F7]/5 border-2 border-[#A855F7]/20">
+                   <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest">Duration of Stay</span>
+                      <div className="flex items-center gap-4 bg-white rounded-full p-1 border border-[#A855F7]/20">
+                         <button onClick={() => setEditNights(Math.max(1, editNights - 1))} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold">-</button>
+                         <span className="font-black text-[#1a0b2e] w-4 text-center">{editNights}</span>
+                         <button onClick={() => setEditNights(editNights + 1)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold">+</button>
+                      </div>
+                   </div>
+                   <div className="flex justify-between items-center pt-4 border-t border-[#A855F7]/10">
+                      <span className="font-black text-[#1a0b2e]">Total Accommodation Cost</span>
+                      <span className="font-black text-[#A855F7] text-3xl">₹{(bookingOverlay.price_per_night * editNights).toLocaleString()}</span>
+                   </div>
+                </div>
               </div>
               
-              <button onClick={() => onSelect(bookingOverlay)} className="w-full bg-[#1a0b2e] flex items-center justify-center hover:bg-[#A855F7] text-white h-16 rounded-2xl font-black text-lg transition-all">
+              <Button 
+                onClick={() => {
+                  onSelect({ ...bookingOverlay, price: bookingOverlay.price_per_night * editNights, nights: editNights });
+                  setTaskbarSlid(false);
+                }} 
+                className="w-full bg-[#1a0b2e] flex items-center justify-center hover:bg-[#A855F7] text-white h-20 rounded-[2rem] font-black text-xl shadow-xl shadow-[#A855F7]/20 transition-all"
+              >
                 Confirm & Add to Manifest
-              </button>
+              </Button>
             </motion.div>
           </motion.div>
         )}

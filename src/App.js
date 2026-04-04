@@ -10,6 +10,7 @@ import TripPlanner from '@/pages/TripPlanner';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Taskbar from '@/components/Taskbar';
 import Particles from '@/components/Particles';
+import { UIProvider } from '@/context/UIContext';
 import '@/App.css';
 
 function AppRouter() {
@@ -46,7 +47,9 @@ function App() {
     <div className="App relative min-h-screen overflow-hidden">
       <Particles />
       <BrowserRouter>
-        <AppRouter />
+        <UIProvider>
+          <AppRouter />
+        </UIProvider>
       </BrowserRouter>
       <Toaster position="top-right" />
     </div>

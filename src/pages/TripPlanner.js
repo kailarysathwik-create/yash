@@ -24,6 +24,62 @@ const TripPlanner = () => {
   const [itinerary, setItinerary] = useState([]);
   const [orchestrating, setOrchestrating] = useState(false);
   const [manualAgencyCharge, setManualAgencyCharge] = useState(0);
+  const [passengers, setPassengers] = useState([]);
+  const [transactionId, setTransactionId] = useState('');
+
+  const generateManifest = () => {
+    let manifest = `--- Y.A.S.H TRIP MANIFEST ---\n`;
+    manifest += `Generated: ${new Date().toLocaleString()}\n`;
+    manifest += `Trip ID: ${tripId}\n\n`;
+    
+    manifest += `[PASSENGERS]\n`;
+    passengers.forEach((p, i) => {
+      manifest += `${i+1}. ${p.name || 'Anonymous'} | ID: ${p.id || 'N/A'} | Phone: ${p.phone || 'N/A'} | Email: ${p.email || 'N/A'}\n`;
+    });
+    
+    manifest += `\n[TRANSPORT]\n`;
+    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.type}) | Price: ₹${selectedTransport.onward?.price}\n`;
+    if (selectedTransport.return) {
+      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type}) | Price: ₹${selectedTransport.return?.price}\n`;
+    }
+    
+    manifest += `\n[STAY]\n`;
+    manifest += `${selectedStay?.name} | Nights: ${selectedStay?.nights} | Total: ₹${selectedStay?.price}\n`;
+    
+    manifest += `\n[FINANCIALS]\n`;
+    manifest += `Agency Charge: ₹${manualAgencyCharge}\n`;
+    manifest += `Transaction ID: ${transactionId}\n`;
+    manifest += `TOTAL PAID: ₹${((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + (selectedStay?.price || 0) + manualAgencyCharge).toLocaleString()}\n`;
+    
+    return manifest;
+  };
+
+  const downloadManifest = async () => {
+    const manifest = generateManifest();
+    
+    // 1. Local Download
+    const element = document.createElement("a");
+    const file = new Blob([manifest], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `YASH_Manifest_${tripId}.txt`;
+    document.body.appendChild(element);
+    element.click();
+
+    // 2. Network Dispatch (Notification Hub)
+    try {
+      const emails = passengers.map(p => p.email).filter(Boolean);
+      const phones = passengers.map(p => p.phone).filter(Boolean);
+      await apiClient.post('/trip/send-manifest', {
+        manifest,
+        emails,
+        phones,
+        trip_id: tripId
+      });
+      toast.success('Manifest dispatched to explorer terminals');
+    } catch (err) {
+      console.warn('Notification hub offline, manifest delivered locally only');
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -36,6 +92,8 @@ const TripPlanner = () => {
         setTransportOptions(response.transports || { onward: [], return: [] });
         setStayOptions(response.stays || []);
         setItinerary(response.itinerary || []);
+        // Initialize passengers array
+        setPassengers(Array.from({ length: response.trip_details?.num_people || 1 }).map(() => ({ name: '', id: '', phone: '', email: '' })));
         setStep(2); // Move immediately to Transport
       } catch (error) {
         toast.error('Failed to synchronize and orchestrate trip data');
@@ -130,6 +188,7 @@ const TripPlanner = () => {
             <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <RealTransportSearch
                 options={transportOptions}
+                initialPeople={trip.details.num_people}
                 onSelect={(opt) => { setSelectedTransport(opt); setStep(3); }}
               />
             </motion.div>
@@ -184,15 +243,48 @@ const TripPlanner = () => {
           {step === 5 && (
             <motion.div key="step5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">Explorer Details</h2>
+                <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">Explorer Matrix</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {Array.from({ length: trip.details.num_people }).map((_, idx) => (
-                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50">
+                {passengers.map((p, idx) => (
+                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
                     <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
                     <div className="space-y-4">
-                      <input type="text" placeholder="Full Name" className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" />
-                      <input type="text" placeholder="ID / Passport (Optional)" className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" />
+                      <input 
+                        type="text" 
+                        placeholder="Full Name" 
+                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" 
+                        value={p.name}
+                        onChange={(e) => {
+                          const newP = [...passengers];
+                          newP[idx].name = e.target.value;
+                          setPassengers(newP);
+                        }}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <input 
+                          type="text" 
+                          placeholder="Phone (Opt)" 
+                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                          value={p.phone}
+                          onChange={(e) => {
+                            const newP = [...passengers];
+                            newP[idx].phone = e.target.value;
+                            setPassengers(newP);
+                          }}
+                        />
+                        <input 
+                          type="email" 
+                          placeholder="Email (Opt)" 
+                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                          value={p.email}
+                          onChange={(e) => {
+                            const newP = [...passengers];
+                            newP[idx].email = e.target.value;
+                            setPassengers(newP);
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -255,8 +347,10 @@ const TripPlanner = () => {
               <UPIPayment
                 amount={Math.round((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + (selectedStay?.price || 0) + manualAgencyCharge)}
                 tripId={tripId}
+                onTransactionIdChange={(val) => setTransactionId(val)}
                 onComplete={() => {
                   toast.success('Mission Complete: Credits Settled.');
+                  downloadManifest();
                   navigate('/dashboard');
                 }}
               />
