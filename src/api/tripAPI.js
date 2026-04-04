@@ -100,7 +100,7 @@ export const tripAPI = {
       return {
         transports: transportRes.data.transport_options || [],
         stays: stayRes.data.stay_options || [],
-        itinerary: itineraryRes.data.itinerary || []
+        itinerary: itineraryRes.data.itinerary?.days || itineraryRes.data.itinerary || []
       };
     } catch (error) {
       console.error('Hub Orchestration Failed:', error.message);
