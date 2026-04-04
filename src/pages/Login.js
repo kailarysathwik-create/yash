@@ -63,10 +63,10 @@ const Login = () => {
               <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60 ml-1">Email login</Label>
               <Input
                 type="email"
-                placeholder="your email here"
+                placeholder="your@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="glass-input h-16 px-6 font-bold"
+                className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/40 placeholder:font-medium"
                 required
               />
             </div>
@@ -111,13 +111,13 @@ const Login = () => {
         >
           <div className="flex items-center justify-center gap-8 mb-4">
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
-              <MapPin className="w-3 h-3" /> 128 Global Nodes
+              <MapPin className="w-3 h-3" /> Ai Plans
             </div>
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1a0b2e]/20">
-              <Navigation className="w-3 h-3" /> Meticulous Curation
+              <Navigation className="w-3 h-3" /> Happy Journey
             </div>
           </div>
-          <p className="text-[#A855F7]/20 text-[9px] font-bold tracking-widest">© 2026 YATRA AND STAY HUB ORCHESTRATION. ALL RIGHTS RESERVED.</p>
+          <p className="text-[#A855F7]/20 text-[9px] font-bold tracking-widest">© 2026 YATRA AND STAY HUB. ALL RIGHTS RESERVED.</p>
         </motion.div>
       </div>
 
