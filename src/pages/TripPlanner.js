@@ -30,7 +30,7 @@ const TripPlanner = () => {
   const [transactionId, setTransactionId] = useState('');
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
-  const remainingNights = (trip?.details?.num_days || 0) - bookedNights;
+  const remainingNights = (trip?.num_days || 0) - bookedNights;
 
   const maskAadhar = (val) => {
     if (!val) return 'N/A';
@@ -172,15 +172,15 @@ const TripPlanner = () => {
           <div className="glass-card rounded-[3rem] p-10 flex flex-wrap items-center gap-12 border-white/50 shadow-xl shadow-[#A855F7]/5">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><MapPin className="text-[#A855F7] w-6 h-6" /></div>
-              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Vector</p><p className="font-bold text-[#1a0b2e]">{trip.details.from_location} → {trip.details.destination}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Vector</p><p className="font-bold text-[#1a0b2e]">{trip.from_location} → {trip.destination}</p></div>
             </div>
             <div className="flex items-center gap-4 border-l border-[#1a0b2e]/5 pl-12">
               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><Calendar className="text-[#A855F7] w-6 h-6" /></div>
-              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Commencement</p><p className="font-bold text-[#1a0b2e]">{trip.details.start_date} • {trip.details.num_days} Days</p></div>
+              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Commencement</p><p className="font-bold text-[#1a0b2e]">{trip.start_date} • {trip.num_days} Days</p></div>
             </div>
             <div className="flex items-center gap-4 border-l border-[#1a0b2e]/5 pl-12">
               <div className="w-12 h-12 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center"><Users className="text-[#A855F7] w-6 h-6" /></div>
-              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Personnel</p><p className="font-bold text-[#1a0b2e]">{trip.details.num_people} Explorer(s)</p></div>
+              <div><p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest mb-1">Personnel</p><p className="font-bold text-[#1a0b2e]">{trip.num_people} Explorer(s)</p></div>
             </div>
           </div>
         </header>
@@ -208,7 +208,7 @@ const TripPlanner = () => {
             <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <RealTransportSearch
                 options={transportOptions}
-                initialPeople={trip.details.num_people}
+                initialPeople={trip.num_people}
                 onSelect={(opt) => { setSelectedTransport(opt); setStep(3); }}
               />
             </motion.div>
@@ -217,7 +217,7 @@ const TripPlanner = () => {
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-[#1a0b2e]">Nights Booked: {bookedNights} / {trip.details.num_days}</h3>
+                <h3 className="text-xl font-black text-[#1a0b2e]">Nights Booked: {bookedNights} / {trip.num_days}</h3>
                 {bookedNights > 0 && (
                    <Button onClick={() => setStep(4)} className="bg-[#A855F7] text-white rounded-full">Continue to Itinerary</Button>
                 )}
@@ -226,10 +226,10 @@ const TripPlanner = () => {
                 options={stayOptions}
                 onSelect={(opt) => { 
                   setSelectedStays(prev => [...prev, opt]);
-                  if (bookedNights + opt.nights >= trip.details.num_days) {
+                  if (bookedNights + opt.nights >= trip.num_days) {
                     setStep(4);
                   } else {
-                    toast.info(`Added ${opt.name}. ${trip.details.num_days - (bookedNights + opt.nights)} nights remaining.`);
+                    toast.info(`Added ${opt.name}. ${trip.num_days - (bookedNights + opt.nights)} nights remaining.`);
                   }
                 }}
               />
@@ -443,10 +443,16 @@ const TripPlanner = () => {
                 onTransactionIdChange={(val) => setTransactionId(val)}
                 onComplete={async () => {
                   toast.success('Mission Complete: Credits Settled.');
-                  // Finalizing in Supabase with all passenger data
+                  // Finalizing in Supabase with all relational data
+                  const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+                  
                   await tripAPI.confirmPayment(tripId, {
                     transaction_id: transactionId,
-                    passengers: passengers
+                    total_amount: totalAmount,
+                    agency_charge: manualAgencyCharge,
+                    primary_phone: primaryContact.phone,
+                    email: secondaryContact.email,
+                    secondary_phone: secondaryContact.phone // Note: check if phone exists in secondaryContact
                   });
                   downloadManifest();
                   navigate('/dashboard');

@@ -159,11 +159,11 @@ export const tripAPI = {
   },
 
   // Confirm payment
-  confirmPayment: async (tripId, transactionId) => {
+  confirmPayment: async (tripId, paymentPayload) => {
     try {
       const response = await apiClient.post(
         `/trips/${tripId}/confirm-payment`,
-        { transaction_id: transactionId }
+        paymentPayload
       );
       return response.data;
     } catch (error) {
