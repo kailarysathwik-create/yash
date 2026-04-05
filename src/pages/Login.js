@@ -55,8 +55,8 @@ const Login = () => {
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-12"
         >
-          <div className="w-32 h-32 mx-auto rounded-full overflow-hidden hover:scale-105 transition-transform duration-500 shrink-0">
-            <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
+          <div className="w-32 h-32 mx-auto rounded-full overflow-hidden hover:scale-105 transition-transform duration-500 shrink-0 shadow-2xl shadow-[#A855F7]/20 border-2 border-white aspect-square">
+            <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover rounded-full" />
           </div>
         </motion.div>
 

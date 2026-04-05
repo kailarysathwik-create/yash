@@ -142,8 +142,8 @@ const TripPlanner = () => {
         <header className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
+              <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center shrink-0 shadow-2xl shadow-[#A855F7]/20 border-2 border-white aspect-square">
+                <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover rounded-full" />
               </div>
               <div>
                 <div className="flex items-center gap-4 mb-2">
@@ -253,14 +253,19 @@ const TripPlanner = () => {
                       initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
                       key={i} className="glass-card rounded-[2.5rem] p-10 border-white/50 hover:border-[#A855F7]/30 transition-all duration-500"
                     >
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-6 mb-6">
                         <div className="w-16 h-16 rounded-3xl bg-[#A855F7] text-white flex items-center justify-center font-black text-xl shadow-xl shadow-[#A855F7]/20">D{day.day}</div>
-                        <div>
-                          <h4 className="text-2xl font-black text-[#1a0b2e]">{day.title}</h4>
-                          <p className="text-[#1a0b2e]/50 font-medium">
-                            {day.activities.map(act => (typeof act === 'object' ? JSON.stringify(act) : act)).join(' • ')}
-                          </p>
-                        </div>
+                        <h4 className="text-2xl font-black text-[#1a0b2e]">{day.title}</h4>
+                      </div>
+                      <div className="space-y-3">
+                        {day.activities?.map((act, actIdx) => (
+                          <div key={actIdx} className="flex gap-4 items-start bg-white/40 p-4 rounded-2xl border border-white/50">
+                             <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2 shadow-[0_0_8px_#A855F7]" />
+                             <p className="text-[#1a0b2e]/80 font-bold text-sm">
+                               {typeof act === 'object' ? `${act.time || ''} - ${act.task || act.activity || ''}` : act}
+                             </p>
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   ))}
@@ -482,10 +487,63 @@ const TripPlanner = () => {
                     email: secondaryContact.email || '',
                     secondary_phone: secondaryContact.phone || ''
                   });
-                  downloadManifest();
-                  navigate('/dashboard');
+                  const freshTrip = await tripAPI.getTrip(tripId);
+                  setTrip(freshTrip);
+                  setItinerary(freshTrip.itinerary || []);
+                  setStep(7);
+                  toast.success('Journey Fully Synchronized.');
                 }}
               />
+            </motion.div>
+          )}
+
+          {step === 7 && (
+            <motion.div key="step7" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-12">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Voyage Manifest</h2>
+                  <p className="text-[#1a0b2e]/50 font-bold">Your journey has been successfully synthesized across the hub matrix.</p>
+                </div>
+                <Button onClick={downloadManifest} icon={Download} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] h-16 rounded-3xl">
+                  Download Final Manifest
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8">
+                {itinerary.map((day, idx) => (
+                  <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
+                    <div className="flex items-center gap-8 mb-10 pb-8 border-b border-[#1a0b2e]/5">
+                      <div className="w-24 h-24 rounded-[2.5rem] bg-[#1a0b2e] text-white flex items-center justify-center font-black text-4xl shadow-3xl shadow-[#1a0b2e]/20">
+                        {day.day}
+                      </div>
+                      <div>
+                        <h3 className="text-4xl font-black text-[#1a0b2e] mb-2">{day.title}</h3>
+                        <div className="flex gap-4">
+                          <span className="px-4 py-1 bg-purple-100 rounded-full text-[10px] font-black uppercase text-[#A855F7] tracking-widest">{day.activities?.length || 0} Events Synchronized</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4">
+                      {day.activities?.map((activity, actIdx) => (
+                        <div key={actIdx} className="group flex gap-8 p-8 rounded-[2.5rem] bg-white/40 border border-white/60 hover:bg-white hover:shadow-xl transition-all duration-500">
+                          <div className="font-black text-[#A855F7] text-xl min-w-[120px] pt-1">
+                            {typeof activity === 'string' ? activity.split(' - ')[0] : (activity.time || `E${actIdx + 1}`)}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-2xl font-black text-[#1a0b2e] mb-2 group-hover:text-[#A855F7] transition-colors">
+                              {typeof activity === 'string' ? (activity.split(' - ')[1] || activity) : activity.task}
+                            </h4>
+                            {typeof activity === 'object' && activity.details && (
+                              <p className="text-[#1a0b2e]/60 font-bold leading-relaxed">{activity.details}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
