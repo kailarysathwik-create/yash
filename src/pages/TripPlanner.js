@@ -54,9 +54,9 @@ const TripPlanner = () => {
     });
 
     manifest += `\n[TRANSPORT]\n`;
-    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.type}) | Price: ₹${selectedTransport.onward?.price}\n`;
+    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.vehicle_id || 'N/A'}) | Type: ${selectedTransport.onward?.type} | Price: ₹${selectedTransport.onward?.price}\n`;
     if (selectedTransport.return) {
-      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type}) | Price: ₹${selectedTransport.return?.price}\n`;
+      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.vehicle_id || 'N/A'}) | Type: ${selectedTransport.return?.type} | Price: ₹${selectedTransport.return?.price}\n`;
     }
 
     manifest += `\n[STAYS]\n`;

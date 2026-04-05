@@ -120,8 +120,16 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
           <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <Button onClick={() => handleBookingClick(option, type)} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
-             {isSelected ? 'SELECTED' : 'SELECT'}
+          <Button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelections(prev => ({ ...prev, [type]: { ...option, num_people: initialPeople, total_price: option.price * initialPeople } }));
+              if (type === 'onward' && returnOptions.length > 0) setActiveTab('return');
+            }} 
+            variant={isSelected ? "default" : "outline"} 
+            className={`rounded-full px-8 h-12 font-black uppercase tracking-wider text-[10px] transition-all duration-300 ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}
+          >
+             {isSelected ? 'ORCHESTRATED' : 'SELECT'}
           </Button>
         </div>
       </div>
