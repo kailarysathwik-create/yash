@@ -4,7 +4,7 @@ import { Plane, Train, Car, MapPin, Navigation, IndianRupee, Clock, ArrowRight, 
 import { Button } from './ui/button';
 import { useUI } from '../context/UIContext';
 
-const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
+const RealTransportSearch = ({ options, onSelect, initialPeople = 1, tripData }) => {
   const { setTaskbarSlid } = useUI();
   const [activeTab, setActiveTab] = useState('onward');
   const [selections, setSelections] = useState({ onward: null, return: null });
