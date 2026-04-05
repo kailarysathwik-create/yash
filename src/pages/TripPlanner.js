@@ -148,7 +148,7 @@ const TripPlanner = () => {
               <div>
                 <div className="flex items-center gap-4 mb-2">
                   <span className="px-4 py-1.5 glass rounded-full text-[10px] font-black text-[#A855F7] uppercase tracking-widest border border-[#A855F7]/20">
-                    Mission: {trip.details.destination}
+                    Mission: {trip.destination}
                   </span>
                   <span className="text-[#1a0b2e]/20 font-bold text-xs uppercase tracking-widest">Ref: {tripId.slice(0, 8)}</span>
                 </div>

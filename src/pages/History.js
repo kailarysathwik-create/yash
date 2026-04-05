@@ -94,28 +94,28 @@ const HistoryPage = () => {
                   </div>
 
                   <h3 className="text-3xl font-black text-[#1a0b2e] mb-8 group-hover:translate-x-2 transition-transform duration-500 relative z-10 leading-tight">
-                    {trip.details.from_location} <ArrowRight className="inline w-5 h-5 mx-2 text-[#A855F7]/30" /> {trip.details.destination}
+                    {trip.from_location} <ArrowRight className="inline w-5 h-5 mx-2 text-[#A855F7]/30" /> {trip.destination}
                   </h3>
 
                   <div className="space-y-5 mb-10 relative z-10">
                     <div className="flex items-center gap-4 text-sm font-bold text-[#1a0b2e]/40 group-hover:text-[#1a0b2e]/70 transition-colors">
                       <Calendar className="w-5 h-5 text-[#A855F7]" />
-                      {trip.details.start_date} • {trip.details.num_days} Deployment Days
+                      {trip.start_date} • {trip.num_days} Deployment Days
                     </div>
                     <div className="flex items-center gap-4 text-sm font-bold text-[#1a0b2e]/40 group-hover:text-[#1a0b2e]/70 transition-colors">
                       <Users className="w-5 h-5 text-[#A855F7]" />
-                      {trip.details.num_people} Personnel Synchronized
+                      {trip.num_people} Personnel Synchronized
                     </div>
                   </div>
 
                   <div className="pt-8 border-t border-[#1a0b2e]/5 flex items-center justify-between group-hover:border-[#A855F7]/20 transition-all duration-500 relative z-10">
                      <div className="flex items-center gap-3">
                         <div className="bg-white/60 p-3 rounded-2xl group-hover:bg-[#A855F7] transition-all duration-500 group-hover:shadow-lg group-hover:shadow-[#A855F7]/20">
-                          {trip.details.transport_mode === 'flight' && <Plane className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
-                          {trip.details.transport_mode === 'train' && <Train className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
-                          {trip.details.transport_mode === 'car' && <Car className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
+                          {trip.transport_mode === 'flight' && <Plane className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
+                          {trip.transport_mode === 'train' && <Train className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
+                          {trip.transport_mode === 'car' && <Car className="w-5 h-5 text-[#A855F7] group-hover:text-white" />}
                         </div>
-                        <span className="text-[11px] font-black uppercase text-[#1a0b2e]/30 group-hover:text-[#1a0b2e] tracking-widest">{trip.details.transport_mode === 'car' ? 'Ground Cab' : trip.details.transport_mode}</span>
+                        <span className="text-[11px] font-black uppercase text-[#1a0b2e]/30 group-hover:text-[#1a0b2e] tracking-widest">{trip.transport_mode === 'car' ? 'Ground Cab' : trip.transport_mode}</span>
                      </div>
                      <div className="w-12 h-12 rounded-full border border-[#1a0b2e]/10 flex items-center justify-center group-hover:bg-[#1a0b2e] group-hover:border-[#1a0b2e] transition-all duration-500 shadow-sm">
                        <ExternalLink className="w-5 h-5 text-[#1a0b2e] group-hover:text-white" />
