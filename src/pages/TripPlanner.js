@@ -112,7 +112,7 @@ const TripPlanner = () => {
         setStayOptions(response.stays || []);
         setItinerary(response.itinerary || []);
         // Initialize passengers array from trip data
-        const travelerCount = data.details?.num_people || 1;
+        const travelerCount = data.num_people || 1;
         setPassengers(Array.from({ length: travelerCount }).map(() => ({ name: '', age: '', gender: '', proof: '' })));
         setStep(2); // Move immediately to Transport
       } catch (error) {
@@ -382,7 +382,10 @@ const TripPlanner = () => {
                     try {
                       setLoading(true);
                       await tripAPI.updateTouristDetails(tripId, {
-                        tourists: passengers,
+                        tourists: passengers.map(p => ({
+                          ...p,
+                          age: parseInt(p.age) || 0
+                        })),
                         contact_phone: primaryContact.phone,
                         contact_email: secondaryContact.email,
                         secondary_phone: secondaryContact.phone,

@@ -128,8 +128,8 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
     >
       <div className="bg-[#A855F7]/5 px-8 py-4 flex items-center justify-between border-b border-[#A855F7]/10">
         <div className="flex items-center gap-3">
-          <Plane className="w-5 h-5 text-[#A855F7]" />
-          <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Airline'}</span>
+          {option.type === 'flight' ? <Plane className="w-5 h-5 text-[#A855F7]" /> : <Car className="w-5 h-5 text-[#A855F7]" />}
+          <span className="font-black text-[#1a0b2e] text-sm">{option.provider || 'Carrier'}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-widest text-white bg-[#A855F7] px-3 py-1 rounded-full">{option.class || 'Economy'}</span>
@@ -146,7 +146,11 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
             <p className="text-[9px] font-black text-[#A855F7]/60 uppercase tracking-widest mb-2">{option.duration || 'Non-stop'}</p>
             <div className="w-full flex items-center">
               <div className="flex-1 h-[2px] bg-gradient-to-r from-[#A855F7]/20 to-[#A855F7]/60" />
-              <Plane className="w-4 h-4 text-[#A855F7] mx-1 shrink-0 -rotate-45" />
+              {option.type === 'flight' ? (
+                <Plane className="w-4 h-4 text-[#A855F7] mx-1 shrink-0 -rotate-45" />
+              ) : (
+                <Car className="w-4 h-4 text-[#A855F7] mx-1 shrink-0" />
+              )}
             </div>
           </div>
           <div className="text-center">
@@ -305,7 +309,7 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
       {activeList.length === 0 && (
         <div className="text-center py-20">
           <div className="w-20 h-20 bg-[#A855F7]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            {transportType === 'train' ? <Train className="w-10 h-10 text-[#A855F7]" /> : <Plane className="w-10 h-10 text-[#A855F7]" />}
+            {transportType === 'train' ? <Train className="w-10 h-10 text-[#A855F7]" /> : (isCab ? <Car className="w-10 h-10 text-[#A855F7]" /> : <Plane className="w-10 h-10 text-[#A855F7]" />)}
           </div>
           <p className="text-[#1a0b2e]/40 font-bold">Scanning live network...</p>
         </div>
@@ -351,7 +355,7 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
               >X</button>
               
               <div className="w-16 h-16 bg-[#A855F7]/10 text-[#A855F7] rounded-3xl flex items-center justify-center mb-6">
-                {transportType === 'train' ? <Train className="w-8 h-8" /> : <Plane className="w-8 h-8" />}
+                {transportType === 'train' ? <Train className="w-8 h-8" /> : (isCab ? <Car className="w-8 h-8" /> : <Plane className="w-8 h-8" />)}
               </div>
               
               <h3 className="text-3xl font-black text-[#1a0b2e] mb-2">Review Reservation</h3>
