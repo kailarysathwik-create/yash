@@ -58,7 +58,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <motion.div
               transition={{ duration: 0.8 }}
-              className="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center border-4 border-white shadow-xl overflow-hidden"
+              className="w-16 h-16 flex items-center justify-center shrink-0"
             >
               <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
             </motion.div>
