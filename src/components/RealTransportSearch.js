@@ -9,6 +9,9 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const [activeTab, setActiveTab] = useState('onward');
   const [selections, setSelections] = useState({ onward: null, return: null });
   const [editPeople, setEditPeople] = useState(initialPeople);
+  const [cabMode, setCabMode] = useState(null); // 'agency' or 'self'
+  const [agencyCabCharge, setAgencyCabCharge] = useState('');
+  const [bookingOverlay, setBookingOverlay] = useState(null); // { option, type }
   const [numCabs, setNumCabs] = useState(1);
   const [numberPlate, setNumberPlate] = useState('');
 
