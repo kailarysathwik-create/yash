@@ -28,17 +28,9 @@ const Taskbar = () => {
   ];
 
   return (
-    <div className="fixed bottom-8 left-1/2 z-[100] w-full max-w-fit px-6 pointer-events-none">
-      <motion.nav 
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ 
-          y: 0, 
-          opacity: 1,
-          x: isTaskbarSlid ? "-250%" : "-50%",
-          scale: isTaskbarSlid ? 0.6 : 1
-        }}
-        transition={{ type: "spring", stiffness: 200, damping: 30 }}
-        className="taskbar-glass flex items-center gap-2 p-2 px-4 border border-white/50 pointer-events-auto origin-bottom-left"
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-full max-w-fit px-6 pointer-events-none">
+      <nav 
+        className="taskbar-glass flex items-center gap-2 p-2 px-4 border border-white/50 pointer-events-auto"
       >
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -48,21 +40,14 @@ const Taskbar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`relative flex items-center justify-center p-4 rounded-full transition-all duration-500 group ${
+              className={`relative flex items-center justify-center p-4 rounded-full transition-all group ${
                 isActive ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20' : 'text-[#1a0b2e]/60 hover:text-[#1a0b2e] hover:bg-white/40'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'animate-pulse' : ''}`} />
+              <Icon className="w-5 h-5" />
               <span className={`absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#1a0b2e] text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none`}>
                 {item.label}
               </span>
-              {isActive && (
-                <motion.div 
-                  layoutId="active-pill"
-                  className="absolute inset-0 bg-[#A855F7] rounded-full -z-10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
             </button>
           );
         })}
@@ -71,14 +56,14 @@ const Taskbar = () => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center p-4 rounded-full text-[#1a0b2e]/60 hover:text-red-500 hover:bg-red-50 group relative transition-all duration-500"
+          className="flex items-center justify-center p-4 rounded-full text-[#1a0b2e]/60 hover:text-red-500 hover:bg-red-50 group relative transition-all"
         >
           <LogOut className="w-5 h-5" />
           <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#1a0b2e] text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
             Sign Out
           </span>
         </button>
-      </motion.nav>
+      </nav>
     </div>
   );
 };

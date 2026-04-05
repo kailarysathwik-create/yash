@@ -432,13 +432,14 @@ const TripPlanner = () => {
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Transport (Onward)</p>
                     <h3 className="text-2xl font-black text-[#1a0b2e] mb-1">{selectedTransport.onward?.provider || selectedTransport.onward?.type || "None"}</h3>
-                    <p className="text-[10px] text-[#1a0b2e]/40 font-bold mb-4">{selectedTransport.cab_mode === 'self' ? 'Self Arranged Cab' : ''}</p>
+                    <p className="text-[10px] text-[#A855F7] font-black mb-4">ID: {selectedTransport.onward?.vehicle_id || "N/A"}</p>
                     <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport.onward?.price || 0).toLocaleString()}</div>
                   </div>
                   {selectedTransport.return && (
                     <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
                       <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Transport (Return)</p>
                       <h3 className="text-2xl font-black text-[#1a0b2e] mb-1">{selectedTransport.return.provider || selectedTransport.return.type}</h3>
+                      <p className="text-[10px] text-[#A855F7] font-black mb-4">ID: {selectedTransport.return.vehicle_id || "N/A"}</p>
                       <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport.return.price || 0).toLocaleString()}</div>
                     </div>
                   )}
@@ -484,7 +485,7 @@ const TripPlanner = () => {
                 onComplete={async () => {
                   toast.success('Mission Complete: Credits Settled.');
                   // Finalizing in Supabase with all relational data
-                  const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+                  const totalAmount = Number(selectedTransport.onward?.price || 0) + Number(selectedTransport.return?.price || 0) + Number(selectedTransport.agency_charge || 0) + Number(selectedStays.reduce((acc, s) => acc + (s.price || 0), 0)) + Number(manualAgencyCharge || 0);
 
                   await tripAPI.confirmPayment(tripId, {
                     transaction_id: transactionId,
