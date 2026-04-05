@@ -42,7 +42,7 @@ const TripPlanner = () => {
     let manifest = `--- Y.A.S.H TRIP MANIFEST ---\n`;
     manifest += `Generated: ${new Date().toLocaleString()}\n`;
     manifest += `Trip ID: ${tripId}\n\n`;
-    
+
     manifest += `[PRIMARY CONTACT]\n`;
     manifest += `Name: ${primaryContact.name || 'N/A'}\n`;
     manifest += `Phone: ${primaryContact.phone || 'N/A'}\n`;
@@ -50,35 +50,35 @@ const TripPlanner = () => {
 
     manifest += `[PASSENGERS]\n`;
     passengers.forEach((p, i) => {
-      manifest += `${i+1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Proof (Aadhar): ${maskAadhar(p.proof)}\n`;
+      manifest += `${i + 1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Proof (Aadhar): ${maskAadhar(p.proof)}\n`;
     });
-    
+
     manifest += `\n[TRANSPORT]\n`;
     manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.type}) | Price: ₹${selectedTransport.onward?.price}\n`;
     if (selectedTransport.return) {
       manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type}) | Price: ₹${selectedTransport.return?.price}\n`;
     }
-    
+
     manifest += `\n[STAYS]\n`;
     selectedStays.forEach((s, i) => {
-      manifest += `${i+1}. ${s.name} | Nights: ${s.nights} | Total: ₹${s.price}\n`;
+      manifest += `${i + 1}. ${s.name} | Nights: ${s.nights} | Total: ₹${s.price}\n`;
     });
-    
+
     manifest += `\n[FINANCIALS]\n`;
     manifest += `Agency Charge: ₹${manualAgencyCharge}\n`;
     manifest += `Transaction ID: ${transactionId || 'OFFLINE'}\n`;
     const totalStayPrice = selectedStays.reduce((acc, s) => acc + (s.price || 0), 0);
     manifest += `TOTAL PAID: ₹${((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + totalStayPrice + manualAgencyCharge).toLocaleString()}\n`;
-    
+
     return manifest;
   };
 
   const downloadManifest = async () => {
     const manifest = generateManifest();
-    
+
     // 1. Local Download
     const element = document.createElement("a");
-    const file = new Blob([manifest], {type: 'text/plain'});
+    const file = new Blob([manifest], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `YASH_Manifest_${tripId}.txt`;
     document.body.appendChild(element);
@@ -219,12 +219,12 @@ const TripPlanner = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-black text-[#1a0b2e]">Nights Booked: {bookedNights} / {trip.num_days}</h3>
                 {bookedNights > 0 && (
-                   <Button onClick={() => setStep(4)} className="bg-[#A855F7] text-white rounded-full">Continue to Itinerary</Button>
+                  <Button onClick={() => setStep(4)} className="bg-[#A855F7] text-white rounded-full">Continue to Itinerary</Button>
                 )}
               </div>
               <RealStaySearch
                 options={stayOptions}
-                onSelect={(opt) => { 
+                onSelect={(opt) => {
                   setSelectedStays(prev => [...prev, opt]);
                   if (bookedNights + opt.nights >= trip.num_days) {
                     setStep(4);
@@ -245,7 +245,7 @@ const TripPlanner = () => {
                   <span className="text-[10px] font-black uppercase text-[#1a0b2e] tracking-widest">Itinerary Loaded</span>
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6">
                   {itinerary.map((day, i) => (
@@ -260,10 +260,10 @@ const TripPlanner = () => {
                       <div className="space-y-3">
                         {day.activities?.map((act, actIdx) => (
                           <div key={actIdx} className="flex gap-4 items-start bg-white/40 p-4 rounded-2xl border border-white/50">
-                             <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2 shadow-[0_0_8px_#A855F7]" />
-                             <p className="text-[#1a0b2e]/80 font-bold text-sm">
-                               {typeof act === 'object' ? `${act.time || ''} - ${act.task || act.activity || ''}` : act}
-                             </p>
+                            <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2 shadow-[0_0_8px_#A855F7]" />
+                            <p className="text-[#1a0b2e]/80 font-bold text-sm">
+                              {typeof act === 'object' ? `${act.time || ''} - ${act.task || act.activity || ''}` : act}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -292,32 +292,32 @@ const TripPlanner = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-[#A855F7]">Leader Name</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Enter Name"
                         className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
                         value={primaryContact.name}
-                        onChange={(e) => setPrimaryContact({...primaryContact, name: e.target.value})}
+                        onChange={(e) => setPrimaryContact({ ...primaryContact, name: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-[#A855F7]">Primary Phone (Req)</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="+91 XXXX"
                         className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
                         value={primaryContact.phone}
-                        onChange={(e) => setPrimaryContact({...primaryContact, phone: e.target.value})}
+                        onChange={(e) => setPrimaryContact({ ...primaryContact, phone: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-[#A855F7]">Agency Email (Opt)</label>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         placeholder="email@agency.com"
                         className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
                         value={secondaryContact.email}
-                        onChange={(e) => setSecondaryContact({...secondaryContact, email: e.target.value})}
+                        onChange={(e) => setSecondaryContact({ ...secondaryContact, email: e.target.value })}
                       />
                     </div>
                   </div>
@@ -329,10 +329,10 @@ const TripPlanner = () => {
                     <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
                       <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
                       <div className="space-y-4">
-                        <input 
-                          type="text" 
-                          placeholder="Full Name" 
-                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold" 
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
                           value={p.name}
                           onChange={(e) => {
                             const newP = [...passengers];
@@ -341,10 +341,10 @@ const TripPlanner = () => {
                           }}
                         />
                         <div className="grid grid-cols-3 gap-4">
-                          <input 
-                            type="number" 
-                            placeholder="Age" 
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                          <input
+                            type="number"
+                            placeholder="Age"
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
                             value={p.age}
                             onChange={(e) => {
                               const newP = [...passengers];
@@ -352,8 +352,8 @@ const TripPlanner = () => {
                               setPassengers(newP);
                             }}
                           />
-                          <select 
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none" 
+                          <select
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none"
                             value={p.gender}
                             onChange={(e) => {
                               const newP = [...passengers];
@@ -366,10 +366,10 @@ const TripPlanner = () => {
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                           </select>
-                          <input 
-                            type="text" 
-                            placeholder="Aadhar ID" 
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm" 
+                          <input
+                            type="text"
+                            placeholder="Aadhar ID"
+                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
                             value={p.proof}
                             onChange={(e) => {
                               const newP = [...passengers];
@@ -384,8 +384,15 @@ const TripPlanner = () => {
                 </div>
               </div>
               <div className="flex justify-center pt-20">
-                <Button 
+                <Button
                   onClick={async () => {
+                    // Validation for Mandatory Fields
+                    const incomplete = passengers.some(p => !p.name || !p.age || !p.gender || !p.proof);
+                    if (incomplete) {
+                      toast.error('Please fill all passenger details, including Aadhar ID.');
+                      return;
+                    }
+
                     try {
                       setLoading(true);
                       await tripAPI.updateTouristDetails(tripId, {
@@ -407,7 +414,7 @@ const TripPlanner = () => {
                     } finally {
                       setLoading(false);
                     }
-                  }} 
+                  }}
                   disabled={loading}
                   className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30"
                 >
@@ -445,26 +452,26 @@ const TripPlanner = () => {
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Stays</p>
                     <div className="space-y-2">
-                       {selectedStays.map((s, idx) => (
-                         <div key={idx} className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-white/50">
-                            <span className="font-bold text-[#1a0b2e] text-sm">{s.name}</span>
-                            <span className="font-black text-[#A855F7] text-sm">₹{s.price.toLocaleString()}</span>
-                         </div>
-                       ))}
+                      {selectedStays.map((s, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-white/50">
+                          <span className="font-bold text-[#1a0b2e] text-sm">{s.name}</span>
+                          <span className="font-black text-[#A855F7] text-sm">₹{s.price.toLocaleString()}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20 bg-[#A855F7]/5">
                     <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Platform Fee & Taxes</p>
                     <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">Agency Charge</h3>
                     <div className="flex items-center gap-2">
-                       <span className="text-3xl font-black text-[#A855F7]">₹</span>
-                       <input 
-                         type="number" 
-                         value={manualAgencyCharge || ''} 
-                         onChange={(e) => setManualAgencyCharge(Number(e.target.value) || 0)}
-                         placeholder="0"
-                         className="bg-transparent border-b-2 border-[#A855F7]/30 text-3xl font-black text-[#A855F7] w-32 focus:outline-none focus:border-[#A855F7] transition-all"
-                       />
+                      <span className="text-3xl font-black text-[#A855F7]">₹</span>
+                      <input
+                        type="number"
+                        value={manualAgencyCharge || ''}
+                        onChange={(e) => setManualAgencyCharge(Number(e.target.value) || 0)}
+                        placeholder="0"
+                        className="bg-transparent border-b-2 border-[#A855F7]/30 text-3xl font-black text-[#A855F7] w-32 focus:outline-none focus:border-[#A855F7] transition-all"
+                      />
                     </div>
                   </div>
                 </div>
@@ -478,7 +485,7 @@ const TripPlanner = () => {
                   toast.success('Mission Complete: Credits Settled.');
                   // Finalizing in Supabase with all relational data
                   const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-                  
+
                   await tripAPI.confirmPayment(tripId, {
                     transaction_id: transactionId,
                     total_amount: totalAmount,
