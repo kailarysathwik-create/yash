@@ -8,10 +8,9 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const { setTaskbarSlid } = useUI();
   const [activeTab, setActiveTab] = useState('onward');
   const [selections, setSelections] = useState({ onward: null, return: null });
-  const [cabMode, setCabMode] = useState(null); // 'agency' or 'self'
-  const [agencyCabCharge, setAgencyCabCharge] = useState('');
-  const [bookingOverlay, setBookingOverlay] = useState(null); // { option, type }
   const [editPeople, setEditPeople] = useState(initialPeople);
+  const [numCabs, setNumCabs] = useState(1);
+  const [numberPlate, setNumberPlate] = useState('');
 
   // Detect transport type from first onward option
   const onwardOptions = options?.onward || [];
@@ -20,10 +19,17 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const isCab = transportType === 'car' || transportType === 'taxi' || transportType === 'cab';
 
   const handleCabSelect = (option) => {
-    if (cabMode === 'agency' && agencyCabCharge) {
-      onSelect({ onward: option, return: null, cab_mode: 'agency', agency_charge: parseFloat(agencyCabCharge) });
+    if (cabMode === 'agency') {
+      onSelect({ 
+        onward: option, 
+        return: null, 
+        cab_mode: 'agency', 
+        agency_charge: parseFloat(agencyCabCharge) || 0,
+        num_cabs: parseInt(numCabs) || 1,
+        number_plate: numberPlate
+      });
     } else if (cabMode === 'self') {
-      onSelect({ onward: option, return: null, cab_mode: 'self', agency_charge: 0 });
+      onSelect({ onward: option, return: null, cab_mode: 'self', agency_charge: 0, num_cabs: 0, number_plate: '' });
     }
   };
 
@@ -193,17 +199,43 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
               </div>
             </div>
             {cabMode === 'agency' && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-6">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60 mb-3 block">Cab Charge (₹)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={agencyCabCharge}
-                  onChange={(e) => setAgencyCabCharge(e.target.value)}
-                  placeholder="Enter cab charge"
-                  className="w-full bg-white/50 border-2 border-[#A855F7]/20 text-[#1a0b2e] rounded-2xl h-16 px-6 font-black text-xl placeholder:text-[#A855F7]/30 placeholder:font-medium focus:border-[#A855F7] focus:outline-none transition-all"
-                  onClick={(e) => e.stopPropagation()}
-                />
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-6 space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60 mb-2 block ml-2">Total Cab Charge (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={agencyCabCharge}
+                    onChange={(e) => setAgencyCabCharge(e.target.value)}
+                    placeholder="Enter total charge"
+                    className="w-full bg-white/50 border-2 border-[#A855F7]/20 text-[#1a0b2e] rounded-2xl h-14 px-6 font-black text-lg placeholder:text-[#A855F7]/30 placeholder:font-medium focus:border-[#A855F7] focus:outline-none transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60 mb-2 block ml-2">No. of Cabs</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={numCabs}
+                        onChange={(e) => setNumCabs(e.target.value)}
+                        className="w-full bg-white/50 border-2 border-[#A855F7]/20 text-[#1a0b2e] rounded-2xl h-14 px-6 font-black text-lg focus:border-[#A855F7] focus:outline-none transition-all"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                   </div>
+                   <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[#A855F7]/60 mb-2 block ml-2">Number Plate</label>
+                      <input
+                        type="text"
+                        value={numberPlate}
+                        onChange={(e) => setNumberPlate(e.target.value)}
+                        placeholder="MH 12 XX 1234"
+                        className="w-full bg-white/50 border-2 border-[#A855F7]/20 text-[#1a0b2e] rounded-2xl h-14 px-6 font-black text-lg focus:border-[#A855F7] focus:outline-none transition-all"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                   </div>
+                </div>
               </motion.div>
             )}
           </motion.div>

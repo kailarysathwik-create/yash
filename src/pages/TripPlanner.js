@@ -257,7 +257,9 @@ const TripPlanner = () => {
                         <div className="w-16 h-16 rounded-3xl bg-[#A855F7] text-white flex items-center justify-center font-black text-xl shadow-xl shadow-[#A855F7]/20">D{day.day}</div>
                         <div>
                           <h4 className="text-2xl font-black text-[#1a0b2e]">{day.title}</h4>
-                          <p className="text-[#1a0b2e]/50 font-medium">{day.activities.join(' • ')}</p>
+                          <p className="text-[#1a0b2e]/50 font-medium">
+                            {day.activities.map(act => (typeof act === 'object' ? JSON.stringify(act) : act)).join(' • ')}
+                          </p>
                         </div>
                       </div>
                     </motion.div>
@@ -389,7 +391,9 @@ const TripPlanner = () => {
                         contact_phone: primaryContact.phone,
                         contact_email: secondaryContact.email,
                         secondary_phone: secondaryContact.phone,
-                        agency_charges: manualAgencyCharge
+                        agency_charge: manualAgencyCharge,
+                        num_cabs: selectedTransport.num_cabs || 1,
+                        number_plate: selectedTransport.number_plate || ''
                       });
                       toast.success('Explorer Matrix Synchronized');
                       setStep(6);
