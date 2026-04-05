@@ -4,7 +4,20 @@ import { Home, Star, MapPin, CheckCircle2, Shield, Wifi, Coffee, Car, Waves, Dum
 import { useUI } from '../context/UIContext';
 import { Button } from './ui/button';
 
-const RealStaySearch = ({ options, onSelect }) => {
+const RealStaySearch = ({ options, onSelect, tripData }) => {
+  const numPeople = tripData?.num_people || 1;
+
+  const getMMTLink = (option) => {
+    if (!tripData) return '#';
+    const checkinDate = new Date(tripData.start_date || new Date());
+    const checkoutDate = new Date(tripData.end_date || new Date());
+    
+    // Format YYYYMMDD
+    const fCheckin = `${checkinDate.getFullYear()}${String(checkinDate.getMonth() + 1).padStart(2, '0')}${String(checkinDate.getDate()).padStart(2, '0')}`;
+    const fCheckout = `${checkoutDate.getFullYear()}${String(checkoutDate.getMonth() + 1).padStart(2, '0')}${String(checkoutDate.getDate()).padStart(2, '0')}`;
+    
+    return `https://www.makemytrip.com/hotels/hotel-listing?checkin=${fCheckin}&checkout=${fCheckout}&city=${tripData.destination}&hotelName=${option.name}`;
+  };
   const { setTaskbarSlid } = useUI();
   const [sortBy, setSortBy] = useState('price'); // 'price' | 'rating'
   const [expandedCard, setExpandedCard] = useState(null);
@@ -162,23 +175,32 @@ const RealStaySearch = ({ options, onSelect }) => {
 
                   <div className="text-right mt-4">
                     <p className="text-[9px] font-bold text-[#1a0b2e]/30 mb-1">
-                      {totalNights > 0 ? totalNights : 1} night{totalNights !== 1 ? 's' : ''} total
+                      Total for {numPeople} {numPeople === 1 ? 'Person' : 'People'} ({totalNights > 0 ? totalNights : 1} Nights)
                     </p>
-                    <p className="text-xl font-black text-[#1a0b2e]">₹{totalPrice.toLocaleString()}</p>
+                    <p className="text-xl font-black text-[#1a0b2e]">₹{(totalPrice * numPeople).toLocaleString()}</p>
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const totalNights = (option.check_out_day || 2) - (option.check_in_day || 1);
-                      setEditNights(totalNights > 0 ? totalNights : 1);
-                      setBookingOverlay({ ...option, price: totalPrice, nights: totalNights > 0 ? totalNights : 1 });
-                      setTaskbarSlid(true);
-                    }}
-                    className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#1a0b2e] text-white rounded-2xl font-black text-xs uppercase tracking-widest opacity-80 group-hover:opacity-100 group-hover:bg-[#A855F7] transition-all duration-500 shadow-lg"
-                  >
-                    Book Now <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="mt-4 w-full flex flex-col gap-2">
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const totalNights = (option.check_out_day || 2) - (option.check_in_day || 1);
+                        setEditNights(totalNights > 0 ? totalNights : 1);
+                        setBookingOverlay({ ...option, price: totalPrice, nights: totalNights > 0 ? totalNights : 1, total_group_price: totalPrice * numPeople });
+                        setTaskbarSlid(true);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#1a0b2e] text-white rounded-2xl font-black text-xs uppercase tracking-widest opacity-80 group-hover:opacity-100 group-hover:bg-[#A855F7] transition-all duration-500 shadow-lg"
+                    >
+                      Orchestrate <ArrowRight className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      onClick={(e) => { e.stopPropagation(); window.open(getMMTLink(option), '_blank'); }}
+                      variant="outline"
+                      className="w-full h-14 rounded-2xl border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7]/10 font-black text-xs uppercase tracking-widest"
+                    >
+                      BOOK ON MMT
+                    </Button>
+                  </div>
                 </div>
               </div>
 

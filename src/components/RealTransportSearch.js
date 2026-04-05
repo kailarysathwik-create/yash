@@ -8,6 +8,24 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const { setTaskbarSlid } = useUI();
   const [activeTab, setActiveTab] = useState('onward');
   const [selections, setSelections] = useState({ onward: null, return: null });
+
+  const getIxigoLink = (option, type) => {
+    if (!tripData) return '#';
+    const dateStrRaw = type === 'onward' ? tripData.start_date : tripData.end_date;
+    const dateObj = new Date(dateStrRaw || new Date());
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yyyy = dateObj.getFullYear();
+    const dateStr = `${dd}${mm}${yyyy}`;
+    
+    const from = type === 'onward' ? tripData.from_location : tripData.destination;
+    const to = type === 'onward' ? tripData.destination : tripData.from_location;
+
+    if (option.type?.toLowerCase() === 'flight') {
+      return `https://www.ixigo.com/search/result/flight/${from}/${to}/${dateStr}//1/0/0/economy`;
+    }
+    return `https://www.ixigo.com/search/result/train?from=${from}&to=${to}&date=${dateStr}`;
+  };
   const [editPeople, setEditPeople] = useState(initialPeople);
   const [cabMode, setCabMode] = useState(null); // 'agency' or 'self'
   const [agencyCabCharge, setAgencyCabCharge] = useState('');
@@ -15,10 +33,11 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
   const [numCabs, setNumCabs] = useState(1);
   const [numberPlate, setNumberPlate] = useState('');
 
-  // Detect transport type from first onward option
-  const onwardOptions = options?.onward || [];
-  const returnOptions = options?.return || [];
-  const transportType = onwardOptions[0]?.type?.toLowerCase() || 'train';
+  // Detect transport type and strictly filter based on selected mode
+  const mode = tripData?.transport_mode?.toLowerCase() || 'train';
+  const onwardOptions = (options?.onward || []).filter(o => o.type?.toLowerCase() === mode);
+  const returnOptions = (options?.return || []).filter(o => o.type?.toLowerCase() === mode);
+  const transportType = mode;
   const isCab = transportType === 'car' || transportType === 'taxi' || transportType === 'cab';
 
   const handleCabSelect = (option) => {
@@ -119,18 +138,30 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
           </div>
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
-          <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <Button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelections(prev => ({ ...prev, [type]: { ...option, num_people: initialPeople, total_price: option.price * initialPeople } }));
-              if (type === 'onward' && returnOptions.length > 0) setActiveTab('return');
-            }} 
-            variant={isSelected ? "default" : "outline"} 
-            className={`rounded-full px-8 h-12 font-black uppercase tracking-wider text-[10px] transition-all duration-300 ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}
-          >
-             {isSelected ? 'ORCHESTRATED' : 'SELECT'}
-          </Button>
+          <div className="flex flex-col">
+            <p className="text-[9px] font-black uppercase text-[#A855F7]/60 mb-1">Total For {initialPeople} People</p>
+            <div className="text-3xl font-black text-[#A855F7]">₹{(option.price * initialPeople || 0).toLocaleString()}</div>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => window.open(getIxigoLink(option, type), '_blank')}
+              variant="outline" 
+              className="rounded-full px-6 h-12 font-black uppercase tracking-wider text-[10px] border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
+            >
+               BOOK ON IXIGO
+            </Button>
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelections(prev => ({ ...prev, [type]: { ...option, num_people: initialPeople, total_price: option.price * initialPeople } }));
+                if (type === 'onward' && returnOptions.length > 0) setActiveTab('return');
+              }} 
+              variant={isSelected ? "default" : "outline"} 
+              className={`rounded-full px-8 h-12 font-black uppercase tracking-wider text-[10px] transition-all duration-300 ${isSelected ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/30 border-none scale-105' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}
+            >
+               {isSelected ? 'ORCHESTRATED' : 'SELECT'}
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -178,10 +209,29 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
           </div>
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-[#1a0b2e]/5">
-          <div className="text-3xl font-black text-[#A855F7]">₹{(option.price || 0).toLocaleString()}</div>
-          <Button onClick={() => handleBookingClick(option, type)} variant={isSelected ? "default" : "outline"} className={`rounded-full px-6 font-bold uppercase tracking-wider text-[10px] ${isSelected ? 'bg-[#A855F7] text-white' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}>
-             {isSelected ? 'SELECTED' : 'SELECT'}
-          </Button>
+          <div className="flex flex-col">
+            <p className="text-[9px] font-black uppercase text-[#A855F7]/60 mb-1">Total For {initialPeople} People</p>
+            <div className="text-3xl font-black text-[#A855F7]">₹{(option.price * initialPeople || 0).toLocaleString()}</div>
+          </div>
+          <div className="flex gap-3">
+             <Button 
+                onClick={() => window.open(getIxigoLink(option, type), '_blank')}
+                variant="outline" 
+                className="rounded-full px-6 h-12 font-black uppercase tracking-wider text-[10px] border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
+              >
+                BOOK ON IXIGO
+              </Button>
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelections(prev => ({ ...prev, [type]: { ...option, num_people: initialPeople, total_price: option.price * initialPeople } }));
+                }} 
+                variant={isSelected ? "default" : "outline"} 
+                className={`rounded-full px-8 h-12 font-black uppercase tracking-wider text-[10px] transition-all duration-500 ${isSelected ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/40 border-none scale-105' : 'border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7] hover:text-white'}`}
+              >
+                {isSelected ? 'ORCHESTRATED' : 'SELECT'}
+              </Button>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -208,8 +208,9 @@ const TripPlanner = () => {
             <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <RealTransportSearch
                 options={transportOptions}
-                initialPeople={trip.num_people}
-                onSelect={(opt) => { setSelectedTransport(opt); setStep(3); }}
+                initialPeople={trip?.num_people || 1}
+                tripData={trip}
+                onSelect={(val) => { setSelectedTransport(val); setStep(3); }}
               />
             </motion.div>
           )}
@@ -224,6 +225,8 @@ const TripPlanner = () => {
               </div>
               <RealStaySearch
                 options={stayOptions}
+                tripData={trip}
+                numDays={trip?.num_days || 1}
                 onSelect={(opt) => {
                   setSelectedStays(prev => [...prev, opt]);
                   if (bookedNights + opt.nights >= trip.num_days) {
