@@ -56,11 +56,10 @@ const Dashboard = () => {
       <header className="px-8 py-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <motion.div
-              transition={{ duration: 0.8 }}
-              className="w-16 h-16 flex items-center justify-center shrink-0"
-            >
-              <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
+            <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
+              </div>
             </motion.div>
           </div>
           <div className="flex items-center gap-2">

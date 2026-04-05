@@ -142,7 +142,7 @@ const TripPlanner = () => {
         <header className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6">
-              <div className="w-20 h-20 flex items-center justify-center shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
                 <img src="/logo.png" alt="Y.A.S.H Logo" className="w-full h-full object-cover scale-[1.15]" />
               </div>
               <div>
