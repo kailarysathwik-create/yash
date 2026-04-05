@@ -104,6 +104,9 @@ export const tripAPI = {
       };
     } catch (error) {
       console.error('Hub Orchestration Failed:', error.message);
+      if (error.response && error.response.data) {
+        console.error('Backend Error Details:', error.response.data);
+      }
       throw error;
     }
   },
