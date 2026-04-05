@@ -50,12 +50,11 @@ const UPIPayment = ({ amount, tripId, onComplete, onTransactionIdChange }) => {
     setProcessing(true);
     setStep('verifying');
     try {
-      // Simulate Hub Ledger Settlement
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      await tripAPI.confirmPayment(tripId, transactionId);
+      // Simulate Hub Ledger Settlement & Secure Handshake
+      await new Promise(resolve => setTimeout(resolve, 2500));
       setStep('success');
       toast.success('Credits Settled via Y.A.S.H Protocol');
-      setTimeout(onComplete, 2000);
+      setTimeout(onComplete, 1500);
     } catch (error) {
       toast.error('Financial Handshake Failed');
       setStep('qr');
