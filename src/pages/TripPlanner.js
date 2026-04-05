@@ -513,6 +513,7 @@ const TripPlanner = () => {
                 {itinerary.map((day, idx) => (
                   <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
                     <div className="flex items-center gap-8 mb-10 pb-8 border-b border-[#1a0b2e]/5">
+
                       <div className="w-24 h-24 rounded-[2.5rem] bg-[#1a0b2e] text-white flex items-center justify-center font-black text-4xl shadow-3xl shadow-[#1a0b2e]/20">
                         {day.day}
                       </div>

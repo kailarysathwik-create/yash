@@ -384,6 +384,7 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1 }) => {
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
               className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative"
             >
+
               <button 
                 onClick={closeOverlay} 
                 className="absolute top-8 right-8 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition text-[#1a0b2e] font-black"
