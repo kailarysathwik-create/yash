@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Navigation, History, LogOut, Sparkles } from 'lucide-react';
+import { Navigation, History, LogOut, Sparkles, Settings } from 'lucide-react';
 import { tripAPI } from '../api/tripAPI';
 import { toast } from 'sonner';
 import { useUI } from '../context/UIContext';
@@ -25,6 +25,7 @@ const Taskbar = () => {
   const menuItems = [
     { icon: Navigation, label: 'Plan', path: '/dashboard' },
     { icon: History, label: 'Archive', path: '/history' },
+    { icon: Settings, label: 'Settings', path: '/profile' },
   ];
 
   return (

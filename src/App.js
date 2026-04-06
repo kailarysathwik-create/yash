@@ -8,6 +8,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import HistoryPage from './pages/History';
 import TripPlanner from './pages/TripPlanner';
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import Taskbar from './components/Taskbar';
 import Particles from './components/Particles';
@@ -22,7 +23,7 @@ function AppRouter() {
     return <AuthCallback />;
   }
 
-  const showTaskbar = ['/dashboard', '/history', '/trip/'].some(path => location.pathname.includes(path));
+  const showTaskbar = ['/dashboard', '/history', '/trip/', '/profile'].some(path => location.pathname.includes(path));
 
   return (
     <>
@@ -34,6 +35,7 @@ function AppRouter() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
         <Route path="/trip/:tripId" element={<ProtectedRoute><TripPlanner /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Routes>
       {showTaskbar && <Taskbar />}
     </>

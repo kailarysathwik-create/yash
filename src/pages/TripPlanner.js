@@ -51,32 +51,45 @@ const TripPlanner = () => {
     doc.text(`Timestamp: ${new Date().toLocaleString()}`, 20, 40);
     doc.line(20, 45, 190, 45);
 
+    // Primary Contacts
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247); // Purple
-    doc.text('[PRIMARY CONTACT]', 20, 55);
+    doc.text('[PRIMARY CONTACTS]', 20, 55);
     doc.setFontSize(11);
     doc.setTextColor(26, 11, 46);
-    doc.text(`Name: ${primaryContact.name || 'N/A'}`, 25, 65);
-    doc.text(`Phone: ${primaryContact.phone || 'N/A'}`, 25, 72);
-    doc.text(`Email: ${secondaryContact.email || 'N/A'}`, 25, 79);
+    const primaryP = passengers.filter(p => p.is_primary);
+    primaryP.forEach((pp, i) => {
+        doc.text(`${i+1}. ${pp.name || 'N/A'} (Aadhar: ${pp.proof})`, 25, 65 + (i * 7));
+    });
 
+    const paxY = 65 + (primaryP.length * 7) + 10;
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
-    doc.text('[PASSENGER MATRIX]', 20, 95);
+    doc.text('[PASSENGER MATRIX]', 20, paxY);
     doc.setFontSize(10);
     doc.setTextColor(26, 11, 46);
     passengers.forEach((p, i) => {
-      doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | Proof: ${p.proof}`, 25, 105 + (i * 8));
+      doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | ${p.is_primary ? '*(PRIMARY)*' : ''}`, 25, paxY + 10 + (i * 8));
     });
 
-    const currentY = 105 + (passengers.length * 8) + 10;
+    const itnY = paxY + 10 + (passengers.length * 8) + 15;
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
+    doc.text('[VOYAGE HIGHLIGHTS]', 20, itnY);
+    doc.setFontSize(9);
+    doc.setTextColor(26, 11, 46);
+    itinerary.forEach((day, i) => {
+        doc.text(`D${day.day}: ${day.title} - ${day.summary || 'Plan pending.'}`, 25, itnY + 10 + (i * 7));
+    });
+
+    const currentY = itnY + 10 + (itinerary.length * 7) + 15;
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
     doc.text('[FINANCIAL RECONCILIATION]', 20, currentY);
     doc.setFontSize(11);
     doc.setTextColor(26, 11, 46);
-    doc.text(`Agency Markup (Profit): Rs. ${manualAgencyCharge}`, 25, currentY + 10);
-    doc.text(`Transaction Ref: ${transactionId || 'OFFLINE_SETTLEMENT'}`, 25, currentY + 17);
+    doc.text(`Agency Markup: Rs. ${manualAgencyCharge}`, 25, currentY + 10);
+    doc.text(`Transaction Status: ${transactionId ? 'AUTHENTICATED' : 'OFFLINE_SETTLEMENT'}`, 25, currentY + 17);
     
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
     doc.setFontSize(16);
@@ -84,43 +97,59 @@ const TripPlanner = () => {
     doc.text(`TOTAL REVENUE: Rs. ${totalAmount.toLocaleString()}`, 20, currentY + 30);
 
     doc.save(`AGENCY_COPY_${tripId}.pdf`);
-    toast.success('Professional Agency Matrix Saved.');
+    toast.success('Internal Master Record Saved.');
   };
 
-  const generateCustomerManifest = () => {
+  const generateCustomerManifest = async () => {
     const doc = new jsPDF();
+    // Fetch latest agency stats
+    let agencyName = "Y.A.S.H Agency";
+    let agencyContact = "N/A";
+    try {
+        const userRes = await tripAPI.auth.getMe();
+        agencyName = userRes.organization || agencyName;
+        agencyContact = userRes.phone || agencyContact;
+    } catch(e) {}
+
     doc.setFontSize(26);
     doc.setTextColor(168, 85, 247);
     doc.text('Y.A.S.H', 105, 25, { align: 'center' });
     
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(`PREMIUM VOYAGE PLAN: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
+    doc.text(`YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
     doc.line(20, 45, 190, 45);
 
     doc.setFontSize(16);
     doc.setTextColor(26, 11, 46);
-    doc.text('Your Itinerary Overview', 20, 60);
+    doc.text('Brief Itinerary', 20, 60);
     doc.setFontSize(10);
     doc.setTextColor(50);
     itinerary.forEach((day, i) => {
-      doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 8));
+      doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 12));
+      doc.setFontSize(8);
+      doc.text(`- ${day.summary || 'Daily activities synchronized.'}`, 28, 75 + (i * 12) + 5);
+      doc.setFontSize(10);
     });
 
+    const costY = 75 + (itinerary.length * 12) + 15;
     doc.setFontSize(16);
     doc.setTextColor(26, 11, 46);
-    const costY = 75 + (itinerary.length * 8) + 15;
     doc.text('Inclusive Package Price', 20, costY);
     doc.setFontSize(12);
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
     doc.text(`Total Credits: Rs. ${totalAmount.toLocaleString()} (All Taxes Included)`, 25, costY + 12);
 
-    doc.setTextColor(150);
-    doc.setFontSize(8);
-    doc.text('Crafted with elegance via Y.A.S.H Agency Platform', 105, 285, { align: 'center' });
+    // Final Branding
+    doc.line(20, 270, 190, 270);
+    doc.setFontSize(10);
+    doc.setTextColor(168, 85, 247);
+    doc.text(`Provided by: ${agencyName}`, 20, 278);
+    doc.setTextColor(100);
+    doc.text(`Official Contact: ${agencyContact}`, 20, 283);
 
     doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
-    toast.success('Premium Journey Blueprint Saved.');
+    toast.success('Customer Blueprint Saved.');
   };
 
   const downloadAgencyManifest = () => {
@@ -367,7 +396,21 @@ const TripPlanner = () => {
                 {/* Explorer Matrix */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {passengers.map((p, idx) => (
-                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
+                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
+                         <label className="text-[10px] font-black uppercase text-[#A855F7]/40 group-hover:text-[#A855F7] transition-colors cursor-pointer">Official Primary</label>
+                         <input 
+                           type="checkbox"
+                           className="w-5 h-5 accent-[#A855F7] cursor-pointer"
+                           checked={p.is_primary}
+                           onChange={(e) => {
+                             const newP = [...passengers];
+                             newP[idx].is_primary = e.target.checked;
+                             setPassengers(newP);
+                           }}
+                         />
+                      </div>
+
                       <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
                       <div className="space-y-4">
                         <input
@@ -427,10 +470,15 @@ const TripPlanner = () => {
               <div className="flex justify-center pt-20">
                 <Button
                   onClick={async () => {
-                    // Validation for Mandatory Fields
                     const incomplete = passengers.some(p => !p.name || !p.age || !p.gender || !p.proof);
+                    const noPrimary = !passengers.some(p => p.is_primary);
+
                     if (incomplete) {
-                      toast.error('Please fill all passenger details, including Aadhar ID.');
+                      toast.error('Manifest Incomplete: All traveler data required.');
+                      return;
+                    }
+                    if (noPrimary) {
+                      toast.error('Identity Protocol: Please mark at least one "Official Primary" contact.');
                       return;
                     }
 

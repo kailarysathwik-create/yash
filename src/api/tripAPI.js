@@ -239,6 +239,16 @@ export const tripAPI = {
         throw error;
       }
     },
+    
+    updateProfile: async (profileData) => {
+      try {
+        const response = await apiClient.put('/user/profile', profileData);
+        return response.data;
+      } catch (error) {
+        console.error('Failed to update profile:', error.message);
+        throw error;
+      }
+    },
   },
 
   // Send manifest notification
