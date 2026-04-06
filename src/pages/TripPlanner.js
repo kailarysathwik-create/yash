@@ -26,8 +26,6 @@ const TripPlanner = () => {
   const [orchestrating, setOrchestrating] = useState(false);
   const [manualAgencyCharge, setManualAgencyCharge] = useState(0);
   const [passengers, setPassengers] = useState([]);
-  const [primaryContact, setPrimaryContact] = useState({ phone: '', name: '' });
-  const [secondaryContact, setSecondaryContact] = useState({ phone: '', email: '' });
   const [transactionId, setTransactionId] = useState('');
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
@@ -41,60 +39,99 @@ const TripPlanner = () => {
 
   const generateAgencyManifest = () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header Block (Navy)
+    doc.setFillColor(26, 11, 46);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    
     doc.setFontSize(22);
-    doc.setTextColor(26, 11, 46);
-    doc.text('Y.A.S.H AGENCY MANIFEST (INTERNAL)', 105, 20, { align: 'center' });
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Y.A.S.H AGENCY COMMAND', pageWidth / 2, 25, { align: 'center' });
     
     doc.setFontSize(10);
+    doc.setTextColor(200);
+    doc.text(`INTERNAL MASTER RECORD • REF: ${tripId.toUpperCase()}`, pageWidth / 2, 35, { align: 'center' });
+    
+    // Status Badge
+    doc.setFillColor(168, 85, 247);
+    doc.roundedRect(pageWidth - 60, 15, 50, 10, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.text('AUTHENTICATED', pageWidth - 35, 21.5, { align: 'center' });
+
+    // metadata
     doc.setTextColor(100);
-    doc.text(`Manifest ID: ${tripId}`, 20, 35);
-    doc.text(`Timestamp: ${new Date().toLocaleString()}`, 20, 40);
-    doc.line(20, 45, 190, 45);
+    doc.setFontSize(9);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 60);
+    doc.line(20, 65, 190, 65);
 
     // Primary Contacts
     doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247); // Purple
-    doc.text('[PRIMARY CONTACTS]', 20, 55);
-    doc.setFontSize(11);
+    doc.setTextColor(168, 85, 247);
+    doc.text('[MISSION LEADS]', 20, 75);
+    
+    doc.setFontSize(10);
     doc.setTextColor(26, 11, 46);
     const primaryP = passengers.filter(p => p.is_primary);
     primaryP.forEach((pp, i) => {
-        doc.text(`${i+1}. ${pp.name || 'N/A'} (Aadhar: ${pp.proof})`, 25, 65 + (i * 7));
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${i+1}. ${pp.name || 'N/A'}`, 25, 85 + (i * 12));
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100);
+        doc.text(`Contact: ${pp.phone || 'N/A'} | Email: ${pp.email || 'N/A'}`, 25, 90 + (i * 12));
+        doc.setTextColor(26, 11, 46);
     });
 
-    const paxY = 65 + (primaryP.length * 7) + 10;
+    const paxY = 90 + (primaryP.length * 12) + 15;
+    
+    // Passenger Matrix Table
+    doc.setFillColor(245, 243, 255);
+    doc.rect(20, paxY, 170, 10, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.text('ID', 25, paxY + 6.5);
+    doc.text('PASSENGER NAME', 40, paxY + 6.5);
+    doc.text('AGE', 120, paxY + 6.5);
+    doc.text('PROOF', 140, paxY + 6.5);
+
+    doc.setFont('helvetica', 'normal');
+    passengers.forEach((p, i) => {
+      const rowY = paxY + 10 + (i * 8);
+      if (i % 2 === 0) {
+        doc.setFillColor(250, 249, 255);
+        doc.rect(20, rowY, 170, 8, 'F');
+      }
+      doc.text(`${i + 1}`, 25, rowY + 5.5);
+      doc.text(`${p.name || 'Anonymous'}`, 40, rowY + 5.5);
+      doc.text(`${p.age || '0'}`, 120, rowY + 5.5);
+      doc.text(`${p.proof || 'N/A'}`, 140, rowY + 5.5);
+    });
+
+    const financeY = paxY + 10 + (passengers.length * 8) + 15;
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
-    doc.text('[PASSENGER MATRIX]', 20, paxY);
+    doc.text('[FINANCIAL RECONCILIATION]', 20, financeY);
+    
+    doc.setDrawColor(168, 85, 247);
+    doc.setLineWidth(0.5);
+    doc.line(20, financeY + 2, 190, financeY + 2);
+    
     doc.setFontSize(10);
     doc.setTextColor(26, 11, 46);
-    passengers.forEach((p, i) => {
-      doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | ${p.is_primary ? '*(PRIMARY)*' : ''}`, 25, paxY + 10 + (i * 8));
-    });
-
-    const itnY = paxY + 10 + (passengers.length * 8) + 15;
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.text('[VOYAGE HIGHLIGHTS]', 20, itnY);
-    doc.setFontSize(9);
-    doc.setTextColor(26, 11, 46);
-    itinerary.forEach((day, i) => {
-        doc.text(`D${day.day}: ${day.title} - ${day.summary || 'Plan pending.'}`, 25, itnY + 10 + (i * 7));
-    });
-
-    const currentY = itnY + 10 + (itinerary.length * 7) + 15;
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.text('[FINANCIAL RECONCILIATION]', 20, currentY);
-    doc.setFontSize(11);
-    doc.setTextColor(26, 11, 46);
-    doc.text(`Agency Markup: Rs. ${manualAgencyCharge}`, 25, currentY + 10);
-    doc.text(`Transaction Status: ${transactionId ? 'AUTHENTICATED' : 'OFFLINE_SETTLEMENT'}`, 25, currentY + 17);
-    
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+    
+    doc.text(`Agency Service Fee: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 12);
+    doc.text(`Payment Vector: ${transactionId ? 'BLOCKCHAIN_VERIFIED' : 'PENDING_SETTLEMENT'}`, 25, financeY + 19);
+    
     doc.setFontSize(16);
-    doc.setTextColor(26, 11, 46);
-    doc.text(`TOTAL REVENUE: Rs. ${totalAmount.toLocaleString()}`, 20, currentY + 30);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`TOTAL SETTLEMENT: Rs. ${totalAmount.toLocaleString()}`, 20, financeY + 32);
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('CONFIDENTIAL • SYSTEM GENERATED MASTER RECORD', 105, 285, { align: 'center' });
 
     doc.save(`AGENCY_COPY_${tripId}.pdf`);
     toast.success('Internal Master Record Saved.');
@@ -102,6 +139,8 @@ const TripPlanner = () => {
 
   const generateCustomerManifest = async () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
     // Fetch latest agency stats
     let agencyName = "Y.A.S.H Agency";
     let agencyContact = "N/A";
@@ -111,42 +150,79 @@ const TripPlanner = () => {
         agencyContact = userRes.phone || agencyContact;
     } catch(e) {}
 
-    doc.setFontSize(26);
-    doc.setTextColor(168, 85, 247);
-    doc.text('Y.A.S.H', 105, 25, { align: 'center' });
+    // Header Block (Branded Purple)
+    doc.setFillColor(168, 85, 247);
+    doc.rect(0, 0, pageWidth, 60, 'F');
+    
+    doc.setFontSize(32);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Y.A.S.H', pageWidth / 2, 30, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.text(`YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
-    doc.line(20, 45, 190, 45);
+    doc.setTextColor(230, 230, 230);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`MISSION: ${trip.destination.toUpperCase()} • EXPLORER BLUEPRINT`, pageWidth / 2, 42, { align: 'center' });
 
-    doc.setFontSize(16);
-    doc.setTextColor(26, 11, 46);
-    doc.text('Brief Itinerary', 20, 60);
-    doc.setFontSize(10);
-    doc.setTextColor(50);
-    itinerary.forEach((day, i) => {
-      doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 12));
-      doc.setFontSize(8);
-      doc.text(`- ${day.summary || 'Daily activities synchronized.'}`, 28, 75 + (i * 12) + 5);
-      doc.setFontSize(10);
-    });
-
-    const costY = 75 + (itinerary.length * 12) + 15;
-    doc.setFontSize(16);
-    doc.setTextColor(26, 11, 46);
-    doc.text('Inclusive Package Price', 20, costY);
-    doc.setFontSize(12);
-    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-    doc.text(`Total Credits: Rs. ${totalAmount.toLocaleString()} (All Taxes Included)`, 25, costY + 12);
-
-    // Final Branding
-    doc.line(20, 270, 190, 270);
+    // Voyage Overview Box
+    doc.setFillColor(250, 248, 255);
+    doc.roundedRect(20, 70, 170, 25, 4, 4, 'F');
     doc.setFontSize(10);
     doc.setTextColor(168, 85, 247);
-    doc.text(`Provided by: ${agencyName}`, 20, 278);
-    doc.setTextColor(100);
-    doc.text(`Official Contact: ${agencyContact}`, 20, 283);
+    doc.setFont('helvetica', 'bold');
+    doc.text('VOYAGE OVERVIEW', 25, 78);
+    doc.setTextColor(26, 11, 46);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Origin: ${trip.from_location} | Duration: ${trip.num_days} Days | Travelers: ${trip.num_people}`, 25, 85);
+
+    // Itinerary Section
+    doc.setFontSize(16);
+    doc.setTextColor(168, 85, 247);
+    doc.text('THE JOURNEY PATH', 20, 110);
+    doc.line(20, 113, 60, 113);
+
+    itinerary.forEach((day, i) => {
+      const boxY = 120 + (i * 22);
+      if (boxY > 260) return; // Basic page overflow check
+
+      doc.setFillColor(252, 250, 255);
+      doc.roundedRect(25, boxY, 160, 18, 3, 3, 'F');
+      
+      doc.setFontSize(12);
+      doc.setTextColor(168, 85, 247);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`D${day.day}`, 30, boxY + 11);
+      
+      doc.setTextColor(26, 11, 46);
+      doc.setFontSize(10);
+      doc.text(`${day.title}`, 45, boxY + 7);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${day.summary || 'Strategic travel sync complete.'}`, 45, boxY + 13);
+    });
+
+    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+    
+    // Settlement Footer
+    doc.setFillColor(26, 11, 46);
+    doc.rect(0, 250, pageWidth, 50, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`PACKAGE VALUATION: Rs. ${totalAmount.toLocaleString()}`, 20, 265);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(200);
+    doc.text(`Official Agency: ${agencyName}`, 20, 275);
+    doc.text(`Support Vector: ${agencyContact}`, 20, 280);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(168, 85, 247);
+    doc.text('Y.A.S.H', pageWidth - 40, 278);
 
     doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
     toast.success('Customer Blueprint Saved.');
@@ -180,7 +256,15 @@ const TripPlanner = () => {
         setItinerary(response.itinerary || []);
         // Initialize passengers array from trip data
         const travelerCount = data.num_people || 1;
-        setPassengers(Array.from({ length: travelerCount }).map(() => ({ name: '', age: '', gender: '', proof: '' })));
+        setPassengers(Array.from({ length: travelerCount }).map(() => ({ 
+          name: '', 
+          age: '', 
+          gender: '', 
+          proof: '', 
+          is_primary: false,
+          phone: '',
+          email: '' 
+        })));
         setStep(2); // Move immediately to Transport
       } catch (error) {
         toast.error('Failed to synchronize and orchestrate trip data');
@@ -356,47 +440,10 @@ const TripPlanner = () => {
                 <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">Explorer Matrix</h2>
               </div>
               <div className="grid grid-cols-1 gap-8">
-                {/* Primary Contacts Section */}
-                <div className="glass-card rounded-[2.5rem] p-10 border-[#A855F7]/20 border-2">
-                  <h3 className="text-xl font-black text-[#1a0b2e] mb-8">Primary Contact Terminal</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Leader Name</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Name"
-                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
-                        value={primaryContact.name}
-                        onChange={(e) => setPrimaryContact({ ...primaryContact, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Primary Phone (Req)</label>
-                      <input
-                        type="text"
-                        placeholder="+91 XXXX"
-                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
-                        value={primaryContact.phone}
-                        onChange={(e) => setPrimaryContact({ ...primaryContact, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-[#A855F7]">Agency Email (Opt)</label>
-                      <input
-                        type="email"
-                        placeholder="email@agency.com"
-                        className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
-                        value={secondaryContact.email}
-                        onChange={(e) => setSecondaryContact({ ...secondaryContact, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Explorer Matrix */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {passengers.map((p, idx) => (
-                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative overflow-hidden group">
+                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative overflow-hidden group transition-all duration-500 hover:shadow-2xl hover:shadow-[#A855F7]/10">
                       <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
                          <label className="text-[10px] font-black uppercase text-[#A855F7]/40 group-hover:text-[#A855F7] transition-colors cursor-pointer">Official Primary</label>
                          <input 
@@ -414,54 +461,97 @@ const TripPlanner = () => {
                       <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
                       <div className="space-y-4">
                         <input
-                          type="text"
-                          placeholder="Full Name"
-                          className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
-                          value={p.name}
-                          onChange={(e) => {
-                            const newP = [...passengers];
-                            newP[idx].name = e.target.value;
-                            setPassengers(newP);
-                          }}
+                           type="text"
+                           placeholder="Full Name"
+                           className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
+                           value={p.name}
+                           onChange={(e) => {
+                             const newP = [...passengers];
+                             newP[idx].name = e.target.value;
+                             setPassengers(newP);
+                           }}
                         />
                         <div className="grid grid-cols-3 gap-4">
-                          <input
-                            type="number"
-                            placeholder="Age"
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
-                            value={p.age}
-                            onChange={(e) => {
-                              const newP = [...passengers];
-                              newP[idx].age = e.target.value;
-                              setPassengers(newP);
-                            }}
-                          />
-                          <select
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none"
-                            value={p.gender}
-                            onChange={(e) => {
-                              const newP = [...passengers];
-                              newP[idx].gender = e.target.value;
-                              setPassengers(newP);
-                            }}
-                          >
-                            <option value="">Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                          </select>
-                          <input
-                            type="text"
-                            placeholder="Aadhar ID"
-                            className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
-                            value={p.proof}
-                            onChange={(e) => {
-                              const newP = [...passengers];
-                              newP[idx].proof = e.target.value;
-                              setPassengers(newP);
-                            }}
-                          />
+                           <input
+                             type="number"
+                             placeholder="Age"
+                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
+                             value={p.age}
+                             onChange={(e) => {
+                               const newP = [...passengers];
+                               newP[idx].age = e.target.value;
+                               setPassengers(newP);
+                             }}
+                           />
+                           <select
+                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none"
+                             value={p.gender}
+                             onChange={(e) => {
+                               const newP = [...passengers];
+                               newP[idx].gender = e.target.value;
+                               setPassengers(newP);
+                             }}
+                           >
+                             <option value="">Gender</option>
+                             <option value="Male">Male</option>
+                             <option value="Female">Female</option>
+                             <option value="Other">Other</option>
+                           </select>
+                           <input
+                             type="text"
+                             placeholder="Aadhar ID"
+                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
+                             value={p.proof}
+                             onChange={(e) => {
+                               const newP = [...passengers];
+                               newP[idx].proof = e.target.value;
+                               setPassengers(newP);
+                             }}
+                           />
                         </div>
+
+                        {/* Dynamic Contact Sector */}
+                        <AnimatePresence>
+                          {p.is_primary && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }} 
+                              animate={{ height: 'auto', opacity: 1 }} 
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden space-y-4 pt-4 border-t border-[#A855F7]/10"
+                            >
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Mobile (Req)</label>
+                                  <input 
+                                    type="text"
+                                    placeholder="+91 XXXX"
+                                    className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
+                                    value={p.phone}
+                                    onChange={(e) => {
+                                      const newP = [...passengers];
+                                      newP[idx].phone = e.target.value;
+                                      setPassengers(newP);
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Email (Opt)</label>
+                                  <input 
+                                    type="email"
+                                    placeholder="email@agency.com"
+                                    className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
+                                    value={p.email}
+                                    onChange={(e) => {
+                                      const newP = [...passengers];
+                                      newP[idx].email = e.target.value;
+                                      setPassengers(newP);
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
                   ))}
@@ -471,27 +561,33 @@ const TripPlanner = () => {
                 <Button
                   onClick={async () => {
                     const incomplete = passengers.some(p => !p.name || !p.age || !p.gender || !p.proof);
-                    const noPrimary = !passengers.some(p => p.is_primary);
+                    const primaries = passengers.filter(p => p.is_primary);
+                    const missingPhone = primaries.some(p => !p.phone);
 
                     if (incomplete) {
                       toast.error('Manifest Incomplete: All traveler data required.');
                       return;
                     }
-                    if (noPrimary) {
+                    if (primaries.length === 0) {
                       toast.error('Identity Protocol: Please mark at least one "Official Primary" contact.');
+                      return;
+                    }
+                    if (missingPhone) {
+                      toast.error('Identity Protocol: Primary traveler requires a valid phone number.');
                       return;
                     }
 
                     try {
                       setLoading(true);
+                      const leadPrimary = primaries[0];
                       await tripAPI.updateTouristDetails(tripId, {
                         tourists: passengers.map(p => ({
                           ...p,
                           age: parseInt(p.age) || 0
                         })),
-                        contact_phone: primaryContact.phone,
-                        contact_email: secondaryContact.email,
-                        secondary_phone: secondaryContact.phone,
+                        contact_phone: leadPrimary.phone,
+                        contact_email: leadPrimary.email || '',
+                        secondary_phone: primaries[1]?.phone || '',
                         agency_charge: manualAgencyCharge,
                         num_cabs: selectedTransport.num_cabs || 1,
                         number_plate: selectedTransport.number_plate || ''
@@ -576,13 +672,14 @@ const TripPlanner = () => {
                   // Finalizing in Supabase with all relational data
                   const totalAmount = Number(selectedTransport.onward?.price || 0) + Number(selectedTransport.return?.price || 0) + Number(selectedTransport.agency_charge || 0) + Number(selectedStays.reduce((acc, s) => acc + (s.price || 0), 0)) + Number(manualAgencyCharge || 0);
 
+                  const leadPrimary = passengers.find(p => p.is_primary) || passengers[0];
                   await tripAPI.confirmPayment(tripId, {
                     transaction_id: transactionId,
                     total_amount: totalAmount,
                     agency_charge: manualAgencyCharge,
-                    primary_phone: primaryContact.phone,
-                    email: secondaryContact.email || '',
-                    secondary_phone: secondaryContact.phone || ''
+                    primary_phone: leadPrimary.phone || '',
+                    email: leadPrimary.email || '',
+                    secondary_phone: passengers.filter(p => p.is_primary)[1]?.phone || ''
                   });
                   const freshTrip = await tripAPI.getTrip(tripId);
                   setTrip(freshTrip);
