@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -39,96 +40,101 @@ const TripPlanner = () => {
   };
 
   const generateAgencyManifest = () => {
-    let manifest = `--- Y.A.S.H AGENCY MANIFEST (INTERNAL) ---\n`;
-    manifest += `Generated: ${new Date().toLocaleString()}\n`;
-    manifest += `Trip ID: ${tripId}\n\n`;
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.setTextColor(26, 11, 46);
+    doc.text('Y.A.S.H AGENCY MANIFEST (INTERNAL)', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Manifest ID: ${tripId}`, 20, 35);
+    doc.text(`Timestamp: ${new Date().toLocaleString()}`, 20, 40);
+    doc.line(20, 45, 190, 45);
 
-    manifest += `[PRIMARY CONTACT]\n`;
-    manifest += `Name: ${primaryContact.name || 'N/A'}\n`;
-    manifest += `Phone: ${primaryContact.phone || 'N/A'}\n`;
-    manifest += `Email: ${secondaryContact.email || 'N/A'}\n\n`;
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247); // Purple
+    doc.text('[PRIMARY CONTACT]', 20, 55);
+    doc.setFontSize(11);
+    doc.setTextColor(26, 11, 46);
+    doc.text(`Name: ${primaryContact.name || 'N/A'}`, 25, 65);
+    doc.text(`Phone: ${primaryContact.phone || 'N/A'}`, 25, 72);
+    doc.text(`Email: ${secondaryContact.email || 'N/A'}`, 25, 79);
 
-    manifest += `[PASSENGER MATRIX]\n`;
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
+    doc.text('[PASSENGER MATRIX]', 20, 95);
+    doc.setFontSize(10);
+    doc.setTextColor(26, 11, 46);
     passengers.forEach((p, i) => {
-      manifest += `${i + 1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Aadhar: ${p.proof}\n`;
+      doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | Proof: ${p.proof}`, 25, 105 + (i * 8));
     });
 
-    manifest += `\n[TRANSPORT LOGISTICS]\n`;
-    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.vehicle_id || 'N/A'}) | Base: ₹${selectedTransport.onward?.price}\n`;
-    if (selectedTransport.return) {
-      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.vehicle_id || 'N/A'}) | Base: ₹${selectedTransport.return?.price}\n`;
-    }
-
-    manifest += `\n[STAY INVENTORY]\n`;
-    selectedStays.forEach((s, i) => {
-      manifest += `${i + 1}. ${s.name} | Total Cost: ₹${s.price}\n`;
-    });
-
-    manifest += `\n[FINANCIAL RECONCILIATION]\n`;
-    manifest += `Agency Markup: ₹${manualAgencyCharge}\n`;
-    manifest += `Transaction ID: ${transactionId || 'OFFLINE_SETTLEMENT'}\n`;
+    const currentY = 105 + (passengers.length * 8) + 10;
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
+    doc.text('[FINANCIAL RECONCILIATION]', 20, currentY);
+    doc.setFontSize(11);
+    doc.setTextColor(26, 11, 46);
+    doc.text(`Agency Markup (Profit): Rs. ${manualAgencyCharge}`, 25, currentY + 10);
+    doc.text(`Transaction Ref: ${transactionId || 'OFFLINE_SETTLEMENT'}`, 25, currentY + 17);
+    
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-    manifest += `TOTAL REVENUE: ₹${totalAmount.toLocaleString()}\n`;
+    doc.setFontSize(16);
+    doc.setTextColor(26, 11, 46);
+    doc.text(`TOTAL REVENUE: Rs. ${totalAmount.toLocaleString()}`, 20, currentY + 30);
 
-    return manifest;
+    doc.save(`AGENCY_COPY_${tripId}.pdf`);
+    toast.success('Professional Agency Matrix Saved.');
   };
 
   const generateCustomerManifest = () => {
-    let manifest = `--- YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()} ---\n`;
-    manifest += `Synthesized by Y.A.S.H Agency\n\n`;
+    const doc = new jsPDF();
+    doc.setFontSize(26);
+    doc.setTextColor(168, 85, 247);
+    doc.text('Y.A.S.H', 105, 25, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text(`PREMIUM VOYAGE PLAN: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
+    doc.line(20, 45, 190, 45);
 
-    manifest += `[TRAVELER DETAILS]\n`;
-    manifest += `Lead Traveler: ${primaryContact.name || 'N/A'}\n`;
-    manifest += `Personnel: ${passengers.length} Traveler(s)\n\n`;
-
-    manifest += `[ITINERARY SUMMARY]\n`;
-    itinerary.forEach(day => {
-      manifest += `Day ${day.day}: ${day.title}\n`;
-      day.activities?.forEach(act => {
-        manifest += `  - ${typeof act === 'string' ? act : (act.time + ': ' + act.task)}\n`;
-      });
-      manifest += `\n`;
+    doc.setFontSize(16);
+    doc.setTextColor(26, 11, 46);
+    doc.text('Your Itinerary Overview', 20, 60);
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    itinerary.forEach((day, i) => {
+      doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 8));
     });
 
-    manifest += `[ACCOMMODATION & TRANSIT]\n`;
-    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.type})\n`;
-    if (selectedTransport.return) manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type})\n`;
-    selectedStays.forEach(s => {
-      manifest += `Stay: ${s.name} (${s.location})\n`;
-    });
-
-    manifest += `\n[TOTAL PACKAGE PRICE]\n`;
+    doc.setFontSize(16);
+    doc.setTextColor(26, 11, 46);
+    const costY = 75 + (itinerary.length * 8) + 15;
+    doc.text('Inclusive Package Price', 20, costY);
+    doc.setFontSize(12);
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-    manifest += `Total Credits: ₹${totalAmount.toLocaleString()} (All Inclusive)\n`;
+    doc.text(`Total Credits: Rs. ${totalAmount.toLocaleString()} (All Taxes Included)`, 25, costY + 12);
 
-    return manifest;
+    doc.setTextColor(150);
+    doc.setFontSize(8);
+    doc.text('Crafted with elegance via Y.A.S.H Agency Platform', 105, 285, { align: 'center' });
+
+    doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
+    toast.success('Premium Journey Blueprint Saved.');
   };
 
   const downloadAgencyManifest = () => {
-    const text = generateAgencyManifest();
-    const element = document.createElement("a");
-    const file = new Blob([text], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `AGENCY_COPY_${tripId}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    toast.success('Agency Matrix Downloaded');
+    generateAgencyManifest();
   };
 
   const downloadCustomerManifest = async () => {
-    const text = generateCustomerManifest();
-    const element = document.createElement("a");
-    const file = new Blob([text], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `CUSTOMER_PLAN_${tripId}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    
+    generateCustomerManifest();
     try {
-      await tripAPI.sendManifest({ manifest: text, emails: [secondaryContact.email], trip_id: tripId });
-      toast.success('Customer Narrative Dispatched');
+      // Mock sending or actually hitting manifest endpoint
+      await tripAPI.sendManifest({ trip_id: tripId, type: 'customer' });
+      toast.success('Customer Blueprint Dispatched.');
     } catch (err) {
-      toast.info('Plan downloaded. Customer notification hub offline.');
+      toast.info('Blueprint saved. Notification relay offline.');
     }
   };
 

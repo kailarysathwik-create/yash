@@ -320,6 +320,50 @@ const RealTransportSearch = ({ options, onSelect, initialPeople = 1, tripData })
           </motion.div>
         </div>
 
+        {cabMode === 'agency' && (
+          <div className="mt-10 flex justify-center">
+            <Button
+              onClick={() => onSelect({ 
+                onward: { 
+                  type: 'car', 
+                  cab_mode: 'agency', 
+                  price: Number(agencyCabCharge) || 0, 
+                  provider: 'Agency Arranged Cab', 
+                  agency_charge: 0,
+                  num_cabs: numCabs,
+                  number_plate: numberPlate
+                } 
+              })}
+              disabled={!agencyCabCharge || agencyCabCharge <= 0}
+              className="bg-[#A855F7] text-white hover:scale-105 transition-all duration-500 rounded-full h-20 px-16 font-black text-xl shadow-2xl shadow-[#A855F7]/40 border-none"
+            >
+              CONFIRM AGENCY CAB DETAILS
+            </Button>
+          </div>
+        )}
+
+        {cabMode === 'agency' && (
+          <div className="mt-10 flex justify-center">
+            <Button
+              onClick={() => onSelect({ 
+                onward: { 
+                  type: 'car', 
+                  cab_mode: 'agency', 
+                  price: Number(agencyCabCharge) || 0, 
+                  provider: 'Agency Arranged Cab', 
+                  agency_charge: 0,
+                  num_cabs: numCabs,
+                  number_plate: numberPlate
+                } 
+              })}
+              disabled={!agencyCabCharge || agencyCabCharge <= 0}
+              className="bg-[#A855F7] text-white hover:scale-105 transition-all duration-500 rounded-full h-20 px-16 font-black text-xl shadow-2xl shadow-[#A855F7]/40 border-none"
+            >
+              CONFIRM AGENCY CAB DETAILS
+            </Button>
+          </div>
+        )}
+
         {cabMode === 'agency' && onwardOptions.length > 0 && (
           <div className="space-y-6">
             <h3 className="text-xl font-black text-[#1a0b2e]">Available Options</h3>

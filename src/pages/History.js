@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -29,63 +30,89 @@ const HistoryPage = () => {
     fetchHistory();
   }, []);
 
-  const generateAgencyManifest = (trip) => {
-    let manifest = `--- Y.A.S.H AGENCY MANIFEST (INTERNAL) ---\n`;
-    manifest += `Generated: ${new Date().toLocaleString()}\n`;
-    manifest += `Trip ID: ${trip.trip_id}\n\n`;
-
-    manifest += `[CONTACT TERMINAL]\n`;
-    manifest += `Phone: ${trip.contact_phone || 'N/A'}\n`;
-    manifest += `Email: ${trip.contact_email || 'N/A'}\n\n`;
-
-    manifest += `[PASSENGER MATRIX]\n`;
-    if (trip.passengers && Array.isArray(trip.passengers)) {
-      trip.passengers.forEach((p, i) => {
-        manifest += `${i + 1}. ${p.name} | Age: ${p.age} | Gender: ${p.gender} | ID: ${p.proof}\n`;
-      });
-    } else {
-      manifest += `Personnel: ${trip.num_people} Explorer(s)\n`;
-    }
-
-    manifest += `\n[FINANCIAL RECONCILIATION]\n`;
-    manifest += `Agency Markup: ₹${trip.agency_charge || 0}\n`;
-    manifest += `Status: ${trip.status.toUpperCase()}\n`;
-
-    return manifest;
-  };
-
-  const generateCustomerManifest = (trip) => {
-    let manifest = `--- YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()} ---\n`;
-    manifest += `Synthesized by Y.A.S.H Agency\n\n`;
-
-    manifest += `[ITINERARY SUMMARY]\n`;
-    if (trip.itinerary && trip.itinerary.days) {
-      trip.itinerary.days.forEach(day => {
-        manifest += `Day ${day.day}: ${day.title}\n`;
-        day.activities?.forEach(act => {
-          manifest += `  - ${typeof act === 'string' ? act : (act.time + ': ' + act.task)}\n`;
-        });
-        manifest += `\n`;
-      });
-    }
-
-    manifest += `\n[VOYAGE HIGHLIGHTS]\n`;
-    manifest += `Vector: ${trip.from_location} → ${trip.destination}\n`;
-    manifest += `Duration: ${trip.num_days} Days\n`;
-    manifest += `Transport: ${trip.transport_mode.toUpperCase()}\n`;
-
-    return manifest;
-  };
-
   const downloadManifest = (trip, type) => {
-    const text = type === 'agency' ? generateAgencyManifest(trip) : generateCustomerManifest(trip);
-    const element = document.createElement("a");
-    const file = new Blob([text], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `${type.toUpperCase()}_COPY_${trip.trip_id.slice(0, 8)}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    toast.success(`${type === 'agency' ? 'Internal Matrix' : 'Customer Narrative'} Downloaded`);
+    const doc = new jsPDF();
+    
+    if (type === 'agency') {
+      // Agency Copy (Internal)
+      doc.setFontSize(22);
+      doc.setTextColor(26, 11, 46);
+      doc.text('Y.A.S.H AGENCY MANIFEST (INTERNAL)', 105, 20, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Manifest ID: ${trip.trip_id}`, 20, 35);
+      doc.text(`Archived: ${new Date().toLocaleString()}`, 20, 40);
+      doc.line(20, 45, 190, 45);
+
+      doc.setFontSize(14);
+      doc.setTextColor(168, 85, 247);
+      doc.text('[CONTACT DATA]', 20, 55);
+      doc.setFontSize(11);
+      doc.setTextColor(26, 11, 46);
+      doc.text(`Phone: ${trip.contact_phone || 'N/A'}`, 25, 65);
+      doc.text(`Email: ${trip.contact_email || 'N/A'}`, 25, 72);
+
+      doc.setFontSize(14);
+      doc.setTextColor(168, 85, 247);
+      doc.text('[PASSENGER MATRIX]', 20, 85);
+      doc.setFontSize(10);
+      doc.setTextColor(26, 11, 46);
+      const pax = trip.passengers || [];
+      if (pax.length > 0) {
+        pax.forEach((p, i) => {
+          doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | Proof: ${p.proof}`, 25, 95 + (i * 8));
+        });
+      } else {
+        doc.text(`Sync Count: ${trip.num_people} Personnel`, 25, 95);
+      }
+
+      const currentY = pax.length > 0 ? (95 + (pax.length * 8) + 10) : 115;
+      doc.setFontSize(14);
+      doc.setTextColor(168, 85, 247);
+      doc.text('[FINANCIAL SETTLEMENT]', 20, currentY);
+      doc.setFontSize(11);
+      doc.setTextColor(26, 11, 46);
+      doc.text(`Agency Markup: Rs. ${trip.agency_charge || 0}`, 25, currentY + 10);
+      doc.text(`Deployment Status: ${trip.status.toUpperCase()}`, 25, currentY + 17);
+      
+      doc.save(`AGENCY_ARCHIVE_${trip.trip_id.slice(0, 8)}.pdf`);
+    } else {
+      // Customer Copy
+      doc.setFontSize(26);
+      doc.setTextColor(168, 85, 247);
+      doc.text('Y.A.S.H', 105, 25, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      doc.text(`VOYAGE ARCHIVE: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
+      doc.line(20, 45, 190, 45);
+
+      doc.setFontSize(16);
+      doc.setTextColor(26, 11, 46);
+      doc.text('Itinerary Overview', 20, 60);
+      doc.setFontSize(10);
+      doc.setTextColor(50);
+      const days = trip.itinerary?.days || [];
+      days.slice(0, 10).forEach((day, i) => {
+        doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 8));
+      });
+
+      doc.setFontSize(16);
+      doc.setTextColor(26, 11, 46);
+      const costY = 75 + (Math.min(days.length, 10) * 8) + 15;
+      doc.text('Voyage Logistics', 20, costY);
+      doc.setFontSize(12);
+      doc.text(`Vector: ${trip.from_location} to ${trip.destination}`, 25, costY + 12);
+      doc.text(`Transport Vector: ${trip.transport_mode.toUpperCase()}`, 25, costY + 22);
+
+      doc.setTextColor(150);
+      doc.setFontSize(8);
+      doc.text('Archived via Y.A.S.H Hub Protocol', 105, 285, { align: 'center' });
+
+      doc.save(`VOYAGE_PLAN_${trip.trip_id.slice(0, 8)}.pdf`);
+    }
+    toast.success(`${type === 'agency' ? 'Archive Matrix' : 'Journey Blueprint'} Synchronized.`);
   };
 
   return (
