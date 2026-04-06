@@ -42,10 +42,7 @@ const UPIPayment = ({ amount, tripId, onComplete, onTransactionIdChange }) => {
   }, [amount, tripId]);
 
   const handleVerify = async () => {
-    if (!transactionId) {
-      toast.error('Transaction ID is mandatory for settlement');
-      return;
-    }
+    // Transaction ID is now optional for agency settlements
     
     setProcessing(true);
     setStep('verifying');

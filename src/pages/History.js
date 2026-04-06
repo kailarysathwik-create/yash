@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, Sparkles } from 'lucide-react';
+import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, Sparkles, ShieldCheck, Send, Download } from 'lucide-react';
 import { tripAPI } from '../api/tripAPI';
 
 const HistoryPage = () => {
@@ -28,6 +28,65 @@ const HistoryPage = () => {
   useEffect(() => {
     fetchHistory();
   }, []);
+
+  const generateAgencyManifest = (trip) => {
+    let manifest = `--- Y.A.S.H AGENCY MANIFEST (INTERNAL) ---\n`;
+    manifest += `Generated: ${new Date().toLocaleString()}\n`;
+    manifest += `Trip ID: ${trip.trip_id}\n\n`;
+
+    manifest += `[CONTACT TERMINAL]\n`;
+    manifest += `Phone: ${trip.contact_phone || 'N/A'}\n`;
+    manifest += `Email: ${trip.contact_email || 'N/A'}\n\n`;
+
+    manifest += `[PASSENGER MATRIX]\n`;
+    if (trip.passengers && Array.isArray(trip.passengers)) {
+      trip.passengers.forEach((p, i) => {
+        manifest += `${i + 1}. ${p.name} | Age: ${p.age} | Gender: ${p.gender} | ID: ${p.proof}\n`;
+      });
+    } else {
+      manifest += `Personnel: ${trip.num_people} Explorer(s)\n`;
+    }
+
+    manifest += `\n[FINANCIAL RECONCILIATION]\n`;
+    manifest += `Agency Markup: ₹${trip.agency_charge || 0}\n`;
+    manifest += `Status: ${trip.status.toUpperCase()}\n`;
+
+    return manifest;
+  };
+
+  const generateCustomerManifest = (trip) => {
+    let manifest = `--- YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()} ---\n`;
+    manifest += `Synthesized by Y.A.S.H Agency\n\n`;
+
+    manifest += `[ITINERARY SUMMARY]\n`;
+    if (trip.itinerary && trip.itinerary.days) {
+      trip.itinerary.days.forEach(day => {
+        manifest += `Day ${day.day}: ${day.title}\n`;
+        day.activities?.forEach(act => {
+          manifest += `  - ${typeof act === 'string' ? act : (act.time + ': ' + act.task)}\n`;
+        });
+        manifest += `\n`;
+      });
+    }
+
+    manifest += `\n[VOYAGE HIGHLIGHTS]\n`;
+    manifest += `Vector: ${trip.from_location} → ${trip.destination}\n`;
+    manifest += `Duration: ${trip.num_days} Days\n`;
+    manifest += `Transport: ${trip.transport_mode.toUpperCase()}\n`;
+
+    return manifest;
+  };
+
+  const downloadManifest = (trip, type) => {
+    const text = type === 'agency' ? generateAgencyManifest(trip) : generateCustomerManifest(trip);
+    const element = document.createElement("a");
+    const file = new Blob([text], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `${type.toUpperCase()}_COPY_${trip.trip_id.slice(0, 8)}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    toast.success(`${type === 'agency' ? 'Internal Matrix' : 'Customer Narrative'} Downloaded`);
+  };
 
   return (
     <div className="min-h-screen pb-32">
@@ -117,9 +176,25 @@ const HistoryPage = () => {
                         </div>
                         <span className="text-[11px] font-black uppercase text-[#1a0b2e]/30 group-hover:text-[#1a0b2e] tracking-widest">{trip.transport_mode === 'car' ? 'Ground Cab' : trip.transport_mode}</span>
                      </div>
-                     <div className="w-12 h-12 rounded-full border border-[#1a0b2e]/10 flex items-center justify-center group-hover:bg-[#1a0b2e] group-hover:border-[#1a0b2e] transition-all duration-500 shadow-sm">
-                       <ExternalLink className="w-5 h-5 text-[#1a0b2e] group-hover:text-white" />
-                     </div>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); downloadManifest(trip, 'agency'); }}
+                          className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all shadow-sm group/btn"
+                          title="Agency Copy"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-[#1a0b2e] group-hover/btn:text-white" />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); downloadManifest(trip, 'customer'); }}
+                          className="w-10 h-10 rounded-xl border border-[#A855F7]/10 flex items-center justify-center hover:bg-[#A855F7] hover:text-white transition-all shadow-sm group/btn"
+                          title="Send to Customer"
+                        >
+                          <Send className="w-4 h-4 text-[#A855F7] group-hover/btn:text-white" />
+                        </button>
+                        <div className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center group-hover:bg-[#1a0b2e] group-hover:border-[#1a0b2e] transition-all duration-500 shadow-sm">
+                          <ExternalLink className="w-4 h-4 text-[#1a0b2e] group-hover:text-white" />
+                        </div>
+                      </div>
                   </div>
                 </motion.div>
               ))}

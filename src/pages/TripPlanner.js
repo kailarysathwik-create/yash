@@ -7,7 +7,7 @@ import RealTransportSearch from '../components/RealTransportSearch';
 import RealStaySearch from '../components/RealStaySearch';
 import UPIPayment from '../components/UPIPayment';
 import { Button } from '../components/ui/button';
-import { MapPin, Calendar, Users, Sparkles, Navigation, CheckCircle2, ChevronRight, LoaderCircle, Globe } from 'lucide-react';
+import { MapPin, Calendar, Users, Sparkles, Navigation, CheckCircle2, ChevronRight, LoaderCircle, Globe, Download, Send, ShieldCheck } from 'lucide-react';
 
 const TripPlanner = () => {
   const { tripId } = useParams();
@@ -38,65 +38,97 @@ const TripPlanner = () => {
     return `XXXX-XXXX-${val.slice(-4)}`;
   };
 
-  const generateManifest = () => {
-    let manifest = `--- Y.A.S.H TRIP MANIFEST ---\n`;
+  const generateAgencyManifest = () => {
+    let manifest = `--- Y.A.S.H AGENCY MANIFEST (INTERNAL) ---\n`;
     manifest += `Generated: ${new Date().toLocaleString()}\n`;
     manifest += `Trip ID: ${tripId}\n\n`;
 
     manifest += `[PRIMARY CONTACT]\n`;
     manifest += `Name: ${primaryContact.name || 'N/A'}\n`;
     manifest += `Phone: ${primaryContact.phone || 'N/A'}\n`;
-    manifest += `Contact Email: ${secondaryContact.email || 'N/A'}\n\n`;
+    manifest += `Email: ${secondaryContact.email || 'N/A'}\n\n`;
 
-    manifest += `[PASSENGERS]\n`;
+    manifest += `[PASSENGER MATRIX]\n`;
     passengers.forEach((p, i) => {
-      manifest += `${i + 1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Proof (Aadhar): ${maskAadhar(p.proof)}\n`;
+      manifest += `${i + 1}. ${p.name || 'Anonymous'} | Age: ${p.age || 'N/A'} | Gender: ${p.gender || 'N/A'} | Aadhar: ${p.proof}\n`;
     });
 
-    manifest += `\n[TRANSPORT]\n`;
-    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.vehicle_id || 'N/A'}) | Type: ${selectedTransport.onward?.type} | Price: ₹${selectedTransport.onward?.price}\n`;
+    manifest += `\n[TRANSPORT LOGISTICS]\n`;
+    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.vehicle_id || 'N/A'}) | Base: ₹${selectedTransport.onward?.price}\n`;
     if (selectedTransport.return) {
-      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.vehicle_id || 'N/A'}) | Type: ${selectedTransport.return?.type} | Price: ₹${selectedTransport.return?.price}\n`;
+      manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.vehicle_id || 'N/A'}) | Base: ₹${selectedTransport.return?.price}\n`;
     }
 
-    manifest += `\n[STAYS]\n`;
+    manifest += `\n[STAY INVENTORY]\n`;
     selectedStays.forEach((s, i) => {
-      manifest += `${i + 1}. ${s.name} | Nights: ${s.nights} | Total: ₹${s.price}\n`;
+      manifest += `${i + 1}. ${s.name} | Total Cost: ₹${s.price}\n`;
     });
 
-    manifest += `\n[FINANCIALS]\n`;
-    manifest += `Agency Charge: ₹${manualAgencyCharge}\n`;
-    manifest += `Transaction ID: ${transactionId || 'OFFLINE'}\n`;
-    const totalStayPrice = selectedStays.reduce((acc, s) => acc + (s.price || 0), 0);
-    manifest += `TOTAL PAID: ₹${((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + totalStayPrice + manualAgencyCharge).toLocaleString()}\n`;
+    manifest += `\n[FINANCIAL RECONCILIATION]\n`;
+    manifest += `Agency Markup: ₹${manualAgencyCharge}\n`;
+    manifest += `Transaction ID: ${transactionId || 'OFFLINE_SETTLEMENT'}\n`;
+    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+    manifest += `TOTAL REVENUE: ₹${totalAmount.toLocaleString()}\n`;
 
     return manifest;
   };
 
-  const downloadManifest = async () => {
-    const manifest = generateManifest();
+  const generateCustomerManifest = () => {
+    let manifest = `--- YOUR VOYAGE PLAN: ${trip.destination.toUpperCase()} ---\n`;
+    manifest += `Synthesized by Y.A.S.H Agency\n\n`;
 
-    // 1. Local Download
+    manifest += `[TRAVELER DETAILS]\n`;
+    manifest += `Lead Traveler: ${primaryContact.name || 'N/A'}\n`;
+    manifest += `Personnel: ${passengers.length} Traveler(s)\n\n`;
+
+    manifest += `[ITINERARY SUMMARY]\n`;
+    itinerary.forEach(day => {
+      manifest += `Day ${day.day}: ${day.title}\n`;
+      day.activities?.forEach(act => {
+        manifest += `  - ${typeof act === 'string' ? act : (act.time + ': ' + act.task)}\n`;
+      });
+      manifest += `\n`;
+    });
+
+    manifest += `[ACCOMMODATION & TRANSIT]\n`;
+    manifest += `Onward: ${selectedTransport.onward?.provider} (${selectedTransport.onward?.type})\n`;
+    if (selectedTransport.return) manifest += `Return: ${selectedTransport.return?.provider} (${selectedTransport.return?.type})\n`;
+    selectedStays.forEach(s => {
+      manifest += `Stay: ${s.name} (${s.location})\n`;
+    });
+
+    manifest += `\n[TOTAL PACKAGE PRICE]\n`;
+    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+    manifest += `Total Credits: ₹${totalAmount.toLocaleString()} (All Inclusive)\n`;
+
+    return manifest;
+  };
+
+  const downloadAgencyManifest = () => {
+    const text = generateAgencyManifest();
     const element = document.createElement("a");
-    const file = new Blob([manifest], { type: 'text/plain' });
+    const file = new Blob([text], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `YASH_Manifest_${tripId}.txt`;
+    element.download = `AGENCY_COPY_${tripId}.txt`;
     document.body.appendChild(element);
     element.click();
+    toast.success('Agency Matrix Downloaded');
+  };
 
-    // 2. Network Dispatch (Notification Hub)
+  const downloadCustomerManifest = async () => {
+    const text = generateCustomerManifest();
+    const element = document.createElement("a");
+    const file = new Blob([text], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `CUSTOMER_PLAN_${tripId}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    
     try {
-      const emails = passengers.map(p => p.email).filter(Boolean);
-      const phones = passengers.map(p => p.phone).filter(Boolean);
-      await tripAPI.sendManifest({
-        manifest,
-        emails,
-        phones,
-        trip_id: tripId
-      });
-      toast.success('Manifest dispatched to explorer terminals');
+      await tripAPI.sendManifest({ manifest: text, emails: [secondaryContact.email], trip_id: tripId });
+      toast.success('Customer Narrative Dispatched');
     } catch (err) {
-      console.warn('Notification hub offline, manifest delivered locally only');
+      toast.info('Plan downloaded. Customer notification hub offline.');
     }
   };
 
@@ -515,9 +547,20 @@ const TripPlanner = () => {
                   <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Voyage Manifest</h2>
                   <p className="text-[#1a0b2e]/50 font-bold">Your journey has been successfully synthesized across the hub matrix.</p>
                 </div>
-                <Button onClick={downloadManifest} icon={Download} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] h-16 rounded-3xl">
-                  Download Final Manifest
-                </Button>
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={downloadAgencyManifest} 
+                    className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"
+                  >
+                    <ShieldCheck className="w-5 h-5" /> Download Agency Copy
+                  </Button>
+                  <Button 
+                    onClick={downloadCustomerManifest} 
+                    className="bg-[#A855F7] text-white hover:bg-[#1a0b2e] h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"
+                  >
+                    <Send className="w-5 h-5" /> Send Customer Copy
+                  </Button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-8">
