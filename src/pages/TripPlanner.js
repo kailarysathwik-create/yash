@@ -41,99 +41,89 @@ const TripPlanner = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Header Block (Navy)
+    // Header Block (Navy Command Aesthetic)
     doc.setFillColor(26, 11, 46);
     doc.rect(0, 0, pageWidth, 50, 'F');
     
-    doc.setFontSize(22);
+    doc.setFontSize(28);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text('Y.A.S.H AGENCY COMMAND', pageWidth / 2, 25, { align: 'center' });
+    doc.text('AGENCY MASTER RECORD', pageWidth / 2, 25, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setTextColor(200);
-    doc.text(`INTERNAL MASTER RECORD • REF: ${tripId.toUpperCase()}`, pageWidth / 2, 35, { align: 'center' });
-    
-    // Status Badge
-    doc.setFillColor(168, 85, 247);
-    doc.roundedRect(pageWidth - 60, 15, 50, 10, 3, 3, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(8);
-    doc.text('AUTHENTICATED', pageWidth - 35, 21.5, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text(`MISSION REF: ${tripId.toUpperCase()} • INTERNAL LOGISTICS`, pageWidth / 2, 35, { align: 'center' });
 
     // metadata
     doc.setTextColor(100);
     doc.setFontSize(9);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 60);
+    doc.text(`Manifest Generated: ${new Date().toLocaleString()}`, 20, 60);
     doc.line(20, 65, 190, 65);
 
-    // Primary Contacts
+    // Deep Personnel Matrix
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
-    doc.text('[MISSION LEADS]', 20, 75);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(26, 11, 46);
-    const primaryP = passengers.filter(p => p.is_primary);
-    primaryP.forEach((pp, i) => {
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${i+1}. ${pp.name || 'N/A'}`, 25, 85 + (i * 12));
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100);
-        doc.text(`Contact: ${pp.phone || 'N/A'} | Email: ${pp.email || 'N/A'}`, 25, 90 + (i * 12));
-        doc.setTextColor(26, 11, 46);
-    });
-
-    const paxY = 90 + (primaryP.length * 12) + 15;
-    
-    // Passenger Matrix Table
-    doc.setFillColor(245, 243, 255);
-    doc.rect(20, paxY, 170, 10, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.text('ID', 25, paxY + 6.5);
-    doc.text('PASSENGER NAME', 40, paxY + 6.5);
-    doc.text('AGE', 120, paxY + 6.5);
-    doc.text('PROOF', 140, paxY + 6.5);
+    doc.text('[PERSONNEL MATRIX - FULL DETAIL]', 20, 75);
+    
+    const paxY = 85;
+    doc.setFillColor(245, 243, 255);
+    doc.rect(20, paxY, 175, 10, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(26, 11, 46);
+    doc.text('ID', 22, paxY + 6);
+    doc.text('NAME', 30, paxY + 6);
+    doc.text('AGE', 80, paxY + 6);
+    doc.text('SEX', 95, paxY + 6);
+    doc.text('PROOF ID', 110, paxY + 6);
+    doc.text('CONTACT VECTOR', 145, paxY + 6);
 
     doc.setFont('helvetica', 'normal');
     passengers.forEach((p, i) => {
-      const rowY = paxY + 10 + (i * 8);
+      const rowY = paxY + 10 + (i * 9);
       if (i % 2 === 0) {
         doc.setFillColor(250, 249, 255);
-        doc.rect(20, rowY, 170, 8, 'F');
+        doc.rect(20, rowY, 175, 9, 'F');
       }
-      doc.text(`${i + 1}`, 25, rowY + 5.5);
-      doc.text(`${p.name || 'Anonymous'}`, 40, rowY + 5.5);
-      doc.text(`${p.age || '0'}`, 120, rowY + 5.5);
-      doc.text(`${p.proof || 'N/A'}`, 140, rowY + 5.5);
+      doc.text(`${i + 1}`, 22, rowY + 6);
+      doc.text(`${p.name || 'ANON'}`, 30, rowY + 6);
+      doc.text(`${p.age || '0'}`, 80, rowY + 6);
+      doc.text(`${p.gender || '-'}`, 95, rowY + 6);
+      doc.text(`${p.proof || 'N/A'}`, 110, rowY + 6);
+      doc.text(`${p.phone || (p.is_primary ? 'REQ' : '-')}`, 145, rowY + 6);
     });
 
-    const financeY = paxY + 10 + (passengers.length * 8) + 15;
+    // Strategic Overview (Simple Itinerary)
+    const itnY = paxY + 10 + (passengers.length * 9) + 15;
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
+    doc.setFont('helvetica', 'bold');
+    doc.text('[STRATEGIC OVERVIEW]', 20, itnY);
+    doc.setFontSize(10);
+    doc.setTextColor(26, 11, 46);
+    itinerary.forEach((day, i) => {
+        doc.text(`DAY ${day.day}: ${day.title}`, 25, itnY + 10 + (i * 8));
+    });
+
+    // Financial Reconciliation
+    const financeY = itnY + 10 + (itinerary.length * 8) + 15;
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
     doc.text('[FINANCIAL RECONCILIATION]', 20, financeY);
-    
-    doc.setDrawColor(168, 85, 247);
-    doc.setLineWidth(0.5);
-    doc.line(20, financeY + 2, 190, financeY + 2);
     
     doc.setFontSize(10);
     doc.setTextColor(26, 11, 46);
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
     
-    doc.text(`Agency Service Fee: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 12);
-    doc.text(`Payment Vector: ${transactionId ? 'BLOCKCHAIN_VERIFIED' : 'PENDING_SETTLEMENT'}`, 25, financeY + 19);
+    doc.text(`Agency Charge: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 10);
+    doc.text(`Payment Vector: ${transactionId ? 'AUTHENTICATED' : 'SETTLED_OFFLINE'}`, 25, financeY + 17);
     
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text(`TOTAL SETTLEMENT: Rs. ${totalAmount.toLocaleString()}`, 20, financeY + 32);
+    doc.text(`GRAND TOTAL: Rs. ${totalAmount.toLocaleString()}`, 20, financeY + 30);
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text('CONFIDENTIAL • SYSTEM GENERATED MASTER RECORD', 105, 285, { align: 'center' });
-
-    doc.save(`AGENCY_COPY_${tripId}.pdf`);
+    doc.save(`AGENCY_MASTER_${tripId}.pdf`);
     toast.success('Internal Master Record Saved.');
   };
 
@@ -141,7 +131,6 @@ const TripPlanner = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Fetch latest agency stats
     let agencyName = "Y.A.S.H Agency";
     let agencyContact = "N/A";
     try {
@@ -150,82 +139,77 @@ const TripPlanner = () => {
         agencyContact = userRes.phone || agencyContact;
     } catch(e) {}
 
-    // Header Block (Branded Purple)
+    // Master Header (Branded Y.A.S.H)
     doc.setFillColor(168, 85, 247);
     doc.rect(0, 0, pageWidth, 60, 'F');
-    
-    doc.setFontSize(32);
+    doc.setFontSize(40);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text('Y.A.S.H', pageWidth / 2, 30, { align: 'center' });
+    doc.text('Y.A.S.H', pageWidth / 2, 35, { align: 'center' });
     
     doc.setFontSize(12);
     doc.setTextColor(230, 230, 230);
     doc.setFont('helvetica', 'normal');
-    doc.text(`MISSION: ${trip.destination.toUpperCase()} • EXPLORER BLUEPRINT`, pageWidth / 2, 42, { align: 'center' });
+    doc.text(`VOYAGE BLUEPRINT • ${trip.destination.toUpperCase()}`, pageWidth / 2, 48, { align: 'center' });
 
-    // Voyage Overview Box
-    doc.setFillColor(250, 248, 255);
-    doc.roundedRect(20, 70, 170, 25, 4, 4, 'F');
-    doc.setFontSize(10);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('VOYAGE OVERVIEW', 25, 78);
-    doc.setTextColor(26, 11, 46);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Origin: ${trip.from_location} | Duration: ${trip.num_days} Days | Travelers: ${trip.num_people}`, 25, 85);
-
-    // Itinerary Section
+    // Mission Highlights (Must-Visit)
     doc.setFontSize(16);
     doc.setTextColor(168, 85, 247);
-    doc.text('THE JOURNEY PATH', 20, 110);
-    doc.line(20, 113, 60, 113);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TRAVEL HIGHLIGHTS & MUST-VISITS', 20, 80);
+    doc.setDrawColor(168, 85, 247);
+    doc.line(20, 83, 100, 83);
 
     itinerary.forEach((day, i) => {
-      const boxY = 120 + (i * 22);
-      if (boxY > 260) return; // Basic page overflow check
-
-      doc.setFillColor(252, 250, 255);
-      doc.roundedRect(25, boxY, 160, 18, 3, 3, 'F');
-      
-      doc.setFontSize(12);
-      doc.setTextColor(168, 85, 247);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`D${day.day}`, 30, boxY + 11);
-      
+      const dayY = 95 + (i * 20);
+      if (dayY > 200) return; 
+      doc.setFontSize(11);
       doc.setTextColor(26, 11, 46);
-      doc.setFontSize(10);
-      doc.text(`${day.title}`, 45, boxY + 7);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`DAY ${day.day}: ${day.title}`, 25, dayY);
       
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setTextColor(100);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${day.summary || 'Strategic travel sync complete.'}`, 45, boxY + 13);
+      doc.text(`- ${day.summary || 'Strategic exploration planned.'}`, 28, dayY + 6);
     });
 
-    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
+    // The Voyage Receipt
+    const receiptY = 210;
+    doc.setFillColor(248, 246, 255);
+    doc.roundedRect(15, receiptY, pageWidth - 30, 55, 5, 5, 'F');
     
-    // Settlement Footer
-    doc.setFillColor(26, 11, 46);
-    doc.rect(0, 250, pageWidth, 50, 'F');
-    
-    doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
     doc.setFont('helvetica', 'bold');
-    doc.text(`PACKAGE VALUATION: Rs. ${totalAmount.toLocaleString()}`, 20, 265);
-    
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(200);
-    doc.text(`Official Agency: ${agencyName}`, 20, 275);
-    doc.text(`Support Vector: ${agencyContact}`, 20, 280);
+    doc.text('VOYAGE RECEIPT', 25, receiptY + 12);
     
     doc.setFontSize(10);
-    doc.setTextColor(168, 85, 247);
-    doc.text('Y.A.S.H', pageWidth - 40, 278);
+    doc.setTextColor(26, 11, 46);
+    doc.setFont('helvetica', 'normal');
+    const onwardPrice = selectedTransport.onward?.price || 0;
+    const returnPrice = selectedTransport.return?.price || 0;
+    const staysPrice = selectedStays.reduce((acc, s) => acc + (s.price || 0), 0);
+    const cabCharge = selectedTransport.agency_charge || 0;
+    
+    doc.text(`- Transport Vector (Onward/Return/Cab): Rs. ${(onwardPrice + returnPrice + cabCharge).toLocaleString()}`, 30, receiptY + 22);
+    doc.text(`- Accommodation Matrix: Rs. ${staysPrice.toLocaleString()}`, 30, receiptY + 29);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`- Agency Service Fee: Rs. ${manualAgencyCharge.toLocaleString()}`, 30, receiptY + 36);
+    
+    const totalAmount = onwardPrice + returnPrice + staysPrice + cabCharge + manualAgencyCharge;
+    doc.setFontSize(18);
+    doc.text(`TOTAL VALUATION: Rs. ${totalAmount.toLocaleString()}`, 30, receiptY + 48);
+
+    // Final Branding Footer
+    doc.setFillColor(26, 11, 46);
+    doc.rect(0, 275, pageWidth, 25, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Provisioned by: ${agencyName} | Support: ${agencyContact}`, pageWidth / 2, 287, { align: 'center' });
 
     doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
-    toast.success('Customer Blueprint Saved.');
+    toast.success('Explorer Blueprint Saved.');
   };
 
   const downloadAgencyManifest = () => {
@@ -265,6 +249,7 @@ const TripPlanner = () => {
           phone: '',
           email: '' 
         })));
+        setManualAgencyCharge(data.agency_charge || 0);
         setStep(2); // Move immediately to Transport
       } catch (error) {
         toast.error('Failed to synchronize and orchestrate trip data');
