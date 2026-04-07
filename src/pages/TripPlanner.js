@@ -242,19 +242,114 @@ const TripPlanner = () => {
             <motion.div key="step5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {passengers.map((p, idx) => (
-                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
+                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-[#A855F7]/10">
+                    <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
+                      <label className="text-[10px] font-black uppercase text-[#A855F7]/40 group-hover:text-[#A855F7] transition-colors cursor-pointer">Official Primary</label>
+                      <input 
+                        type="checkbox"
+                        className="w-5 h-5 accent-[#A855F7] cursor-pointer"
+                        checked={p.is_primary}
+                        onChange={(e) => {
+                          const newP = [...passengers];
+                          newP[idx].is_primary = e.target.checked;
+                          // If this one is primary, set its phone as lead
+                          setPassengers(newP);
+                        }}
+                      />
+                    </div>
                     <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
-                    <input type="text" placeholder="Full Name" className="w-full bg-white/50 border border-white/50 rounded-xl h-14 px-6 font-bold mb-4" value={p.name} onChange={(e) => { const newP = [...passengers]; newP[idx].name = e.target.value; setPassengers(newP); }} />
-                    <div className="grid grid-cols-3 gap-4">
-                       <input type="number" placeholder="Age" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.age} onChange={(e) => { const newP = [...passengers]; newP[idx].age = e.target.value; setPassengers(newP); }} />
-                       <select className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.gender} onChange={(e) => { const newP = [...passengers]; newP[idx].gender = e.target.value; setPassengers(newP); }}><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option></select>
-                       <input type="text" placeholder="Aadhar ID" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.proof} onChange={(e) => { const newP = [...passengers]; newP[idx].proof = e.target.value; setPassengers(newP); }} />
+                    <div className="space-y-4">
+                      <input type="text" placeholder="Full Name" className="w-full bg-white/50 border border-white/50 rounded-xl h-14 px-6 font-bold" value={p.name} onChange={(e) => { const newP = [...passengers]; newP[idx].name = e.target.value; setPassengers(newP); }} />
+                      <div className="grid grid-cols-3 gap-4">
+                        <input type="number" placeholder="Age" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.age} onChange={(e) => { const newP = [...passengers]; newP[idx].age = e.target.value; setPassengers(newP); }} />
+                        <select className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm appearance-none" value={p.gender} onChange={(e) => { const newP = [...passengers]; newP[idx].gender = e.target.value; setPassengers(newP); }}><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option></select>
+                        <input type="text" placeholder="Aadhar ID" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.proof} onChange={(e) => { const newP = [...passengers]; newP[idx].proof = e.target.value; setPassengers(newP); }} />
+                      </div>
+
+                      <AnimatePresence>
+                        {p.is_primary && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }} 
+                            animate={{ height: 'auto', opacity: 1 }} 
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden space-y-4 pt-4 border-t border-[#A855F7]/10"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Mobile (Req)</label>
+                                <input 
+                                  type="text"
+                                  placeholder="+91 XXXX"
+                                  className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
+                                  value={p.phone || ''}
+                                  onChange={(e) => {
+                                    const newP = [...passengers];
+                                    newP[idx].phone = e.target.value;
+                                    setPassengers(newP);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-1.5">
+                                <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Email (Opt)</label>
+                                <input 
+                                  type="email"
+                                  placeholder="email@agency.com"
+                                  className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
+                                  value={p.email || ''}
+                                  onChange={(e) => {
+                                    const newP = [...passengers];
+                                    newP[idx].email = e.target.value;
+                                    setPassengers(newP);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="flex justify-center pt-20">
-                <Button onClick={async () => { await tripAPI.updateTouristDetails(tripId, { tourists: passengers }); setStep(6); }} className="bg-[#1a0b2e] text-white rounded-full h-24 px-20 font-black text-2xl">Next: Settle Credits</Button>
+                <Button 
+                  onClick={async () => { 
+                    const primary = passengers.find(p => p.is_primary);
+                    if (!primary || !primary.phone) {
+                      toast.error("Identity Protocol Required: Mark one 'Official Primary' with a phone number.");
+                      return;
+                    }
+
+                    try {
+                      setLoading(true);
+                       await tripAPI.updateTouristDetails(tripId, { 
+                         tourists: passengers.map(p => ({
+                           name: p.name,
+                           age: parseInt(p.age) || 0,
+                           gender: p.gender,
+                           proof: p.proof,
+                           is_primary: p.is_primary || false
+                         })),
+                         contact_phone: primary.phone,
+                         contact_email: primary.email || "",
+                         secondary_phone: "",
+                         agency_charge: manualAgencyCharge,
+                         num_cabs: selectedTransport.num_cabs || 1,
+                         number_plate: selectedTransport.number_plate || ""
+                       }); 
+                       toast.success('Explorer Matrix Synchronized');
+                       setStep(6); 
+                    } catch(err) {
+                       toast.error('Matrix Synchronization Failed (422 Schema)');
+                    } finally {
+                       setLoading(false);
+                    }
+                  }} 
+                  disabled={loading}
+                  className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-24 px-20 font-black text-2xl"
+                >
+                  {loading ? 'Synchronizing Protocols...' : 'Next: Settle Credits'}
+                </Button>
               </div>
             </motion.div>
           )}
