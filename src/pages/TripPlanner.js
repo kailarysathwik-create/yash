@@ -71,31 +71,30 @@ const TripPlanner = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [tripData, userData] = await Promise.all([
-          tripAPI.getTrip(tripId),
-          tripAPI.auth.getMe()
-        ]);
+        const tripData = await tripAPI.getTrip(tripId);
         setTrip(tripData);
-        setUser(userData);
         
-        if (data.transaction_id || data.status === 'completed') {
+        // Fetch user in background to avoid blocking
+        tripAPI.auth.getMe().then(setUser).catch(err => console.error("Identity Sync Postponed:", err));
+
+        if (tripData.transaction_id || tripData.status === 'completed') {
             setIsHistory(true);
-            setTransactionId(data.transaction_id || '');
-            setManualAgencyCharge(data.agency_charge || 0);
+            setTransactionId(tripData.transaction_id || '');
+            setManualAgencyCharge(tripData.agency_charge || 0);
             
             setSelectedTransport({
-              onward: data.transport_details?.onward || null,
-              return: data.transport_details?.return || null,
-              cab_mode: data.transport_details?.cab_mode || null,
-              agency_charge: data.transport_details?.agency_charge || 0,
-              num_cabs: data.num_cabs || 1,
-              number_plate: data.number_plate || ''
+              onward: tripData.transport_details?.onward || null,
+              return: tripData.transport_details?.return || null,
+              cab_mode: tripData.transport_details?.cab_mode || null,
+              agency_charge: tripData.transport_details?.agency_charge || 0,
+              num_cabs: tripData.num_cabs || 1,
+              number_plate: tripData.number_plate || ''
             });
-            setSelectedStays(data.stay_details || []);
-            setItinerary(data.itinerary || []);
+            setSelectedStays(tripData.stay_details || []);
+            setItinerary(tripData.itinerary || []);
 
-            if (data.tourists && data.tourists.length > 0) {
-              setPassengers(data.tourists.map(t => ({
+            if (tripData.tourists && tripData.tourists.length > 0) {
+              setPassengers(tripData.tourists.map(t => ({
                 name: t.name,
                 age: t.age?.toString() || '',
                 gender: t.gender || '',
@@ -113,10 +112,10 @@ const TripPlanner = () => {
             setTransportOptions(response.transports || { onward: [], return: [] });
             setStayOptions(response.stays || []);
             setItinerary(response.itinerary || []);
-            setPassengers(Array.from({ length: data.num_people || 1 }).map(() => ({ 
+            setPassengers(Array.from({ length: tripData.num_people || 1 }).map(() => ({ 
               name: '', age: '', gender: '', proof: '', is_primary: false, phone: '', email: '' 
             })));
-            setManualAgencyCharge(data.agency_charge || 0);
+            setManualAgencyCharge(tripData.agency_charge || 0);
             setStep(2); 
         }
       } catch (error) {
