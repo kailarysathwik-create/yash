@@ -9,6 +9,7 @@ import { tripAPI } from '../api/tripAPI';
 const HistoryPage = () => {
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Synthesis Engine Refs
@@ -34,6 +35,15 @@ const HistoryPage = () => {
 
   useEffect(() => {
     fetchHistory();
+    const fetchUser = async () => {
+      try {
+        const userData = await tripAPI.auth.getMe();
+        setUser(userData);
+      } catch (err) {
+        console.error("Identity Fetch Failed:", err);
+      }
+    };
+    fetchUser();
   }, []);
 
   const initiateCapture = async (trip, type) => {
@@ -205,7 +215,7 @@ const HistoryPage = () => {
         <div ref={customerRef} className="w-[800px] bg-white p-20">
           <div className="bg-[#A855F7] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
             <div className="space-y-1">
-              <h1 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h1>
+              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h1>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Customer Copy • Voyage Blueprint</p>
             </div>
             <div className="text-right">
@@ -225,14 +235,14 @@ const HistoryPage = () => {
             ))}
           </div>
           <div className="pt-20 text-center">
-            <p className="text-[10px] font-black text-[#A855F7] tracking-[0.5em] uppercase opacity-30 italic">crafted by KPN Studio</p>
+            <p className="text-[10px] font-black text-[#A855F7] tracking-[0.5em] uppercase opacity-30 italic">Y.A.S.H crafted by KPN Studios</p>
           </div>
         </div>
 
         <div ref={agencyRef} className="w-[1000px] bg-white p-20">
           <div className="bg-[#1a0b2e] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
             <div className="space-y-1">
-              <h1 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h1>
+              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h1>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Internal Master • Logistics Record</p>
             </div>
             <div className="text-right">
@@ -263,7 +273,7 @@ const HistoryPage = () => {
             </tbody>
           </table>
           <div className="text-center pt-8">
-            <p className="text-[10px] font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">crafted by KPN Studio</p>
+            <p className="text-[10px] font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">Y.A.S.H crafted by KPN Studios</p>
           </div>
         </div>
       </div>

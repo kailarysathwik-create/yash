@@ -17,6 +17,7 @@ const TripPlanner = () => {
   const customerRef = useRef(null);
   const agencyRef = useRef(null);
   const [trip, setTrip] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
 
@@ -70,8 +71,12 @@ const TripPlanner = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const data = await tripAPI.getTrip(tripId);
-        setTrip(data);
+        const [tripData, userData] = await Promise.all([
+          tripAPI.getTrip(tripId),
+          tripAPI.auth.getMe()
+        ]);
+        setTrip(tripData);
+        setUser(userData);
         
         if (data.transaction_id || data.status === 'completed') {
             setIsHistory(true);
@@ -456,7 +461,7 @@ const TripPlanner = () => {
                   <div className="max-w-4xl mx-auto glass-card rounded-[4rem] overflow-hidden shadow-3xl">
                      <div className="bg-[#A855F7] p-12 text-white flex justify-between items-center">
                         <div className="space-y-2">
-                           <h3 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h3>
+                           <h3 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h3>
                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Customer Copy • Voyage Blueprint</p>
                         </div>
                         <div className="text-right">
@@ -477,7 +482,7 @@ const TripPlanner = () => {
                            </div>
                         ))}
                         <div className="pt-20 border-t border-black/5 text-center">
-                           <p className="text-xs font-black text-[#A855F7] tracking-[0.5em] uppercase">crafted by KPN Studio</p>
+                           <p className="text-[10px] font-black text-[#A855F7] tracking-[0.5em] uppercase">Y.A.S.H crafted by KPN Studios</p>
                         </div>
                      </div>
                   </div>
@@ -492,12 +497,12 @@ const TripPlanner = () => {
                   <div className="max-w-4xl mx-auto glass-card rounded-[4rem] overflow-hidden shadow-3xl">
                      <div className="bg-[#1a0b2e] p-12 text-white flex justify-between items-center">
                         <div className="space-y-2">
-                           <h3 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h3>
+                           <h3 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h3>
                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Internal Master • Logistics Record</p>
                         </div>
                         <div className="text-right">
                            <p className="text-2xl font-black italic">PROB: 100% SYNC</p>
-                           <p className="text-xs font-bold opacity-40">Settlement ID: {trip?.transaction_id}</p>
+                           <p className="text-[10px] font-bold opacity-40">Settlement ID: {trip?.transaction_id}</p>
                         </div>
                      </div>
                      <div className="p-16 space-y-12 bg-white/60">
@@ -537,7 +542,7 @@ const TripPlanner = () => {
                            </table>
                         </div>
                         <div className="text-center pt-8">
-                           <p className="text-xs font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">crafted by KPN Studio</p>
+                           <p className="text-[10px] font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">Y.A.S.H crafted by KPN Studios</p>
                         </div>
                      </div>
                   </div>
