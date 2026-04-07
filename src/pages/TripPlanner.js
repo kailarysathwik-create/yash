@@ -37,37 +37,52 @@ const TripPlanner = () => {
     return `XXXX-XXXX-${val.slice(-4)}`;
   };
 
-  const generateAgencyManifest = () => {
+  const generateAgencyManifest = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Header Block (Navy Command Aesthetic)
+    let agencyName = "Y.A.S.H Agency";
+    try {
+        const userRes = await tripAPI.auth.getMe();
+        agencyName = userRes.organization || agencyName;
+    } catch(e) {}
+
+    // Header Block (Agency Branded)
     doc.setFillColor(26, 11, 46);
     doc.rect(0, 0, pageWidth, 50, 'F');
     
-    doc.setFontSize(28);
+    doc.setFontSize(24);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text('AGENCY MASTER RECORD', pageWidth / 2, 25, { align: 'center' });
+    doc.text(agencyName.toUpperCase(), pageWidth / 2, 25, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setTextColor(200);
     doc.setFont('helvetica', 'normal');
-    doc.text(`MISSION REF: ${tripId.toUpperCase()} • INTERNAL LOGISTICS`, pageWidth / 2, 35, { align: 'center' });
+    doc.text(`INTERNAL LOGISTICS MASTER • REF: ${tripId.toUpperCase()}`, pageWidth / 2, 35, { align: 'center' });
 
-    // metadata
-    doc.setTextColor(100);
-    doc.setFontSize(9);
-    doc.text(`Manifest Generated: ${new Date().toLocaleString()}`, 20, 60);
-    doc.line(20, 65, 190, 65);
-
-    // Deep Personnel Matrix
+    // Logistics Overview
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
     doc.setFont('helvetica', 'bold');
-    doc.text('[PERSONNEL MATRIX - FULL DETAIL]', 20, 75);
+    doc.text('[MISSION PARAMETERS]', 20, 70);
     
-    const paxY = 85;
+    doc.setFontSize(10);
+    doc.setTextColor(26, 11, 46);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Origin: ${trip.from_location}`, 25, 80);
+    doc.text(`Destination: ${trip.destination}`, 25, 87);
+    
+    const transportLabel = selectedTransport.onward?.provider || selectedTransport.onward?.type || "N/A";
+    doc.text(`Transport Protocol: ${transportLabel} (ID: ${selectedTransport.onward?.vehicle_id || 'N/A'})`, 25, 94);
+
+    // Dynamic Personnel Matrix
+    doc.setFontSize(14);
+    doc.setTextColor(168, 85, 247);
+    doc.setFont('helvetica', 'bold');
+    doc.text('[PERSONNEL MATRIX - FULL DETAIL]', 20, 110);
+    
+    const paxY = 120;
     doc.setFillColor(245, 243, 255);
     doc.rect(20, paxY, 175, 10, 'F');
     doc.setFontSize(8);
@@ -77,7 +92,7 @@ const TripPlanner = () => {
     doc.text('AGE', 80, paxY + 6);
     doc.text('SEX', 95, paxY + 6);
     doc.text('PROOF ID', 110, paxY + 6);
-    doc.text('CONTACT VECTOR', 145, paxY + 6);
+    doc.text('CONTACT', 145, paxY + 6);
 
     doc.setFont('helvetica', 'normal');
     passengers.forEach((p, i) => {
@@ -91,37 +106,32 @@ const TripPlanner = () => {
       doc.text(`${p.age || '0'}`, 80, rowY + 6);
       doc.text(`${p.gender || '-'}`, 95, rowY + 6);
       doc.text(`${p.proof || 'N/A'}`, 110, rowY + 6);
-      doc.text(`${p.phone || (p.is_primary ? 'REQ' : '-')}`, 145, rowY + 6);
+      doc.text(`${p.phone || (p.is_primary ? 'PRIMARY' : '-')}`, 145, rowY + 6);
     });
 
-    // Strategic Overview (Simple Itinerary)
-    const itnY = paxY + 10 + (passengers.length * 9) + 15;
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('[STRATEGIC OVERVIEW]', 20, itnY);
-    doc.setFontSize(10);
-    doc.setTextColor(26, 11, 46);
-    itinerary.forEach((day, i) => {
-        doc.text(`DAY ${day.day}: ${day.title}`, 25, itnY + 10 + (i * 8));
-    });
-
-    // Financial Reconciliation
-    const financeY = itnY + 10 + (itinerary.length * 8) + 15;
+    // Financial Recon
+    const financeY = paxY + 10 + (passengers.length * 9) + 15;
     doc.setFontSize(14);
     doc.setTextColor(168, 85, 247);
     doc.text('[FINANCIAL RECONCILIATION]', 20, financeY);
-    
     doc.setFontSize(10);
     doc.setTextColor(26, 11, 46);
+    doc.text(`Agency Service Charge: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 10);
     const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-    
-    doc.text(`Agency Charge: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 10);
-    doc.text(`Payment Vector: ${transactionId ? 'AUTHENTICATED' : 'SETTLED_OFFLINE'}`, 25, financeY + 17);
-    
-    doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text(`GRAND TOTAL: Rs. ${totalAmount.toLocaleString()}`, 20, financeY + 30);
+    doc.text(`Grand Total: Rs. ${totalAmount.toLocaleString()}`, 25, financeY + 17);
+
+    // Dual-Line Branding Footer
+    doc.setFillColor(26, 11, 46);
+    doc.rect(0, 275, pageWidth, 25, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Y.A.S.H', pageWidth / 2, 285, { align: 'center' });
+    doc.setFontSize(7);
+    doc.setTextColor(200);
+    doc.setFont('helvetica', 'normal');
+    doc.text('crafted by KPN Studio', pageWidth / 2, 290, { align: 'center' });
 
     doc.save(`AGENCY_MASTER_${tripId}.pdf`);
     toast.success('Internal Master Record Saved.');
@@ -132,81 +142,62 @@ const TripPlanner = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     
     let agencyName = "Y.A.S.H Agency";
-    let agencyContact = "N/A";
     try {
         const userRes = await tripAPI.auth.getMe();
         agencyName = userRes.organization || agencyName;
-        agencyContact = userRes.phone || agencyContact;
     } catch(e) {}
 
-    // Master Header (Branded Y.A.S.H)
+    // Master Header (Agency Branded)
     doc.setFillColor(168, 85, 247);
     doc.rect(0, 0, pageWidth, 60, 'F');
-    doc.setFontSize(40);
+    doc.setFontSize(28);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text('Y.A.S.H', pageWidth / 2, 35, { align: 'center' });
+    doc.text(agencyName.toUpperCase(), pageWidth / 2, 35, { align: 'center' });
     
     doc.setFontSize(12);
     doc.setTextColor(230, 230, 230);
     doc.setFont('helvetica', 'normal');
-    doc.text(`VOYAGE BLUEPRINT • ${trip.destination.toUpperCase()}`, pageWidth / 2, 48, { align: 'center' });
+    doc.text(`OFFICIAL VOYAGE PLAN • ${trip.destination.toUpperCase()}`, pageWidth / 2, 48, { align: 'center' });
 
-    // Mission Highlights (Must-Visit)
+    // Mission Details (Full AI Plan)
     doc.setFontSize(16);
     doc.setTextColor(168, 85, 247);
     doc.setFont('helvetica', 'bold');
-    doc.text('TRAVEL HIGHLIGHTS & MUST-VISITS', 20, 80);
+    doc.text('YOUR AI-CRAFTED JOURNEY', 20, 80);
     doc.setDrawColor(168, 85, 247);
     doc.line(20, 83, 100, 83);
 
+    let currentY = 95;
     itinerary.forEach((day, i) => {
-      const dayY = 95 + (i * 20);
-      if (dayY > 200) return; 
+      if (currentY > 260) {
+        doc.addPage();
+        currentY = 20;
+      }
       doc.setFontSize(11);
       doc.setTextColor(26, 11, 46);
       doc.setFont('helvetica', 'bold');
-      doc.text(`DAY ${day.day}: ${day.title}`, 25, dayY);
+      doc.text(`DAY ${day.day}: ${day.title}`, 25, currentY);
       
+      const summaryLines = doc.splitTextToSize(day.summary || 'Strategic exploration planned.', pageWidth - 50);
       doc.setFontSize(9);
       doc.setTextColor(100);
       doc.setFont('helvetica', 'normal');
-      doc.text(`- ${day.summary || 'Strategic exploration planned.'}`, 28, dayY + 6);
+      doc.text(summaryLines, 28, currentY + 6);
+      currentY += (summaryLines.length * 5) + 12;
     });
 
-    // The Voyage Receipt
-    const receiptY = 210;
-    doc.setFillColor(248, 246, 255);
-    doc.roundedRect(15, receiptY, pageWidth - 30, 55, 5, 5, 'F');
-    
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('VOYAGE RECEIPT', 25, receiptY + 12);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(26, 11, 46);
-    doc.setFont('helvetica', 'normal');
-    const onwardPrice = selectedTransport.onward?.price || 0;
-    const returnPrice = selectedTransport.return?.price || 0;
-    const staysPrice = selectedStays.reduce((acc, s) => acc + (s.price || 0), 0);
-    const cabCharge = selectedTransport.agency_charge || 0;
-    
-    doc.text(`- Transport Vector (Onward/Return/Cab): Rs. ${(onwardPrice + returnPrice + cabCharge).toLocaleString()}`, 30, receiptY + 22);
-    doc.text(`- Accommodation Matrix: Rs. ${staysPrice.toLocaleString()}`, 30, receiptY + 29);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`- Agency Service Fee: Rs. ${manualAgencyCharge.toLocaleString()}`, 30, receiptY + 36);
-    
-    const totalAmount = onwardPrice + returnPrice + staysPrice + cabCharge + manualAgencyCharge;
-    doc.setFontSize(18);
-    doc.text(`TOTAL VALUATION: Rs. ${totalAmount.toLocaleString()}`, 30, receiptY + 48);
-
-    // Final Branding Footer
+    // Dual-Line Branding Footer (Final Page)
     doc.setFillColor(26, 11, 46);
     doc.rect(0, 275, pageWidth, 25, 'F');
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
-    doc.text(`Provisioned by: ${agencyName} | Support: ${agencyContact}`, pageWidth / 2, 287, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text('Y.A.S.H', pageWidth / 2, 285, { align: 'center' });
+    doc.setFontSize(7);
+    doc.setTextColor(200);
+    doc.setFont('helvetica', 'normal');
+    doc.text('crafted by KPN Studio', pageWidth / 2, 290, { align: 'center' });
 
     doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
     toast.success('Explorer Blueprint Saved.');
