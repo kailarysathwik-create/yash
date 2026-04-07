@@ -27,6 +27,7 @@ const TripPlanner = () => {
   const [manualAgencyCharge, setManualAgencyCharge] = useState(0);
   const [passengers, setPassengers] = useState([]);
   const [transactionId, setTransactionId] = useState('');
+  const [isHistory, setIsHistory] = useState(false);
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
   const remainingNights = (trip?.num_days || 0) - bookedNights;
@@ -226,9 +227,22 @@ const TripPlanner = () => {
         
         // Data Hydration: Restore saved details if they exist (History Mode)
         if (data.transaction_id || data.status === 'completed') {
+            setIsHistory(true);
             setTransactionId(data.transaction_id || '');
             setManualAgencyCharge(data.agency_charge || 0);
             
+            // Restore selections for summary view
+            setSelectedTransport({
+              onward: data.transport_details?.onward || null,
+              return: data.transport_details?.return || null,
+              cab_mode: data.transport_details?.cab_mode || null,
+              agency_charge: data.transport_details?.agency_charge || 0,
+              num_cabs: data.num_cabs || 1,
+              number_plate: data.number_plate || ''
+            });
+            setSelectedStays(data.stay_details || []);
+            setItinerary(data.itinerary || []);
+
             // Map saved tourists to passengers state
             if (data.tourists && data.tourists.length > 0) {
               setPassengers(data.tourists.map(t => ({
@@ -239,10 +253,6 @@ const TripPlanner = () => {
                 is_primary: t.is_primary || false,
                 phone: t.phone || '',
                 email: t.email || ''
-              })));
-            } else {
-              setPassengers(Array.from({ length: data.num_people || 1 }).map(() => ({ 
-                name: '', age: '', gender: '', proof: '', is_primary: false, phone: '', email: '' 
               })));
             }
             
@@ -722,6 +732,20 @@ const TripPlanner = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                   <div className="glass-card rounded-[2.5rem] p-10 border-white/50">
+                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Mission Logistics Summary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                       <div className="p-4 bg-white/40 rounded-2xl border border-white/50">
+                         <p className="text-[8px] font-black uppercase text-[#A855F7] mb-1">Chosen Transport</p>
+                         <p className="font-bold text-[#1a0b2e]">{selectedTransport.onward?.provider || selectedTransport.onward?.type || "None"}</p>
+                         <p className="text-[10px] text-[#1a0b2e]/40">{selectedTransport.onward?.vehicle_id || 'MISSION VECTOR'}</p>
+                       </div>
+                       <div className="p-4 bg-white/40 rounded-2xl border border-white/50">
+                         <p className="text-[8px] font-black uppercase text-[#A855F7] mb-1">Accommodation</p>
+                         <p className="font-bold text-[#1a0b2e]">{selectedStays[0]?.name || "None Selected"}</p>
+                         <p className="text-[10px] text-[#1a0b2e]/40">{selectedStays.length} Matrix Point(s)</p>
+                       </div>
+                    </div>
+
                     <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Explorer Manifest</h3>
                     <div className="space-y-4">
                       {passengers.map((p, idx) => (
@@ -756,6 +780,12 @@ const TripPlanner = () => {
                          <span className="text-2xl font-black italic">₹{trip.total_amount?.toLocaleString() || 'N/A'}</span>
                        </div>
                     </div>
+                  </div>
+                  
+                  <div className="p-8 text-center bg-green-500/10 border border-green-500/20 rounded-[2rem]">
+                    <Sparkles className="w-8 h-8 text-green-500 mx-auto mb-4" />
+                    <p className="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">Status: Finalized</p>
+                    <p className="text-xs font-bold text-green-600/60">This mission record is uneditable for logistical integrity.</p>
                   </div>
                 </div>
               </div>
