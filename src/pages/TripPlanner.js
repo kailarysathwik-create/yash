@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { toPng } from 'html-to-image';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { tripAPI } from '../api/tripAPI';
 import RealTransportSearch from '../components/RealTransportSearch';
 import RealStaySearch from '../components/RealStaySearch';
@@ -425,37 +426,123 @@ const TripPlanner = () => {
           )}
 
           {step === 7 && (
-            <motion.div key="step7" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-12">
-              <div className="flex items-center justify-between">
+            <motion.div key="step7" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Voyage Manifest</h2>
+                  <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Mission Settlement</h2>
+                  <p className="text-[#1a0b2e]/50 font-bold uppercase text-[10px] tracking-widest">Reference: YASH-X-00{tripId.slice(-4)}</p>
                 </div>
-                <div className="flex gap-4">
-                  <Button onClick={downloadAgencyManifest} className="bg-[#1a0b2e] text-white h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"><ShieldCheck className="w-5 h-5" /> Download Agency Copy</Button>
-                  <Button onClick={downloadCustomerManifest} className="bg-[#A855F7] text-white h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"><Send className="w-5 h-5" /> Send Customer Copy</Button>
+                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-3xl flex items-center gap-3">
+                   <ShieldCheck className="w-6 h-6 text-green-500" />
+                   <div>
+                     <p className="text-[8px] font-black uppercase text-green-500 tracking-widest">Status: Finalized</p>
+                     <p className="text-[10px] font-bold text-green-800/60 leading-none">ReadOnly Archive</p>
+                   </div>
                 </div>
               </div>
 
-              <div className="fixed -left-[4000px] top-0 pointer-events-none">
-                <div ref={customerRef} className="w-[800px] bg-white p-20">
-                  <div className="bg-[#A855F7] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
-                    <div><h1 className="text-4xl font-black">Y.A.S.H AGENCY</h1><p className="text-sm font-bold opacity-80 uppercase tracking-widest mt-1">Voyager Blueprint</p></div>
-                  </div>
-                  <div className="space-y-12">
-                    {itinerary.map((day, idx) => (
-                      <div key={idx}><h3 className="text-xl font-black text-[#A855F7] mb-2 uppercase">Day {idx + 1}: {day.title}</h3><div className="space-y-3">{day.activities.map((act, i) => <p key={i} className="text-sm text-gray-700 font-bold">• {act}</p>)}</div></div>
-                    ))}
-                  </div>
-                </div>
+              <Tabs defaultValue="blueprint" className="w-full">
+                <TabsList className="bg-white/40 border border-white/50 p-2 rounded-3xl mb-12 h-16 w-full max-w-md">
+                   <TabsTrigger value="blueprint" className="rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-[#A855F7] data-[state=active]:text-white transition-all duration-500">Voyager Blueprint</TabsTrigger>
+                   <TabsTrigger value="logistics" className="rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-[#1a0b2e] data-[state=active]:text-white transition-all duration-500">Logistics Master</TabsTrigger>
+                </TabsList>
 
-                <div ref={agencyRef} className="w-[1000px] bg-white p-20">
-                  <div className="bg-[#1a0b2e] p-12 -mx-20 -mt-20 mb-12 text-white"><h1 className="text-4xl font-black text-center">Y.A.S.H AGENCY</h1><p className="text-center text-sm font-bold opacity-40 uppercase tracking-widest mt-2">Logistics Master Record</p></div>
-                  <table className="w-full mb-12 overflow-hidden rounded-2xl border border-gray-100">
-                    <thead className="bg-gray-50 text-left"><tr><th className="p-4 text-xs font-black uppercase text-gray-500">Explorer</th><th className="p-4 text-xs font-black uppercase text-gray-500">Age/Sex</th><th className="p-4 text-xs font-black uppercase text-gray-500">Proof ID</th></tr></thead>
-                    <tbody className="divide-y divide-gray-50">{passengers.map((p, idx) => <tr key={idx}><td className="p-4 font-bold">{p.name || 'Anonymous'}</td><td className="p-4 text-sm font-bold">{p.age}/{p.gender}</td><td className="p-4 text-mono text-xs">{p.proof}</td></tr>)}</tbody>
-                  </table>
-                </div>
-              </div>
+                <TabsContent value="blueprint" className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
+                  <div className="flex justify-end gap-4 -mt-20 mb-8">
+                     <Button onClick={downloadCustomerManifest} className="bg-[#A855F7] text-white hover:scale-105 transition-all h-14 rounded-2xl px-8 font-black text-xs uppercase tracking-widest shadow-xl shadow-[#A855F7]/20">Capture Blueprint PNG</Button>
+                  </div>
+                  
+                  {/* Live Blueprint Preview */}
+                  <div className="max-w-4xl mx-auto glass-card rounded-[4rem] overflow-hidden shadow-3xl">
+                     <div className="bg-[#A855F7] p-12 text-white flex justify-between items-center">
+                        <div className="space-y-2">
+                           <h3 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h3>
+                           <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Customer Copy • Voyage Blueprint</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-2xl font-black">{trip?.destination.toUpperCase()}</p>
+                           <p className="text-xs font-bold opacity-60">{trip?.num_days} Day Mission</p>
+                        </div>
+                     </div>
+                     <div className="p-16 space-y-16 bg-white/60">
+                        {itinerary.map((day, idx) => (
+                           <div key={idx} className="relative pl-12 border-l-2 border-[#A855F7]/10">
+                              <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#A855F7] shadow-lg shadow-[#A855F7]/30" />
+                              <h4 className="text-2xl font-black text-[#1a0b2e] mb-4">Day {idx + 1}: {day.title}</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 {day.activities.map((act, i) => (
+                                    <div key={i} className="p-4 rounded-2xl bg-white/80 border border-black/5 text-sm font-bold text-gray-600">• {act}</div>
+                                 ))}
+                              </div>
+                           </div>
+                        ))}
+                        <div className="pt-20 border-t border-black/5 text-center">
+                           <p className="text-xs font-black text-[#A855F7] tracking-[0.5em] uppercase">crafted by KPN Studio</p>
+                        </div>
+                     </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="logistics" className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
+                  <div className="flex justify-end gap-4 -mt-20 mb-8">
+                     <Button onClick={downloadAgencyManifest} className="bg-[#1a0b2e] text-white hover:scale-105 transition-all h-14 rounded-2xl px-8 font-black text-xs uppercase tracking-widest shadow-xl shadow-black/20">Capture Logistics PNG</Button>
+                  </div>
+
+                  {/* Live Logistics Preview */}
+                  <div className="max-w-4xl mx-auto glass-card rounded-[4rem] overflow-hidden shadow-3xl">
+                     <div className="bg-[#1a0b2e] p-12 text-white flex justify-between items-center">
+                        <div className="space-y-2">
+                           <h3 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h3>
+                           <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Internal Master • Logistics Record</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-2xl font-black italic">PROB: 100% SYNC</p>
+                           <p className="text-xs font-bold opacity-40">Settlement ID: {trip?.transaction_id}</p>
+                        </div>
+                     </div>
+                     <div className="p-16 space-y-12 bg-white/60">
+                        <div className="grid grid-cols-3 gap-8">
+                           <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5">
+                              <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Mission Payload</p>
+                              <p className="text-xl font-black italic text-[#1a0b2e]">{passengers.length} Matrix Point(s)</p>
+                           </div>
+                           <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5">
+                              <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Transport Vector</p>
+                              <p className="text-xl font-black italic text-[#1a0b2e]">{selectedTransport.onward?.provider || 'CAB'}</p>
+                           </div>
+                           <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5 text-right">
+                              <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Settlement</p>
+                              <p className="text-2xl font-black italic text-[#A855F7]">₹{trip?.total_amount?.toLocaleString()}</p>
+                           </div>
+                        </div>
+
+                        <div className="rounded-[3rem] overflow-hidden border border-black/5 bg-white/80">
+                           <table className="w-full text-left">
+                              <thead className="bg-[#1a0b2e]/[0.02] border-b border-black/5">
+                                 <tr>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Explorer Matrix</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">AGE/SEX</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">ID PROOF</th>
+                                 </tr>
+                              </thead>
+                              <tbody className="divide-y divide-black/5">
+                                 {passengers.map((p, i) => (
+                                    <tr key={i} className="hover:bg-white transition-colors">
+                                       <td className="p-6 font-black text-gray-700">{p.name} {p.is_primary && <span className="ml-2 text-[8px] bg-[#A855F7] text-white px-2 py-0.5 rounded-full">Lead</span>}</td>
+                                       <td className="p-6 font-bold text-gray-500 uppercase">{p.age} • {p.gender}</td>
+                                       <td className="p-6 text-xs font-black text-gray-300 font-mono italic tracking-tighter">{p.proof}</td>
+                                    </tr>
+                                 ))}
+                              </tbody>
+                           </table>
+                        </div>
+                        <div className="text-center pt-8">
+                           <p className="text-xs font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">crafted by KPN Studio</p>
+                        </div>
+                     </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </motion.div>
           )}
         </AnimatePresence>
