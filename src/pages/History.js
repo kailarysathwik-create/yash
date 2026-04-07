@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { jsPDF } from 'jspdf';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, Sparkles, ShieldCheck, Send, Download } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, ShieldCheck, Send, Download } from 'lucide-react';
 import { tripAPI } from '../api/tripAPI';
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Synthesis Engine Refs
+  const agencyRef = useRef(null);
+  const customerRef = useRef(null);
+  const [captureTrip, setCaptureTrip] = useState(null);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -30,89 +36,31 @@ const HistoryPage = () => {
     fetchHistory();
   }, []);
 
-  const downloadManifest = (trip, type) => {
-    const doc = new jsPDF();
-    
-    if (type === 'agency') {
-      // Agency Copy (Internal)
-      doc.setFontSize(22);
-      doc.setTextColor(26, 11, 46);
-      doc.text('Y.A.S.H AGENCY MANIFEST (INTERNAL)', 105, 20, { align: 'center' });
-      
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(`Manifest ID: ${trip.trip_id}`, 20, 35);
-      doc.text(`Archived: ${new Date().toLocaleString()}`, 20, 40);
-      doc.line(20, 45, 190, 45);
+  const initiateCapture = async (trip, type) => {
+    setCaptureTrip(trip);
+    setIsCapturing(true);
+    toast.loading(`Synthesizing ${type === 'agency' ? 'Logistics Master' : 'Voyager Blueprint'}...`, { id: 'capture' });
 
-      doc.setFontSize(14);
-      doc.setTextColor(168, 85, 247);
-      doc.text('[CONTACT DATA]', 20, 55);
-      doc.setFontSize(11);
-      doc.setTextColor(26, 11, 46);
-      doc.text(`Phone: ${trip.contact_phone || 'N/A'}`, 25, 65);
-      doc.text(`Email: ${trip.contact_email || 'N/A'}`, 25, 72);
-
-      doc.setFontSize(14);
-      doc.setTextColor(168, 85, 247);
-      doc.text('[PASSENGER MATRIX]', 20, 85);
-      doc.setFontSize(10);
-      doc.setTextColor(26, 11, 46);
-      const pax = trip.passengers || [];
-      if (pax.length > 0) {
-        pax.forEach((p, i) => {
-          doc.text(`${i + 1}. ${p.name || 'Anon'} | Age: ${p.age} | Proof: ${p.proof}`, 25, 95 + (i * 8));
-        });
-      } else {
-        doc.text(`Sync Count: ${trip.num_people} Personnel`, 25, 95);
+    // Wait for DOM to hydrate with captureTrip data
+    setTimeout(async () => {
+      try {
+        const ref = type === 'agency' ? agencyRef : customerRef;
+        if (!ref.current) throw new Error("Synthesis Vector Not Found");
+        
+        const dataUrl = await toPng(ref.current, { quality: 1, pixelRatio: 2 });
+        const link = document.createElement('a');
+        link.download = `YASH_${type.toUpperCase()}_${trip.trip_id.slice(-6)}.png`;
+        link.href = dataUrl;
+        link.click();
+        
+        toast.success(`${type === 'agency' ? 'Logistics Master' : 'Voyager Blueprint'} Captured`, { id: 'capture' });
+      } catch (err) {
+        toast.error("Synthesis Protocol Failed", { id: 'capture' });
+      } finally {
+        setCaptureTrip(null);
+        setIsCapturing(false);
       }
-
-      const currentY = pax.length > 0 ? (95 + (pax.length * 8) + 10) : 115;
-      doc.setFontSize(14);
-      doc.setTextColor(168, 85, 247);
-      doc.text('[FINANCIAL SETTLEMENT]', 20, currentY);
-      doc.setFontSize(11);
-      doc.setTextColor(26, 11, 46);
-      doc.text(`Agency Markup: Rs. ${trip.agency_charge || 0}`, 25, currentY + 10);
-      doc.text(`Deployment Status: ${trip.status.toUpperCase()}`, 25, currentY + 17);
-      
-      doc.save(`AGENCY_ARCHIVE_${trip.trip_id.slice(0, 8)}.pdf`);
-    } else {
-      // Customer Copy
-      doc.setFontSize(26);
-      doc.setTextColor(168, 85, 247);
-      doc.text('Y.A.S.H', 105, 25, { align: 'center' });
-      
-      doc.setFontSize(12);
-      doc.setTextColor(100);
-      doc.text(`VOYAGE ARCHIVE: ${trip.destination.toUpperCase()}`, 105, 35, { align: 'center' });
-      doc.line(20, 45, 190, 45);
-
-      doc.setFontSize(16);
-      doc.setTextColor(26, 11, 46);
-      doc.text('Itinerary Overview', 20, 60);
-      doc.setFontSize(10);
-      doc.setTextColor(50);
-      const days = trip.itinerary?.days || [];
-      days.slice(0, 10).forEach((day, i) => {
-        doc.text(`Day ${day.day}: ${day.title}`, 25, 75 + (i * 8));
-      });
-
-      doc.setFontSize(16);
-      doc.setTextColor(26, 11, 46);
-      const costY = 75 + (Math.min(days.length, 10) * 8) + 15;
-      doc.text('Voyage Logistics', 20, costY);
-      doc.setFontSize(12);
-      doc.text(`Vector: ${trip.from_location} to ${trip.destination}`, 25, costY + 12);
-      doc.text(`Transport Vector: ${trip.transport_mode.toUpperCase()}`, 25, costY + 22);
-
-      doc.setTextColor(150);
-      doc.setFontSize(8);
-      doc.text('Archived via Y.A.S.H Hub Protocol', 105, 285, { align: 'center' });
-
-      doc.save(`VOYAGE_PLAN_${trip.trip_id.slice(0, 8)}.pdf`);
-    }
-    toast.success(`${type === 'agency' ? 'Archive Matrix' : 'Journey Blueprint'} Synchronized.`);
+    }, 800);
   };
 
   return (
@@ -165,8 +113,7 @@ const HistoryPage = () => {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.6 }}
-                  onClick={() => navigate(`/trip/${trip.trip_id}`)}
-                  className="card-3d glass-card rounded-[3rem] p-10 cursor-pointer group relative overflow-hidden"
+                  className="card-3d glass-card rounded-[3rem] p-10 group relative overflow-hidden"
                 >
                   <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#A855F7]/10 rounded-full blur-[60px] group-hover:bg-[#A855F7]/20 transition-all duration-700" />
                   
@@ -205,22 +152,28 @@ const HistoryPage = () => {
                      </div>
                       <div className="flex items-center gap-2">
                         <button 
-                          onClick={(e) => { e.stopPropagation(); downloadManifest(trip, 'agency'); }}
-                          className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all shadow-sm group/btn"
-                          title="Agency Copy"
+                          disabled={isCapturing}
+                          onClick={() => initiateCapture(trip, 'agency')}
+                          className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all shadow-sm group/btn disabled:opacity-50"
+                          title="Agency Copy (PNG)"
                         >
                           <ShieldCheck className="w-4 h-4 text-[#1a0b2e] group-hover/btn:text-white" />
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); downloadManifest(trip, 'customer'); }}
-                          className="w-10 h-10 rounded-xl border border-[#A855F7]/10 flex items-center justify-center hover:bg-[#A855F7] hover:text-white transition-all shadow-sm group/btn"
-                          title="Send to Customer"
+                          disabled={isCapturing}
+                          onClick={() => initiateCapture(trip, 'customer')}
+                          className="w-10 h-10 rounded-xl border border-[#A855F7]/10 flex items-center justify-center hover:bg-[#A855F7] hover:text-white transition-all shadow-sm group/btn disabled:opacity-50"
+                          title="Customer Copy (PNG)"
                         >
                           <Send className="w-4 h-4 text-[#A855F7] group-hover/btn:text-white" />
                         </button>
-                        <div className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center group-hover:bg-[#1a0b2e] group-hover:border-[#1a0b2e] transition-all duration-500 shadow-sm">
+                        <button 
+                          onClick={() => navigate(`/trip/${trip.trip_id}`)}
+                          className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all duration-500 shadow-sm"
+                          title="View Archive Mirror"
+                        >
                           <ExternalLink className="w-4 h-4 text-[#1a0b2e] group-hover:text-white" />
-                        </div>
+                        </button>
                       </div>
                   </div>
                 </motion.div>
@@ -246,6 +199,74 @@ const HistoryPage = () => {
           </motion.div>
         )}
       </main>
+
+      {/* Background Capture Portal (Hidden) */}
+      <div className="fixed -left-[4000px] top-0 pointer-events-none">
+        <div ref={customerRef} className="w-[800px] bg-white p-20">
+          <div className="bg-[#A855F7] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Customer Copy • Voyage Blueprint</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-black italic">{captureTrip?.destination.toUpperCase()}</p>
+              <p className="text-[10px] font-bold opacity-60">{captureTrip?.num_days} Day Mission</p>
+            </div>
+          </div>
+          <div className="space-y-12">
+            {captureTrip?.itinerary?.days?.map((day, idx) => (
+              <div key={idx} className="relative pl-10 border-l-2 border-[#A855F7]/10">
+                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#A855F7]" />
+                <h3 className="text-xl font-black text-[#1a0b2e] mb-4">Day {idx + 1}: {day.title}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {day.activities.map((act, i) => <p key={i} className="text-xs text-gray-500 font-bold">• {act}</p>)}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="pt-20 text-center">
+            <p className="text-[10px] font-black text-[#A855F7] tracking-[0.5em] uppercase opacity-30 italic">crafted by KPN Studio</p>
+          </div>
+        </div>
+
+        <div ref={agencyRef} className="w-[1000px] bg-white p-20">
+          <div className="bg-[#1a0b2e] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-black italic tracking-tighter">Y.A.S.H</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Internal Master • Logistics Record</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-black italic">PROB: 100% SYNC</p>
+              <p className="text-[10px] font-bold opacity-30">Ref ID: {captureTrip?.trip_id.slice(-8)}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-8 mb-12">
+            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5">
+              <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Personnel</p>
+              <p className="text-xl font-black italic text-[#1a0b2e]">{captureTrip?.num_people} Personnel</p>
+            </div>
+            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5">
+               <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Settlement</p>
+               <p className="text-xl font-black italic text-[#A855F7]">₹{captureTrip?.total_amount?.toLocaleString()}</p>
+            </div>
+            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5 text-right">
+               <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Contact</p>
+               <p className="text-xs font-black italic text-[#1a0b2e]">{captureTrip?.contact_phone}</p>
+            </div>
+          </div>
+          <table className="w-full mb-12 overflow-hidden rounded-3xl border border-gray-100">
+            <thead className="bg-[#1a0b2e]/[0.02] text-left"><tr><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Personnel Matrix</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Age / Sex</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Identity Proof</th></tr></thead>
+            <tbody className="divide-y divide-gray-50">
+              {captureTrip?.passengers?.map((p, idx) => (
+                <tr key={idx}><td className="p-6 font-black text-[#1a0b2e]">{p.name}</td><td className="p-6 font-bold text-gray-400 uppercase text-xs">{p.age} • {p.gender}</td><td className="p-6 text-mono text-xs font-black text-gray-200">{p.proof}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="text-center pt-8">
+            <p className="text-[10px] font-black text-[#1a0b2e] tracking-[0.5em] opacity-10 uppercase italic">crafted by KPN Studio</p>
+          </div>
+        </div>
+      </div>
 
       {/* Decorative BG elements */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 pointer-events-none overflow-hidden">
