@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { jsPDF } from 'jspdf';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { toPng } from 'html-to-image';
 import { tripAPI } from '../api/tripAPI';
 import RealTransportSearch from '../components/RealTransportSearch';
 import RealStaySearch from '../components/RealStaySearch';
 import UPIPayment from '../components/UPIPayment';
 import { Button } from '../components/ui/button';
-import { MapPin, Calendar, Users, Sparkles, Navigation, CheckCircle2, ChevronRight, LoaderCircle, Globe, Download, Send, ShieldCheck } from 'lucide-react';
+import { MapPin, Calendar, Users, Sparkles, CheckCircle2, LoaderCircle, Send, ShieldCheck } from 'lucide-react';
 
 const TripPlanner = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
+  const customerRef = useRef(null);
+  const agencyRef = useRef(null);
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
 
-  // States for orchestration
   const [transportOptions, setTransportOptions] = useState({ onward: [], return: [] });
   const [stayOptions, setStayOptions] = useState([]);
   const [selectedTransport, setSelectedTransport] = useState({ onward: null, return: null, cab_mode: null, agency_charge: 0 });
@@ -30,7 +31,6 @@ const TripPlanner = () => {
   const [isHistory, setIsHistory] = useState(false);
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
-  const remainingNights = (trip?.num_days || 0) - bookedNights;
 
   const maskAadhar = (val) => {
     if (!val) return 'N/A';
@@ -38,184 +38,31 @@ const TripPlanner = () => {
     return `XXXX-XXXX-${val.slice(-4)}`;
   };
 
-  const generateAgencyManifest = async () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    let agencyName = "Y.A.S.H Agency";
-    try {
-        const userRes = await tripAPI.auth.getMe();
-        agencyName = userRes.organization || agencyName;
-    } catch(e) {}
-
-    // Header Block (Agency Branded)
-    doc.setFillColor(26, 11, 46);
-    doc.rect(0, 0, pageWidth, 50, 'F');
-    
-    doc.setFontSize(24);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(agencyName.toUpperCase(), pageWidth / 2, 25, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setTextColor(200);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`INTERNAL LOGISTICS MASTER • REF: ${tripId.toUpperCase()}`, pageWidth / 2, 35, { align: 'center' });
-
-    // Logistics Overview
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('[MISSION PARAMETERS]', 20, 70);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(26, 11, 46);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Origin: ${trip.from_location}`, 25, 80);
-    doc.text(`Destination: ${trip.destination}`, 25, 87);
-    
-    const transportLabel = selectedTransport.onward?.provider || selectedTransport.onward?.type || "N/A";
-    doc.text(`Transport Protocol: ${transportLabel} (ID: ${selectedTransport.onward?.vehicle_id || 'N/A'})`, 25, 94);
-
-    // Dynamic Personnel Matrix
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('[PERSONNEL MATRIX - FULL DETAIL]', 20, 110);
-    
-    const paxY = 120;
-    doc.setFillColor(245, 243, 255);
-    doc.rect(20, paxY, 175, 10, 'F');
-    doc.setFontSize(8);
-    doc.setTextColor(26, 11, 46);
-    doc.text('ID', 22, paxY + 6);
-    doc.text('NAME', 30, paxY + 6);
-    doc.text('AGE', 80, paxY + 6);
-    doc.text('SEX', 95, paxY + 6);
-    doc.text('PROOF ID', 110, paxY + 6);
-    doc.text('CONTACT', 145, paxY + 6);
-
-    doc.setFont('helvetica', 'normal');
-    passengers.forEach((p, i) => {
-      const rowY = paxY + 10 + (i * 9);
-      if (i % 2 === 0) {
-        doc.setFillColor(250, 249, 255);
-        doc.rect(20, rowY, 175, 9, 'F');
-      }
-      doc.text(`${i + 1}`, 22, rowY + 6);
-      doc.text(`${p.name || 'ANON'}`, 30, rowY + 6);
-      doc.text(`${p.age || '0'}`, 80, rowY + 6);
-      doc.text(`${p.gender || '-'}`, 95, rowY + 6);
-      doc.text(`${p.proof || 'N/A'}`, 110, rowY + 6);
-      doc.text(`${p.phone || (p.is_primary ? 'PRIMARY' : '-')}`, 145, rowY + 6);
-    });
-
-    // Financial Recon
-    const financeY = paxY + 10 + (passengers.length * 9) + 15;
-    doc.setFontSize(14);
-    doc.setTextColor(168, 85, 247);
-    doc.text('[FINANCIAL RECONCILIATION]', 20, financeY);
-    doc.setFontSize(10);
-    doc.setTextColor(26, 11, 46);
-    doc.text(`Agency Service Charge: Rs. ${manualAgencyCharge.toLocaleString()}`, 25, financeY + 10);
-    const totalAmount = (selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge;
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Grand Total: Rs. ${totalAmount.toLocaleString()}`, 25, financeY + 17);
-
-    // Dual-Line Branding Footer
-    doc.setFillColor(26, 11, 46);
-    doc.rect(0, 275, pageWidth, 25, 'F');
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Y.A.S.H', pageWidth / 2, 285, { align: 'center' });
-    doc.setFontSize(7);
-    doc.setTextColor(200);
-    doc.setFont('helvetica', 'normal');
-    doc.text('crafted by KPN Studio', pageWidth / 2, 290, { align: 'center' });
-
-    doc.save(`AGENCY_MASTER_${tripId}.pdf`);
-    toast.success('Internal Master Record Saved.');
-  };
-
-  const generateCustomerManifest = async () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    let agencyName = "Y.A.S.H Agency";
-    try {
-        const userRes = await tripAPI.auth.getMe();
-        agencyName = userRes.organization || agencyName;
-    } catch(e) {}
-
-    // Master Header (Agency Branded)
-    doc.setFillColor(168, 85, 247);
-    doc.rect(0, 0, pageWidth, 60, 'F');
-    doc.setFontSize(28);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(agencyName.toUpperCase(), pageWidth / 2, 35, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.setTextColor(230, 230, 230);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`OFFICIAL VOYAGE PLAN • ${trip.destination.toUpperCase()}`, pageWidth / 2, 48, { align: 'center' });
-
-    // Mission Details (Full AI Plan)
-    doc.setFontSize(16);
-    doc.setTextColor(168, 85, 247);
-    doc.setFont('helvetica', 'bold');
-    doc.text('YOUR AI-CRAFTED JOURNEY', 20, 80);
-    doc.setDrawColor(168, 85, 247);
-    doc.line(20, 83, 100, 83);
-
-    let currentY = 95;
-    itinerary.forEach((day, i) => {
-      if (currentY > 260) {
-        doc.addPage();
-        currentY = 20;
-      }
-      doc.setFontSize(11);
-      doc.setTextColor(26, 11, 46);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`DAY ${day.day}: ${day.title}`, 25, currentY);
-      
-      const summaryLines = doc.splitTextToSize(day.summary || 'Strategic exploration planned.', pageWidth - 50);
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      doc.setFont('helvetica', 'normal');
-      doc.text(summaryLines, 28, currentY + 6);
-      currentY += (summaryLines.length * 5) + 12;
-    });
-
-    // Dual-Line Branding Footer (Final Page)
-    doc.setFillColor(26, 11, 46);
-    doc.rect(0, 275, pageWidth, 25, 'F');
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Y.A.S.H', pageWidth / 2, 285, { align: 'center' });
-    doc.setFontSize(7);
-    doc.setTextColor(200);
-    doc.setFont('helvetica', 'normal');
-    doc.text('crafted by KPN Studio', pageWidth / 2, 290, { align: 'center' });
-
-    doc.save(`VOYAGE_PLAN_${tripId}.pdf`);
-    toast.success('Explorer Blueprint Saved.');
-  };
-
-  const downloadAgencyManifest = () => {
-    generateAgencyManifest();
-  };
-
   const downloadCustomerManifest = async () => {
-    generateCustomerManifest();
+    if (!customerRef.current) return;
     try {
-      // Mock sending or actually hitting manifest endpoint
-      await tripAPI.sendManifest({ trip_id: tripId, type: 'customer' });
-      toast.success('Customer Blueprint Dispatched.');
+      const dataUrl = await toPng(customerRef.current, { quality: 1.0, pixelRatio: 2 });
+      const link = document.createElement('a');
+      link.download = `Voyager_Blueprint_${trip?.destination || 'Trip'}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success('Visual Blueprint Captured');
     } catch (err) {
-      toast.info('Blueprint saved. Notification relay offline.');
+      toast.error('Synthesis failed');
+    }
+  };
+
+  const downloadAgencyManifest = async () => {
+    if (!agencyRef.current) return;
+    try {
+      const dataUrl = await toPng(agencyRef.current, { quality: 1.0, pixelRatio: 2 });
+      const link = document.createElement('a');
+      link.download = `Agency_Master_${trip?.destination || 'Trip'}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success('Logistics Master Captured');
+    } catch (err) {
+      toast.error('Synthesis failed');
     }
   };
 
@@ -225,13 +72,11 @@ const TripPlanner = () => {
         const data = await tripAPI.getTrip(tripId);
         setTrip(data);
         
-        // Data Hydration: Restore saved details if they exist (History Mode)
         if (data.transaction_id || data.status === 'completed') {
             setIsHistory(true);
             setTransactionId(data.transaction_id || '');
             setManualAgencyCharge(data.agency_charge || 0);
             
-            // Restore selections for summary view
             setSelectedTransport({
               onward: data.transport_details?.onward || null,
               return: data.transport_details?.return || null,
@@ -243,7 +88,6 @@ const TripPlanner = () => {
             setSelectedStays(data.stay_details || []);
             setItinerary(data.itinerary || []);
 
-            // Map saved tourists to passengers state
             if (data.tourists && data.tourists.length > 0) {
               setPassengers(data.tourists.map(t => ({
                 name: t.name,
@@ -256,9 +100,8 @@ const TripPlanner = () => {
               })));
             }
             
-            setStep(7); // Jump directly to manifest for history
+            setStep(7);
         } else {
-            // New trip: Auto-initialize orchestration
             setOrchestrating(true);
             const response = await tripAPI.orchestrateTrip(tripId);
             setTransportOptions(response.transports || { onward: [], return: [] });
@@ -293,7 +136,6 @@ const TripPlanner = () => {
   return (
     <div className="min-h-screen pb-40 selection:bg-[#A855F7]/20">
       <main className="max-w-7xl mx-auto px-6 py-16">
-        {/* Orchestration Header */}
         <header className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6">
@@ -311,7 +153,7 @@ const TripPlanner = () => {
               </div>
             </motion.div>
 
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center justify-center space-x-4 mb-20 ${isHistory ? 'opacity-0 h-0 pointer-events-none' : ''}`}>
               {[1, 2, 3, 4, 5, 6].map((s) => (
                 <div key={s} className="flex items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-700 ${step >= s ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20' : 'bg-white/40 text-[#1a0b2e]/20 border border-white/50'
@@ -340,20 +182,14 @@ const TripPlanner = () => {
           </div>
         </header>
 
-        {/* Step Manager */}
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="text-center py-20"
-            >
+            <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-20">
               <div className="max-w-2xl mx-auto glass-card rounded-[4rem] p-16 border-dashed border-2 border-[#A855F7]/20">
                 <Sparkles className="w-16 h-16 text-[#A855F7] mx-auto mb-10 animate-pulse" />
                 <h2 className="text-4xl font-black text-[#1a0b2e] mb-6">Plan Ready</h2>
-                <p className="text-[#1a0b2e]/50 font-medium mb-12 text-lg">Y.A.S.H AI is ready to compute the optimal transport matrix and luxury stay in one place.</p>
-                <Button onClick={handleOrchestrate} disabled={orchestrating} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-20 px-12 font-black text-xl shadow-2xl shadow-[#A855F7]/20">
-                  {orchestrating ? 'Synchronizing Protocols...' : 'Initialize AI Sync'}
+                <Button onClick={() => { setOrchestrating(true); tripAPI.orchestrateTrip(tripId).then(r => { setTransportOptions(r.transports); setStayOptions(r.stays); setItinerary(r.itinerary); setStep(2); }); }} disabled={orchestrating} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-20 px-12 font-black text-xl">
+                  {orchestrating ? 'Synchronizing...' : 'Initialize AI Sync'}
                 </Button>
               </div>
             </motion.div>
@@ -361,347 +197,71 @@ const TripPlanner = () => {
 
           {step === 2 && (
             <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <RealTransportSearch
-                options={transportOptions}
-                initialPeople={trip?.num_people || 1}
-                tripData={trip}
-                onSelect={(val) => { setSelectedTransport(val); setStep(3); }}
-              />
+              <RealTransportSearch options={transportOptions} initialPeople={trip?.num_people || 1} tripData={trip} onSelect={(val) => { setSelectedTransport(val); setStep(3); }} />
             </motion.div>
           )}
 
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-[#1a0b2e]">Nights Booked: {bookedNights} / {trip.num_days}</h3>
-                {bookedNights > 0 && (
-                  <Button onClick={() => setStep(4)} className="bg-[#A855F7] text-white rounded-full">Continue to Itinerary</Button>
-                )}
-              </div>
-              <RealStaySearch
-                options={stayOptions}
-                tripData={trip}
-                numDays={trip?.num_days || 1}
-                onSelect={(opt) => {
-                  setSelectedStays(prev => [...prev, opt]);
-                  if (bookedNights + opt.nights >= trip.num_days) {
-                    setStep(4);
-                  } else {
-                    toast.info(`Added ${opt.name}. ${trip.num_days - (bookedNights + opt.nights)} nights remaining.`);
-                  }
-                }}
-              />
+              <RealStaySearch options={stayOptions} tripData={trip} numDays={trip?.num_days || 1} onSelect={(opt) => { setSelectedStays(prev => [...prev, opt]); if (bookedNights + opt.nights >= trip.num_days) setStep(4); }} />
             </motion.div>
           )}
 
           {step === 4 && (
             <motion.div key="step4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">AI Intelligence Narrative</h2>
-                <div className="glass px-6 py-3 rounded-full flex items-center gap-3">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" />
-                  <span className="text-[10px] font-black uppercase text-[#1a0b2e] tracking-widest">Itinerary Loaded</span>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  {itinerary.map((day, i) => (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                      key={i} className="glass-card rounded-[2.5rem] p-10 border-white/50 hover:border-[#A855F7]/30 transition-all duration-500"
-                    >
-                      <div className="flex items-center gap-6 mb-6">
-                        <div className="w-16 h-16 rounded-3xl bg-[#A855F7] text-white flex items-center justify-center font-black text-xl shadow-xl shadow-[#A855F7]/20">D{day.day}</div>
-                        <h4 className="text-2xl font-black text-[#1a0b2e]">{day.title}</h4>
+              <div className="grid grid-cols-1 gap-8">
+                {itinerary.map((day, idx) => (
+                  <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
+                    <div className="flex items-start justify-between mb-8">
+                      <div>
+                        <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-2">Day {idx + 1}</h3>
+                        <h4 className="text-3xl font-black text-[#1a0b2e] tracking-tight">{day.title}</h4>
                       </div>
-                      <div className="space-y-3">
-                        {day.activities?.map((act, actIdx) => (
-                          <div key={actIdx} className="flex gap-4 items-start bg-white/40 p-4 rounded-2xl border border-white/50">
-                            <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2 shadow-[0_0_8px_#A855F7]" />
-                            <p className="text-[#1a0b2e]/80 font-bold text-sm">
-                              {typeof act === 'object' ? `${act.time || ''} - ${act.task || act.activity || ''}` : act}
-                            </p>
-                          </div>
-                        ))}
+                      <div className="w-16 h-16 rounded-3xl bg-[#A855F7]/10 flex items-center justify-center">
+                        <Calendar className="w-8 h-8 text-[#A855F7]" />
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
+                    </div>
+                    <div className="space-y-6">
+                      {day.activities.map((activity, aIdx) => (
+                        <div key={aIdx} className="flex items-start gap-4 p-4 rounded-2xl bg-[#1a0b2e]/[0.02] border border-[#1a0b2e]/5">
+                          <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2.5 shrink-0" />
+                          <p className="text-[#1a0b2e] font-bold leading-relaxed">{activity}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-
               <div className="flex justify-center pt-20">
-                <Button onClick={() => setStep(5)} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30">
-                  Next: Passenger Details
-                </Button>
+                <Button onClick={() => setStep(5)} className="bg-[#1a0b2e] text-white rounded-full h-24 px-20 font-black text-2xl">Next: Passenger Details</Button>
               </div>
             </motion.div>
           )}
 
           {step === 5 && (
             <motion.div key="step5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight">Explorer Matrix</h2>
-              </div>
-              <div className="grid grid-cols-1 gap-8">
-                {/* Explorer Matrix */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {passengers.map((p, idx) => (
-                    <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative overflow-hidden group transition-all duration-500 hover:shadow-2xl hover:shadow-[#A855F7]/10">
-                      <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
-                         <label className="text-[10px] font-black uppercase text-[#A855F7]/40 group-hover:text-[#A855F7] transition-colors cursor-pointer">Official Primary</label>
-                         <input 
-                           type="checkbox"
-                           disabled={step === 7}
-                           className={`w-5 h-5 accent-[#A855F7] ${step === 7 ? 'cursor-default opacity-50' : 'cursor-pointer'}`}
-                           checked={p.is_primary}
-                           onChange={(e) => {
-                             if (step === 7) return;
-                             const newP = [...passengers];
-                             newP[idx].is_primary = e.target.checked;
-                             setPassengers(newP);
-                           }}
-                         />
-                      </div>
-
-                      <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
-                      <div className="space-y-4">
-                        <input
-                           type="text"
-                           placeholder="Full Name"
-                           className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
-                           value={p.name}
-                           onChange={(e) => {
-                             if (step === 7) return;
-                             const newP = [...passengers];
-                             newP[idx].name = e.target.value;
-                             setPassengers(newP);
-                           }}
-                           readOnly={step === 7}
-                        />
-                        <div className="grid grid-cols-3 gap-4">
-                           <input
-                             type="number"
-                             placeholder="Age"
-                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
-                             value={p.age}
-                             readOnly={step === 7}
-                             onChange={(e) => {
-                               if (step === 7) return;
-                               const newP = [...passengers];
-                               newP[idx].age = e.target.value;
-                               setPassengers(newP);
-                             }}
-                           />
-                           <select
-                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none"
-                             value={p.gender}
-                             disabled={step === 7}
-                             onChange={(e) => {
-                               if (step === 7) return;
-                               const newP = [...passengers];
-                               newP[idx].gender = e.target.value;
-                               setPassengers(newP);
-                             }}
-                           >
-                             <option value="">Gender</option>
-                             <option value="Male">Male</option>
-                             <option value="Female">Female</option>
-                             <option value="Other">Other</option>
-                           </select>
-                           <input
-                             type="text"
-                             placeholder="Aadhar ID"
-                             className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
-                             value={p.proof}
-                             readOnly={step === 7}
-                             onChange={(e) => {
-                               if (step === 7) return;
-                               const newP = [...passengers];
-                               newP[idx].proof = e.target.value;
-                               setPassengers(newP);
-                             }}
-                           />
-                        </div>
-
-                        {/* Dynamic Contact Sector */}
-                        <AnimatePresence>
-                          {p.is_primary && (
-                            <motion.div 
-                              initial={{ height: 0, opacity: 0 }} 
-                              animate={{ height: 'auto', opacity: 1 }} 
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden space-y-4 pt-4 border-t border-[#A855F7]/10"
-                            >
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                  <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Mobile (Req)</label>
-                                  <input 
-                                    type="text"
-                                    placeholder="+91 XXXX"
-                                    className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
-                                    value={p.phone}
-                                    onChange={(e) => {
-                                      const newP = [...passengers];
-                                      newP[idx].phone = e.target.value;
-                                      setPassengers(newP);
-                                    }}
-                                  />
-                                </div>
-                                <div className="space-y-1.5">
-                                  <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Email (Opt)</label>
-                                  <input 
-                                    type="email"
-                                    placeholder="email@agency.com"
-                                    className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
-                                    value={p.email}
-                                    onChange={(e) => {
-                                      const newP = [...passengers];
-                                      newP[idx].email = e.target.value;
-                                      setPassengers(newP);
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {passengers.map((p, idx) => (
+                  <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30">
+                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Passenger {idx + 1}</h3>
+                    <input type="text" placeholder="Full Name" className="w-full bg-white/50 border border-white/50 rounded-xl h-14 px-6 font-bold mb-4" value={p.name} onChange={(e) => { const newP = [...passengers]; newP[idx].name = e.target.value; setPassengers(newP); }} />
+                    <div className="grid grid-cols-3 gap-4">
+                       <input type="number" placeholder="Age" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.age} onChange={(e) => { const newP = [...passengers]; newP[idx].age = e.target.value; setPassengers(newP); }} />
+                       <select className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.gender} onChange={(e) => { const newP = [...passengers]; newP[idx].gender = e.target.value; setPassengers(newP); }}><option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option></select>
+                       <input type="text" placeholder="Aadhar ID" className="bg-white/50 border border-white/50 rounded-xl h-12 px-6 font-bold text-sm" value={p.proof} onChange={(e) => { const newP = [...passengers]; newP[idx].proof = e.target.value; setPassengers(newP); }} />
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
               <div className="flex justify-center pt-20">
-                <Button
-                  onClick={async () => {
-                    const incomplete = passengers.some(p => !p.name || !p.age || !p.gender || !p.proof);
-                    const primaries = passengers.filter(p => p.is_primary);
-                    const missingPhone = primaries.some(p => !p.phone);
-
-                    if (incomplete) {
-                      toast.error('Manifest Incomplete: All traveler data required.');
-                      return;
-                    }
-                    if (primaries.length === 0) {
-                      toast.error('Identity Protocol: Please mark at least one "Official Primary" contact.');
-                      return;
-                    }
-                    if (missingPhone) {
-                      toast.error('Identity Protocol: Primary traveler requires a valid phone number.');
-                      return;
-                    }
-
-                    try {
-                      setLoading(true);
-                      const leadPrimary = primaries[0];
-                      await tripAPI.updateTouristDetails(tripId, {
-                        tourists: passengers.map(p => ({
-                          ...p,
-                          age: parseInt(p.age) || 0
-                        })),
-                        contact_phone: leadPrimary.phone,
-                        contact_email: leadPrimary.email || '',
-                        secondary_phone: primaries[1]?.phone || '',
-                        agency_charge: manualAgencyCharge,
-                        num_cabs: selectedTransport.num_cabs || 1,
-                        number_plate: selectedTransport.number_plate || ''
-                      });
-                      toast.success('Explorer Matrix Synchronized');
-                      setStep(6);
-                    } catch (err) {
-                      toast.error('Matrix Sync Failed');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  disabled={loading}
-                  className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] hover:scale-105 transition-all duration-500 rounded-full h-24 px-20 font-black text-2xl shadow-3xl shadow-[#A855F7]/30"
-                >
-                  {loading ? 'Synchronizing...' : 'Next: Settle Credits & Checkout'}
-                </Button>
+                <Button onClick={async () => { await tripAPI.updateTouristDetails(tripId, { tourists: passengers }); setStep(6); }} className="bg-[#1a0b2e] text-white rounded-full h-24 px-20 font-black text-2xl">Next: Settle Credits</Button>
               </div>
             </motion.div>
           )}
 
           {step === 6 && (
             <motion.div key="step6" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="mb-12">
-                <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-8">Checkout Manifest</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
-                    <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Transport (Onward)</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-1">{selectedTransport.onward?.provider || selectedTransport.onward?.type || "None"}</h3>
-                    <p className="text-[10px] text-[#A855F7] font-black mb-4">ID: {selectedTransport.onward?.vehicle_id || "N/A"}</p>
-                    <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport.onward?.price || 0).toLocaleString()}</div>
-                  </div>
-                  {selectedTransport.return && (
-                    <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
-                      <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Transport (Return)</p>
-                      <h3 className="text-2xl font-black text-[#1a0b2e] mb-1">{selectedTransport.return.provider || selectedTransport.return.type}</h3>
-                      <p className="text-[10px] text-[#A855F7] font-black mb-4">ID: {selectedTransport.return.vehicle_id || "N/A"}</p>
-                      <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport.return.price || 0).toLocaleString()}</div>
-                    </div>
-                  )}
-                  {selectedTransport.cab_mode === 'agency' && selectedTransport.agency_charge > 0 && (
-                    <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
-                      <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Cab Charge</p>
-                      <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">Agency Cab</h3>
-                      <div className="text-3xl font-black text-[#A855F7]">₹{(selectedTransport.agency_charge || 0).toLocaleString()}</div>
-                    </div>
-                  )}
-                  <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20">
-                    <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Stays</p>
-                    <div className="space-y-2">
-                      {selectedStays.map((s, idx) => (
-                        <div key={idx} className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-white/50">
-                          <span className="font-bold text-[#1a0b2e] text-sm">{s.name}</span>
-                          <span className="font-black text-[#A855F7] text-sm">₹{s.price.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="card-3d glass-card rounded-[2rem] p-8 border-[#A855F7]/20 bg-[#A855F7]/5">
-                    <p className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-4">Platform Fee & Taxes</p>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] mb-4">Agency Charge</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl font-black text-[#A855F7]">₹</span>
-                      <input
-                        type="number"
-                        value={manualAgencyCharge || ''}
-                        onChange={(e) => setManualAgencyCharge(Number(e.target.value) || 0)}
-                        placeholder="0"
-                        className="bg-transparent border-b-2 border-[#A855F7]/30 text-3xl font-black text-[#A855F7] w-32 focus:outline-none focus:border-[#A855F7] transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <UPIPayment
-                amount={Math.round((selectedTransport.onward?.price || 0) + (selectedTransport.return?.price || 0) + (selectedTransport.agency_charge || 0) + selectedStays.reduce((acc, s) => acc + (s.price || 0), 0) + manualAgencyCharge)}
-                tripId={tripId}
-                onTransactionIdChange={(val) => setTransactionId(val)}
-                onComplete={async () => {
-                  toast.success('Mission Complete: Credits Settled.');
-                  // Finalizing in Supabase with all relational data
-                  const totalAmount = Number(selectedTransport.onward?.price || 0) + Number(selectedTransport.return?.price || 0) + Number(selectedTransport.agency_charge || 0) + Number(selectedStays.reduce((acc, s) => acc + (s.price || 0), 0)) + Number(manualAgencyCharge || 0);
-
-                  const leadPrimary = passengers.find(p => p.is_primary) || passengers[0];
-                  await tripAPI.confirmPayment(tripId, {
-                    transaction_id: transactionId,
-                    total_amount: totalAmount,
-                    agency_charge: manualAgencyCharge,
-                    primary_phone: leadPrimary.phone || '',
-                    email: leadPrimary.email || '',
-                    secondary_phone: passengers.filter(p => p.is_primary)[1]?.phone || ''
-                  });
-                  const freshTrip = await tripAPI.getTrip(tripId);
-                  setTrip(freshTrip);
-                  setItinerary(freshTrip.itinerary || []);
-                  setStep(7);
-                  toast.success('Journey Fully Synchronized.');
-                }}
-              />
+              <UPIPayment amount={1000} tripId={tripId} onComplete={() => setStep(7)} />
             </motion.div>
           )}
 
@@ -710,128 +270,37 @@ const TripPlanner = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Voyage Manifest</h2>
-                  <p className="text-[#1a0b2e]/50 font-bold">Your journey has been successfully synthesized across the hub matrix.</p>
                 </div>
                 <div className="flex gap-4">
-                  <Button 
-                    onClick={downloadAgencyManifest} 
-                    className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"
-                  >
-                    <ShieldCheck className="w-5 h-5" /> Download Agency Copy
-                  </Button>
-                  <Button 
-                    onClick={downloadCustomerManifest} 
-                    className="bg-[#A855F7] text-white hover:bg-[#1a0b2e] h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"
-                  >
-                    <Send className="w-5 h-5" /> Send Customer Copy
-                  </Button>
+                  <Button onClick={downloadAgencyManifest} className="bg-[#1a0b2e] text-white h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"><ShieldCheck className="w-5 h-5" /> Download Agency Copy</Button>
+                  <Button onClick={downloadCustomerManifest} className="bg-[#A855F7] text-white h-14 rounded-2xl px-8 flex items-center gap-3 font-bold"><Send className="w-5 h-5" /> Send Customer Copy</Button>
                 </div>
               </div>
 
-              {/* Instant Manifest Summary (For History View) */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="glass-card rounded-[2.5rem] p-10 border-white/50">
-                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Mission Logistics Summary</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                       <div className="p-4 bg-white/40 rounded-2xl border border-white/50">
-                         <p className="text-[8px] font-black uppercase text-[#A855F7] mb-1">Chosen Transport</p>
-                         <p className="font-bold text-[#1a0b2e]">{selectedTransport.onward?.provider || selectedTransport.onward?.type || "None"}</p>
-                         <p className="text-[10px] text-[#1a0b2e]/40">{selectedTransport.onward?.vehicle_id || 'MISSION VECTOR'}</p>
-                       </div>
-                       <div className="p-4 bg-white/40 rounded-2xl border border-white/50">
-                         <p className="text-[8px] font-black uppercase text-[#A855F7] mb-1">Accommodation</p>
-                         <p className="font-bold text-[#1a0b2e]">{selectedStays[0]?.name || "None Selected"}</p>
-                         <p className="text-[10px] text-[#1a0b2e]/40">{selectedStays.length} Matrix Point(s)</p>
-                       </div>
-                    </div>
-
-                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Explorer Manifest</h3>
-                    <div className="space-y-4">
-                      {passengers.map((p, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-white/40 rounded-2xl border border-white/50">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-[#A855F7]/10 flex items-center justify-center font-black text-[#A855F7]">{idx + 1}</div>
-                            <div>
-                              <p className="font-bold text-[#1a0b2e]">{p.name || 'Anonymous'}</p>
-                              <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase">{p.gender} • AGE {p.age}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                             <p className="text-[10px] font-black text-[#A855F7] uppercase tracking-widest">{p.is_primary ? 'Primary Contact' : 'Explorer'}</p>
-                             <p className="font-mono text-xs text-[#1a0b2e]/60">{maskAadhar(p.proof)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+              <div className="fixed -left-[4000px] top-0 pointer-events-none">
+                <div ref={customerRef} className="w-[800px] bg-white p-20">
+                  <div className="bg-[#A855F7] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
+                    <div><h1 className="text-4xl font-black">Y.A.S.H AGENCY</h1><p className="text-sm font-bold opacity-80 uppercase tracking-widest mt-1">Voyager Blueprint</p></div>
+                  </div>
+                  <div className="space-y-12">
+                    {itinerary.map((day, idx) => (
+                      <div key={idx}><h3 className="text-xl font-black text-[#A855F7] mb-2 uppercase">Day {idx + 1}: {day.title}</h3><div className="space-y-3">{day.activities.map((act, i) => <p key={i} className="text-sm text-gray-700 font-bold">• {act}</p>)}</div></div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="space-y-8">
-                  <div className="glass-card rounded-[2.5rem] p-8 border-white/50 bg-[#1a0b2e] text-white">
-                    <h3 className="text-[10px] font-black uppercase text-white/40 tracking-widest mb-6">Mission Reconciliation</h3>
-                    <div className="space-y-4">
-                       <div className="flex justify-between border-b border-white/10 pb-4">
-                         <span className="text-xs font-bold text-white/60">Agency Fee</span>
-                         <span className="font-black">₹{manualAgencyCharge.toLocaleString()}</span>
-                       </div>
-                       <div className="flex justify-between items-center bg-white/10 p-4 rounded-xl">
-                         <span className="text-xs font-black uppercase">Total Collection</span>
-                         <span className="text-2xl font-black italic">₹{trip.total_amount?.toLocaleString() || 'N/A'}</span>
-                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-8 text-center bg-green-500/10 border border-green-500/20 rounded-[2rem]">
-                    <Sparkles className="w-8 h-8 text-green-500 mx-auto mb-4" />
-                    <p className="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">Status: Finalized</p>
-                    <p className="text-xs font-bold text-green-600/60">This mission record is uneditable for logistical integrity.</p>
-                  </div>
+                <div ref={agencyRef} className="w-[1000px] bg-white p-20">
+                  <div className="bg-[#1a0b2e] p-12 -mx-20 -mt-20 mb-12 text-white"><h1 className="text-4xl font-black text-center">Y.A.S.H AGENCY</h1><p className="text-center text-sm font-bold opacity-40 uppercase tracking-widest mt-2">Logistics Master Record</p></div>
+                  <table className="w-full mb-12 overflow-hidden rounded-2xl border border-gray-100">
+                    <thead className="bg-gray-50 text-left"><tr><th className="p-4 text-xs font-black uppercase text-gray-500">Explorer</th><th className="p-4 text-xs font-black uppercase text-gray-500">Age/Sex</th><th className="p-4 text-xs font-black uppercase text-gray-500">Proof ID</th></tr></thead>
+                    <tbody className="divide-y divide-gray-50">{passengers.map((p, idx) => <tr key={idx}><td className="p-4 font-bold">{p.name || 'Anonymous'}</td><td className="p-4 text-sm font-bold">{p.age}/{p.gender}</td><td className="p-4 text-mono text-xs">{p.proof}</td></tr>)}</tbody>
+                  </table>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-8">
-                {itinerary.map((day, idx) => (
-                  <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
-                    <div className="flex items-center gap-8 mb-10 pb-8 border-b border-[#1a0b2e]/5">
-
-                      <div className="w-24 h-24 rounded-[2.5rem] bg-[#1a0b2e] text-white flex items-center justify-center font-black text-4xl shadow-3xl shadow-[#1a0b2e]/20">
-                        {day.day}
-                      </div>
-                      <div>
-                        <h3 className="text-4xl font-black text-[#1a0b2e] mb-2">{day.title}</h3>
-                        <div className="flex gap-4">
-                          <span className="px-4 py-1 bg-purple-100 rounded-full text-[10px] font-black uppercase text-[#A855F7] tracking-widest">{day.activities?.length || 0} Events Synchronized</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4">
-                      {day.activities?.map((activity, actIdx) => (
-                        <div key={actIdx} className="group flex gap-8 p-8 rounded-[2.5rem] bg-white/40 border border-white/60 hover:bg-white hover:shadow-xl transition-all duration-500">
-                          <div className="font-black text-[#A855F7] text-xl min-w-[120px] pt-1">
-                            {typeof activity === 'string' ? activity.split(' - ')[0] : (activity.time || `E${actIdx + 1}`)}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-2xl font-black text-[#1a0b2e] mb-2 group-hover:text-[#A855F7] transition-colors">
-                              {typeof activity === 'string' ? (activity.split(' - ')[1] || activity) : activity.task}
-                            </h4>
-                            {typeof activity === 'object' && activity.details && (
-                              <p className="text-[#1a0b2e]/60 font-bold leading-relaxed">{activity.details}</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
-
-      {/* Decorative BG - Airy & Bright */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 pointer-events-none overflow-hidden">
         <div className="absolute top-[5%] right-[5%] w-[900px] h-[900px] bg-[#fdfafb] rounded-full blur-[150px] opacity-100" />
         <div className="absolute top-[20%] left-[10%] w-[600px] h-[600px] bg-[#f3e8ff] rounded-full blur-[140px] pulse-bg opacity-40" />
