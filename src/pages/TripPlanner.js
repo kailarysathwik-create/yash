@@ -516,7 +516,7 @@ const TripPlanner = () => {
                            </div>
                            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5 text-right">
                               <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Settlement</p>
-                              <p className="text-2xl font-black italic text-[#A855F7]">₹{trip?.total_amount?.toLocaleString()}</p>
+                              <p className="text-2xl font-black italic text-[#A855F7]">₹{(trip?.total_amount || trip?.total_price || 0).toLocaleString()}</p>
                            </div>
                         </div>
 
@@ -530,11 +530,11 @@ const TripPlanner = () => {
                                  </tr>
                               </thead>
                               <tbody className="divide-y divide-black/5">
-                                 {passengers.map((p, i) => (
+                                 {(passengers.length > 0 ? passengers : (trip?.tourists || trip?.passengers || [])).map((p, i) => (
                                     <tr key={i} className="hover:bg-white transition-colors">
-                                       <td className="p-6 font-black text-gray-700">{p.name} {p.is_primary && <span className="ml-2 text-[8px] bg-[#A855F7] text-white px-2 py-0.5 rounded-full">Lead</span>}</td>
-                                       <td className="p-6 font-bold text-gray-500 uppercase">{p.age} • {p.gender}</td>
-                                       <td className="p-6 text-xs font-black text-gray-300 font-mono italic tracking-tighter">{p.proof}</td>
+                                       <td className="p-6 font-black text-gray-700">{p.name || 'PERSONNEL'} {p.is_primary && <span className="ml-2 text-[8px] bg-[#A855F7] text-white px-2 py-0.5 rounded-full">Lead</span>}</td>
+                                       <td className="p-6 font-bold text-gray-500 uppercase">{p.age || 'N/A'} • {p.gender || 'N/A'}</td>
+                                       <td className="p-6 text-xs font-black text-gray-300 font-mono italic tracking-tighter">{p.proof || 'N/A'}</td>
                                     </tr>
                                  ))}
                               </tbody>

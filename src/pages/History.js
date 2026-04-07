@@ -248,9 +248,9 @@ const HistoryPage = () => {
               <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Personnel</p>
               <p className="text-xl font-black italic text-[#1a0b2e]">{captureTrip?.num_people} Personnel</p>
             </div>
-            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5">
+            <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5 text-right">
                <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Settlement</p>
-               <p className="text-xl font-black italic text-[#A855F7]">₹{captureTrip?.total_amount?.toLocaleString()}</p>
+               <p className="text-xl font-black italic text-[#A855F7]">₹{(captureTrip?.total_amount || captureTrip?.total_price || 0).toLocaleString()}</p>
             </div>
             <div className="p-6 rounded-[2rem] bg-[#1a0b2e]/5 text-right">
                <p className="text-[8px] font-black uppercase text-[#1a0b2e]/40 mb-2">Contact</p>
@@ -260,8 +260,8 @@ const HistoryPage = () => {
           <table className="w-full mb-12 overflow-hidden rounded-3xl border border-gray-100">
             <thead className="bg-[#1a0b2e]/[0.02] text-left"><tr><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Personnel Matrix</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Age / Sex</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Identity Proof</th></tr></thead>
             <tbody className="divide-y divide-gray-50">
-              {(captureTrip?.passengers || captureTrip?.tourists)?.map((p, idx) => (
-                <tr key={idx}><td className="p-6 font-black text-[#1a0b2e]">{p.name || 'ANON'}</td><td className="p-6 font-bold text-gray-400 uppercase text-xs">{p.age || 'N/A'} • {p.gender || 'N/A'}</td><td className="p-6 text-mono text-xs font-black text-gray-200">{p.proof || 'N/A'}</td></tr>
+              {(captureTrip?.passengers || captureTrip?.tourists || [])?.map((p, idx) => (
+                <tr key={idx}><td className="p-6 font-black text-[#1a0b2e]">{p.name || 'PERSONNEL'}</td><td className="p-6 font-bold text-gray-400 uppercase text-xs">{p.age || 'N/A'} • {p.gender || 'N/A'}</td><td className="p-6 text-mono text-xs font-black text-gray-200">{p.proof || 'N/A'}</td></tr>
               ))}
             </tbody>
           </table>
