@@ -223,27 +223,45 @@ const TripPlanner = () => {
       try {
         const data = await tripAPI.getTrip(tripId);
         setTrip(data);
-        // Auto-initialize orchestration to skip the manual "Plan Ready" step
-        setOrchestrating(true);
-        const response = await tripAPI.orchestrateTrip(tripId);
-        setTransportOptions(response.transports || { onward: [], return: [] });
-        setStayOptions(response.stays || []);
-        setItinerary(response.itinerary || []);
-        // Initialize passengers array from trip data
-        const travelerCount = data.num_people || 1;
-        setPassengers(Array.from({ length: travelerCount }).map(() => ({ 
-          name: '', 
-          age: '', 
-          gender: '', 
-          proof: '', 
-          is_primary: false,
-          phone: '',
-          email: '' 
-        })));
-        setManualAgencyCharge(data.agency_charge || 0);
-        setStep(2); // Move immediately to Transport
+        
+        // Data Hydration: Restore saved details if they exist (History Mode)
+        if (data.transaction_id || data.status === 'completed') {
+            setTransactionId(data.transaction_id || '');
+            setManualAgencyCharge(data.agency_charge || 0);
+            
+            // Map saved tourists to passengers state
+            if (data.tourists && data.tourists.length > 0) {
+              setPassengers(data.tourists.map(t => ({
+                name: t.name,
+                age: t.age?.toString() || '',
+                gender: t.gender || '',
+                proof: t.proof || '',
+                is_primary: t.is_primary || false,
+                phone: t.phone || '',
+                email: t.email || ''
+              })));
+            } else {
+              setPassengers(Array.from({ length: data.num_people || 1 }).map(() => ({ 
+                name: '', age: '', gender: '', proof: '', is_primary: false, phone: '', email: '' 
+              })));
+            }
+            
+            setStep(7); // Jump directly to manifest for history
+        } else {
+            // New trip: Auto-initialize orchestration
+            setOrchestrating(true);
+            const response = await tripAPI.orchestrateTrip(tripId);
+            setTransportOptions(response.transports || { onward: [], return: [] });
+            setStayOptions(response.stays || []);
+            setItinerary(response.itinerary || []);
+            setPassengers(Array.from({ length: data.num_people || 1 }).map(() => ({ 
+              name: '', age: '', gender: '', proof: '', is_primary: false, phone: '', email: '' 
+            })));
+            setManualAgencyCharge(data.agency_charge || 0);
+            setStep(2); 
+        }
       } catch (error) {
-        toast.error('Failed to synchronize and orchestrate trip data');
+        toast.error('Failed to synchronize hub data');
         navigate('/dashboard');
       } finally {
         setLoading(false);
@@ -424,9 +442,11 @@ const TripPlanner = () => {
                          <label className="text-[10px] font-black uppercase text-[#A855F7]/40 group-hover:text-[#A855F7] transition-colors cursor-pointer">Official Primary</label>
                          <input 
                            type="checkbox"
-                           className="w-5 h-5 accent-[#A855F7] cursor-pointer"
+                           disabled={step === 7}
+                           className={`w-5 h-5 accent-[#A855F7] ${step === 7 ? 'cursor-default opacity-50' : 'cursor-pointer'}`}
                            checked={p.is_primary}
                            onChange={(e) => {
+                             if (step === 7) return;
                              const newP = [...passengers];
                              newP[idx].is_primary = e.target.checked;
                              setPassengers(newP);
@@ -442,10 +462,12 @@ const TripPlanner = () => {
                            className="w-full bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-14 px-6 font-bold"
                            value={p.name}
                            onChange={(e) => {
+                             if (step === 7) return;
                              const newP = [...passengers];
                              newP[idx].name = e.target.value;
                              setPassengers(newP);
                            }}
+                           readOnly={step === 7}
                         />
                         <div className="grid grid-cols-3 gap-4">
                            <input
@@ -453,7 +475,9 @@ const TripPlanner = () => {
                              placeholder="Age"
                              className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
                              value={p.age}
+                             readOnly={step === 7}
                              onChange={(e) => {
+                               if (step === 7) return;
                                const newP = [...passengers];
                                newP[idx].age = e.target.value;
                                setPassengers(newP);
@@ -462,7 +486,9 @@ const TripPlanner = () => {
                            <select
                              className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm appearance-none"
                              value={p.gender}
+                             disabled={step === 7}
                              onChange={(e) => {
+                               if (step === 7) return;
                                const newP = [...passengers];
                                newP[idx].gender = e.target.value;
                                setPassengers(newP);
@@ -478,7 +504,9 @@ const TripPlanner = () => {
                              placeholder="Aadhar ID"
                              className="bg-white/50 border border-white/50 text-[#1a0b2e] rounded-xl h-12 px-6 font-bold text-sm"
                              value={p.proof}
+                             readOnly={step === 7}
                              onChange={(e) => {
+                               if (step === 7) return;
                                const newP = [...passengers];
                                newP[idx].proof = e.target.value;
                                setPassengers(newP);
@@ -690,6 +718,48 @@ const TripPlanner = () => {
                 </div>
               </div>
 
+              {/* Instant Manifest Summary (For History View) */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="glass-card rounded-[2.5rem] p-10 border-white/50">
+                    <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-6">Explorer Manifest</h3>
+                    <div className="space-y-4">
+                      {passengers.map((p, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 bg-white/40 rounded-2xl border border-white/50">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#A855F7]/10 flex items-center justify-center font-black text-[#A855F7]">{idx + 1}</div>
+                            <div>
+                              <p className="font-bold text-[#1a0b2e]">{p.name || 'Anonymous'}</p>
+                              <p className="text-[10px] font-bold text-[#1a0b2e]/40 uppercase">{p.gender} • AGE {p.age}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[10px] font-black text-[#A855F7] uppercase tracking-widest">{p.is_primary ? 'Primary Contact' : 'Explorer'}</p>
+                             <p className="font-mono text-xs text-[#1a0b2e]/60">{maskAadhar(p.proof)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="glass-card rounded-[2.5rem] p-8 border-white/50 bg-[#1a0b2e] text-white">
+                    <h3 className="text-[10px] font-black uppercase text-white/40 tracking-widest mb-6">Mission Reconciliation</h3>
+                    <div className="space-y-4">
+                       <div className="flex justify-between border-b border-white/10 pb-4">
+                         <span className="text-xs font-bold text-white/60">Agency Fee</span>
+                         <span className="font-black">₹{manualAgencyCharge.toLocaleString()}</span>
+                       </div>
+                       <div className="flex justify-between items-center bg-white/10 p-4 rounded-xl">
+                         <span className="text-xs font-black uppercase">Total Collection</span>
+                         <span className="text-2xl font-black italic">₹{trip.total_amount?.toLocaleString() || 'N/A'}</span>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 gap-8">
                 {itinerary.map((day, idx) => (
                   <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
@@ -736,6 +806,13 @@ const TripPlanner = () => {
         <div className="absolute top-[5%] right-[5%] w-[900px] h-[900px] bg-[#fdfafb] rounded-full blur-[150px] opacity-100" />
         <div className="absolute top-[20%] left-[10%] w-[600px] h-[600px] bg-[#f3e8ff] rounded-full blur-[140px] pulse-bg opacity-40" />
       </div>
+
+      {/* Branded Visual Signature */}
+      <footer className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#A855F7]/20 to-transparent mb-8" />
+        <p className="text-2xl font-black text-[#1a0b2e] tracking-tighter">Y.A.S.H</p>
+        <p className="text-[10px] font-black uppercase text-[#A855F7]/40 tracking-widest">crafted by KPN Studio</p>
+      </footer>
     </div>
   );
 };
