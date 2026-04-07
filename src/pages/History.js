@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { toPng } from 'html-to-image';
-import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, ExternalLink, LoaderCircle, ShieldCheck, Send, Download } from 'lucide-react';
+import { History, RefreshCw, Calendar, Users, Plane, Train, Car, ArrowRight, LoaderCircle, Building2, User, Download } from 'lucide-react';
 import { tripAPI } from '../api/tripAPI';
 
 const HistoryPage = () => {
@@ -167,7 +167,7 @@ const HistoryPage = () => {
                           className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all shadow-sm group/btn disabled:opacity-50"
                           title="Agency Copy (PNG)"
                         >
-                          <ShieldCheck className="w-4 h-4 text-[#1a0b2e] group-hover/btn:text-white" />
+                          <Building2 className="w-4 h-4 text-[#1a0b2e] group-hover/btn:text-white" />
                         </button>
                         <button 
                           disabled={isCapturing}
@@ -175,14 +175,7 @@ const HistoryPage = () => {
                           className="w-10 h-10 rounded-xl border border-[#A855F7]/10 flex items-center justify-center hover:bg-[#A855F7] hover:text-white transition-all shadow-sm group/btn disabled:opacity-50"
                           title="Customer Copy (PNG)"
                         >
-                          <Send className="w-4 h-4 text-[#A855F7] group-hover/btn:text-white" />
-                        </button>
-                        <button 
-                          onClick={() => navigate(`/trip/${trip.trip_id}`)}
-                          className="w-10 h-10 rounded-xl border border-[#1a0b2e]/10 flex items-center justify-center hover:bg-[#1a0b2e] hover:text-white transition-all duration-500 shadow-sm"
-                          title="View Archive Mirror"
-                        >
-                          <ExternalLink className="w-4 h-4 text-[#1a0b2e] group-hover:text-white" />
+                          <User className="w-4 h-4 text-[#A855F7] group-hover/btn:text-white" />
                         </button>
                       </div>
                   </div>
@@ -215,7 +208,7 @@ const HistoryPage = () => {
         <div ref={customerRef} className="w-[800px] bg-white p-20">
           <div className="bg-[#A855F7] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
             <div className="space-y-1">
-              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h1>
+              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'AGENCY'}</h1>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Customer Copy • Voyage Blueprint</p>
             </div>
             <div className="text-right">
@@ -242,7 +235,7 @@ const HistoryPage = () => {
         <div ref={agencyRef} className="w-[1000px] bg-white p-20">
           <div className="bg-[#1a0b2e] p-12 -mx-20 -mt-20 mb-12 flex justify-between items-center text-white">
             <div className="space-y-1">
-              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'Y.A.S.H'}</h1>
+              <h1 className="text-4xl font-black italic tracking-tighter uppercase">{user?.organization || 'AGENCY'}</h1>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Internal Master • Logistics Record</p>
             </div>
             <div className="text-right">
@@ -267,8 +260,8 @@ const HistoryPage = () => {
           <table className="w-full mb-12 overflow-hidden rounded-3xl border border-gray-100">
             <thead className="bg-[#1a0b2e]/[0.02] text-left"><tr><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Personnel Matrix</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Age / Sex</th><th className="p-6 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Identity Proof</th></tr></thead>
             <tbody className="divide-y divide-gray-50">
-              {captureTrip?.passengers?.map((p, idx) => (
-                <tr key={idx}><td className="p-6 font-black text-[#1a0b2e]">{p.name}</td><td className="p-6 font-bold text-gray-400 uppercase text-xs">{p.age} • {p.gender}</td><td className="p-6 text-mono text-xs font-black text-gray-200">{p.proof}</td></tr>
+              {(captureTrip?.passengers || captureTrip?.tourists)?.map((p, idx) => (
+                <tr key={idx}><td className="p-6 font-black text-[#1a0b2e]">{p.name || 'ANON'}</td><td className="p-6 font-bold text-gray-400 uppercase text-xs">{p.age || 'N/A'} • {p.gender || 'N/A'}</td><td className="p-6 text-mono text-xs font-black text-gray-200">{p.proof || 'N/A'}</td></tr>
               ))}
             </tbody>
           </table>
