@@ -51,11 +51,21 @@ const TripPlanner = () => {
       if (pnrDetails && Object.keys(seatMatrix).length === 0) {
         try {
           const res = await tripAPI.fetchPNRStatus(pnrDetails);
-          if (res.status === 'Verified') {
-             // Map some mock seat data for each passenger for demo
+          if (res.status === 'Verified' && res.passengers) {
              const matrix = {};
-             passengers.forEach((p, i) => {
-                matrix[p.name || `P${i}`] = { coach: res.coach, seat: (parseInt(res.seat) + i).toString() };
+             const passengersToMap = passengers.length > 0 ? passengers : (trip?.tourists || []);
+             
+             // Real API returns an array of {Number, BookingStatus, CurrentStatus, Coach, ...}
+             res.passengers.forEach((pStatus, idx) => {
+                if (passengersToMap[idx]) {
+                   // Some APIs give "Coach" and "Number", others give "CurrentStatus" like "B1, 45, LB"
+                   const coach = pStatus.Coach || pStatus.CurrentStatus?.split(',')[0] || 'CNF';
+                   const seat = pStatus.Number || pStatus.CurrentStatus?.split(',')[1] || 'CNF';
+                   matrix[passengersToMap[idx].name || `P${idx+1}`] = { 
+                      coach: coach.trim(), 
+                      seat: seat.trim() 
+                   };
+                }
              });
              setSeatMatrix(matrix);
           }
