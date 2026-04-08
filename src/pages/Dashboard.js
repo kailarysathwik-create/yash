@@ -6,8 +6,9 @@ import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Plane, Train, Car, Navigation, Sparkles, Waves } from 'lucide-react';
+import { Plane, Train, Car, Navigation, Sparkles, Waves, MapPin } from 'lucide-react';
 import { tripAPI } from '../api/tripAPI';
+import { indiaData } from '../utils/indiaData';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,7 +16,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
+    from_state: '',
     from_location: '',
+    dest_state: '',
     destination: '',
     num_people: 1,
     budget: '',
@@ -26,13 +29,16 @@ const Dashboard = () => {
     preferences: ''
   });
 
+  const states = Object.keys(indiaData).sort();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const { from_state, dest_state, ...restData } = formData;
       const payload = {
-        ...formData,
+        ...restData,
         num_people: parseInt(formData.num_people),
         num_days: parseInt(formData.num_days),
         budget: formData.budget ? parseFloat(formData.budget) : null
@@ -108,13 +114,60 @@ const Dashboard = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-3">
-                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start</Label>
-                      <Input value={formData.from_location} onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/30 placeholder:font-medium" placeholder="Departure City" required />
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Departure State</Label>
+                        <select 
+                          value={formData.from_state} 
+                          onChange={(e) => setFormData({ ...formData, from_state: e.target.value, from_location: '' })} 
+                          className="glass-input h-16 px-6 font-bold w-full appearance-none bg-white/20"
+                          required
+                        >
+                          <option value="" disabled className="bg-white text-[#1a0b2e]">Select State</option>
+                          {states.map(s => <option key={s} value={s} className="bg-white text-[#1a0b2e]">{s}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Departure City</Label>
+                        <select 
+                          value={formData.from_location} 
+                          onChange={(e) => setFormData({ ...formData, from_location: e.target.value })} 
+                          className="glass-input h-16 px-6 font-bold w-full appearance-none disabled:opacity-40 bg-white/20"
+                          disabled={!formData.from_state}
+                          required
+                        >
+                          <option value="" disabled className="bg-white text-[#1a0b2e]">Select City</option>
+                          {formData.from_state && indiaData[formData.from_state].sort().map(c => <option key={c} value={c} className="bg-white text-[#1a0b2e]">{c}</option>)}
+                        </select>
+                      </div>
                     </div>
-                    <div className="space-y-3">
-                      <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination</Label>
-                      <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className="glass-input h-16 px-6 font-bold placeholder:text-[#A855F7]/30 placeholder:font-medium" placeholder="Destination City" required />
+
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination State</Label>
+                        <select 
+                          value={formData.dest_state} 
+                          onChange={(e) => setFormData({ ...formData, dest_state: e.target.value, destination: '' })} 
+                          className="glass-input h-16 px-6 font-bold w-full appearance-none bg-white/20"
+                          required
+                        >
+                          <option value="" disabled className="bg-white text-[#1a0b2e]">Select State</option>
+                          {states.map(s => <option key={s} value={s} className="bg-white text-[#1a0b2e]">{s}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Destination City</Label>
+                        <select 
+                          value={formData.destination} 
+                          onChange={(e) => setFormData({ ...formData, destination: e.target.value })} 
+                          className="glass-input h-16 px-6 font-bold w-full appearance-none disabled:opacity-40 bg-white/20"
+                          disabled={!formData.dest_state}
+                          required
+                        >
+                          <option value="" disabled className="bg-white text-[#1a0b2e]">Select City</option>
+                          {formData.dest_state && indiaData[formData.dest_state].sort().map(c => <option key={c} value={c} className="bg-white text-[#1a0b2e]">{c}</option>)}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
