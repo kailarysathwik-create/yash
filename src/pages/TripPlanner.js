@@ -9,6 +9,8 @@ import RealTransportSearch from '../components/RealTransportSearch';
 import RealStaySearch from '../components/RealStaySearch';
 import UPIPayment from '../components/UPIPayment';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { MapPin, Calendar, Users, Sparkles, CheckCircle2, LoaderCircle, Send, ShieldCheck } from 'lucide-react';
 
 const TripPlanner = () => {
