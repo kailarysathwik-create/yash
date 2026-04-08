@@ -206,7 +206,14 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Start Date</Label>
-                      <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="glass-input h-16 px-6 font-bold text-[#A855F7]/70" required />
+                      <Input 
+                        type="date" 
+                        min={new Date().toISOString().split('T')[0]}
+                        value={formData.start_date} 
+                        onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} 
+                        className="glass-input h-16 px-6 font-bold text-[#A855F7]/70" 
+                        required 
+                      />
                     </div>
                     <div className="space-y-3">
                       <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Places To Cover</Label>

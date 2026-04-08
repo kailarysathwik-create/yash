@@ -31,6 +31,8 @@ const TripPlanner = () => {
   const [passengers, setPassengers] = useState([]);
   const [transactionId, setTransactionId] = useState('');
   const [isHistory, setIsHistory] = useState(false);
+  const [pnrDetails, setPnrDetails] = useState('');
+  const [hqStayName, setHqStayName] = useState('');
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
 
@@ -193,7 +195,22 @@ const TripPlanner = () => {
               <div className="max-w-2xl mx-auto glass-card rounded-[4rem] p-16 border-dashed border-2 border-[#A855F7]/20">
                 <Sparkles className="w-16 h-16 text-[#A855F7] mx-auto mb-10 animate-pulse" />
                 <h2 className="text-4xl font-black text-[#1a0b2e] mb-6">Plan Ready</h2>
-                <Button onClick={() => { setOrchestrating(true); tripAPI.orchestrateTrip(tripId).then(r => { setTransportOptions(r.transports); setStayOptions(r.stays); setItinerary(r.itinerary); setStep(2); }); }} disabled={orchestrating} className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-20 px-12 font-black text-xl">
+                <Button 
+                  onClick={() => { 
+                    setOrchestrating(true); 
+                    tripAPI.orchestrateTrip(tripId, {
+                      pnr_details: pnrDetails || 'Internal Hub Log',
+                      stay_name: hqStayName || 'Selected HQ'
+                    }).then(r => { 
+                      setTransportOptions(r.transports); 
+                      setStayOptions(r.stays); 
+                      setItinerary(r.itinerary); 
+                      setStep(2); 
+                    }); 
+                  }} 
+                  disabled={orchestrating} 
+                  className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-20 px-12 font-black text-xl"
+                >
                   {orchestrating ? 'Synchronizing...' : 'Initialize AI Sync'}
                 </Button>
               </div>
@@ -208,7 +225,68 @@ const TripPlanner = () => {
 
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-              <RealStaySearch options={stayOptions} tripData={trip} numDays={trip?.num_days || 1} onSelect={(opt) => { setSelectedStays(prev => [...prev, opt]); if (bookedNights + opt.nights >= trip.num_days) setStep(4); }} />
+              <div className="glass-card rounded-[3rem] p-10 border-[#A855F7]/20 mb-8 bg-[#A855F7]/5 group hover:shadow-2xl transition-all duration-700">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-14 h-14 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center border border-[#A855F7]/20">
+                    <ShieldCheck className="w-7 h-7 text-[#A855F7]" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-[#1a0b2e] tracking-tight">Vector Identity Matrix</h3>
+                    <p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest">Metadata Synchronization Required</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Transit Reference (PNR/Flight No.)</Label>
+                    <Input 
+                      value={pnrDetails} 
+                      onChange={(e) => setPnrDetails(e.target.value)} 
+                      className="glass-input h-14 px-5 font-bold border-[#A855F7]/20 focus:border-[#A855F7]" 
+                      placeholder="e.g. 6E-201 / PNR: 49AAB378" 
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Stay Mission HQ Name</Label>
+                    <Input 
+                      value={hqStayName} 
+                      onChange={(e) => setHqStayName(e.target.value)} 
+                      className="glass-input h-14 px-5 font-bold border-[#A855F7]/20 focus:border-[#A855F7]" 
+                      placeholder="e.g. Radisson Blu / Hilton HQ" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <RealStaySearch options={stayOptions} tripData={trip} numDays={trip?.num_days || 1} onSelect={(opt) => { setSelectedStays(prev => [...prev, opt]); }} />
+              
+              <div className="flex justify-center pt-16">
+                 <Button 
+                   onClick={async () => {
+                     try {
+                        setLoading(true);
+                        const res = await tripAPI.generateItinerary(tripId, {
+                           pnr_details: pnrDetails || 'Hub Transit Protocol',
+                           stay_name: hqStayName || selectedStays[0]?.name || 'Mission Genesis HQ',
+                           transport: selectedTransport,
+                           stays: selectedStays
+                        });
+                        setItinerary(res.itinerary || []);
+                        setStep(4);
+                     } catch (err) {
+                        toast.error("AI Strategic Refusal: Check identifiers.");
+                     } finally {
+                        setLoading(false);
+                     }
+                   }} 
+                   disabled={selectedStays.length === 0 || loading}
+                   className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-24 px-20 font-black text-2xl shadow-2xl transition-all disabled:opacity-30"
+                 >
+                   {loading ? 'Orchestrating Blueprint...' : 'Mission Ready: Generate Plan'}
+                 </Button>
+                 {selectedStays.length === 0 && (
+                   <p className="absolute mt-28 text-[10px] font-black uppercase text-[#A855F7]/40">At least one Stay HQ required to initiate Plan</p>
+                 )}
+              </div>
             </motion.div>
           )}
 
