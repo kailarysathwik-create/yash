@@ -251,6 +251,17 @@ export const tripAPI = {
     },
   },
 
+  // Fetch PNR status (Ephemeral)
+  fetchPNRStatus: async (pnr) => {
+    try {
+      const response = await apiClient.post('/fetch-pnr-status', { pnr });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch PNR status:', error.message);
+      throw error;
+    }
+  },
+
   // Send manifest notification
   sendManifest: async (manifestData) => {
     try {

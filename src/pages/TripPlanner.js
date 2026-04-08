@@ -33,6 +33,8 @@ const TripPlanner = () => {
   const [isHistory, setIsHistory] = useState(false);
   const [pnrDetails, setPnrDetails] = useState('');
   const [hqStayName, setHqStayName] = useState('');
+  const [seatMatrix, setSeatMatrix] = useState({}); // {personName: {coach, seat}}
+  const [currentManifestPage, setCurrentManifestPage] = useState(0); 
 
   const bookedNights = selectedStays.reduce((acc, s) => acc + (s.nights || 0), 0);
 
@@ -45,11 +47,47 @@ const TripPlanner = () => {
   const downloadCustomerManifest = async () => {
     if (!customerRef.current) return;
     try {
-      const dataUrl = await toPng(customerRef.current, { quality: 1.0, pixelRatio: 2 });
-      const link = document.createElement('a');
-      link.download = `Voyager_Blueprint_${trip?.destination || 'Trip'}.png`;
-      link.href = dataUrl;
-      link.click();
+      // 1. Fetch Ephemeral Seat Matrix if PNR exists
+      if (pnrDetails && Object.keys(seatMatrix).length === 0) {
+        try {
+          const res = await tripAPI.fetchPNRStatus(pnrDetails);
+          if (res.status === 'Verified') {
+             // Map some mock seat data for each passenger for demo
+             const matrix = {};
+             passengers.forEach((p, i) => {
+                matrix[p.name || `P${i}`] = { coach: res.coach, seat: (parseInt(res.seat) + i).toString() };
+             });
+             setSeatMatrix(matrix);
+          }
+        } catch (e) {
+          console.error("PNR Handshake Failed:", e);
+        }
+      }
+
+      // 2. Pagination Logic
+      const passengersToPrint = passengers.length > 0 ? passengers : (trip?.tourists || []);
+      const pageSize = 10;
+      const totalPages = Math.ceil(passengersToPrint.length / pageSize) || 1;
+
+      toast.info(`Preparing ${totalPages} Blueprint Page(s)...`);
+
+      for (let i = 0; i < totalPages; i++) {
+        // Update state to current page for rendering
+        setCurrentManifestPage(i);
+        
+        // Wait for React to re-render the canvas with the new page of passengers
+        await new Promise(resolve => setTimeout(resolve, 500)); 
+
+        const dataUrl = await toPng(customerRef.current, { quality: 1.0, pixelRatio: 2 });
+        const link = document.createElement('a');
+        link.download = `Voyager_Blueprint_${trip?.destination || 'Trip'}_Page_${i + 1}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+      
+      // Reset to page 0
+      setCurrentManifestPage(0);
+      
       toast.success('Visual Blueprint Captured');
     } catch (err) {
       toast.error('Synthesis failed');
@@ -604,14 +642,16 @@ const TripPlanner = () => {
                                  <tr>
                                     <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Explorer Matrix</th>
                                     <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">AGE/SEX</th>
+                                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Coach/Seat</th>
                                     <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">ID PROOF</th>
                                  </tr>
                               </thead>
                               <tbody className="divide-y divide-black/5">
-                                 {(passengers.length > 0 ? passengers : (trip?.tourists || trip?.passengers || [])).map((p, i) => (
+                                 {(passengers.length > 0 ? passengers : (trip?.tourists || trip?.passengers || [])).slice(currentManifestPage * 10, (currentManifestPage + 1) * 10).map((p, i) => (
                                     <tr key={i} className="hover:bg-white transition-colors">
                                        <td className="p-6 font-black text-gray-700">{p.name || 'PERSONNEL'} {p.is_primary && <span className="ml-2 text-[8px] bg-[#A855F7] text-white px-2 py-0.5 rounded-full">Lead</span>}</td>
                                        <td className="p-6 font-bold text-gray-500 uppercase">{p.age || 'N/A'} • {p.gender || 'N/A'}</td>
+                                       <td className="p-6 font-black text-[#A855F7]/80">{seatMatrix[p.name]?.coach || 'B1'} • {seatMatrix[p.name]?.seat || '12'}</td>
                                        <td className="p-6 text-xs font-black text-gray-300 font-mono italic tracking-tighter">{p.proof || 'N/A'}</td>
                                     </tr>
                                  ))}
