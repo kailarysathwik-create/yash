@@ -33,7 +33,8 @@ const TripPlanner = () => {
   const [passengers, setPassengers] = useState([]);
   const [transactionId, setTransactionId] = useState('');
   const [isHistory, setIsHistory] = useState(false);
-  const [pnrDetails, setPnrDetails] = useState('');
+  const [onwardTransit, setOnwardTransit] = useState('');
+  const [returnTransit, setReturnTransit] = useState('');
   const [hqStayName, setHqStayName] = useState('');
   const [seatMatrix, setSeatMatrix] = useState({}); // {personName: {coach, seat}}
   const [currentManifestPage, setCurrentManifestPage] = useState(0); 
@@ -211,13 +212,13 @@ const TripPlanner = () => {
             </motion.div>
 
             <div className={`flex items-center justify-center space-x-4 mb-20 ${isHistory ? 'opacity-0 h-0 pointer-events-none' : ''}`}>
-              {[1, 2, 3, 4, 5, 6].map((s) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
                 <div key={s} className="flex items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-700 ${step >= s ? 'bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20' : 'bg-white/40 text-[#1a0b2e]/20 border border-white/50'
                     }`}>
                     {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                   </div>
-                  {s < 6 && <div className={`w-8 h-[2px] mx-1 rounded-full ${step > s ? 'bg-[#A855F7]' : 'bg-[#1a0b2e]/5'}`} />}
+                  {s < 8 && <div className={`w-8 h-[2px] mx-1 rounded-full ${step > s ? 'bg-[#A855F7]' : 'bg-[#1a0b2e]/5'}`} />}
                 </div>
               ))}
             </div>
@@ -248,15 +249,12 @@ const TripPlanner = () => {
                 <Button 
                   onClick={() => { 
                     setOrchestrating(true); 
-                    tripAPI.orchestrateTrip(tripId, {
-                      pnr_details: pnrDetails || 'Internal Hub Log',
-                      stay_name: hqStayName || 'Selected HQ'
-                    }).then(r => { 
+                    tripAPI.orchestrateTrip(tripId).then(r => { 
                       setTransportOptions(r.transports); 
                       setStayOptions(r.stays); 
                       setItinerary(r.itinerary); 
                       setStep(2); 
-                    }); 
+                    }).finally(() => setOrchestrating(false));
                   }} 
                   disabled={orchestrating} 
                   className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-20 px-12 font-black text-xl"
@@ -275,104 +273,160 @@ const TripPlanner = () => {
 
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-              <div className="glass-card rounded-[3rem] p-10 border-[#A855F7]/20 mb-8 bg-[#A855F7]/5 group hover:shadow-2xl transition-all duration-700">
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="w-14 h-14 rounded-2xl bg-[#A855F7]/10 flex items-center justify-center border border-[#A855F7]/20">
-                    <ShieldCheck className="w-7 h-7 text-[#A855F7]" />
+               {/* Nights Remaining HUD */}
+               <div className="flex items-center justify-between p-8 glass-card rounded-3xl border-[#A855F7]/30 bg-[#A855F7]/5 mb-8">
+                  <div className="flex items-center gap-4">
+                     <div className="w-12 h-12 rounded-2xl bg-[#A855F7] flex items-center justify-center shadow-lg shadow-[#A855F7]/20">
+                        <Calendar className="w-6 h-6 text-white" />
+                     </div>
+                     <div>
+                        <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest">Mission Duration</h3>
+                        <p className="text-xl font-black text-[#1a0b2e]">{trip?.num_days} Day(s) Total</p>
+                     </div>
+                  </div>
+                  <div className="text-right">
+                     <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest">Temporal Status</h3>
+                     <p className={`text-xl font-black ${bookedNights > trip?.num_days ? 'text-red-500' : (bookedNights === trip?.num_days ? 'text-green-500' : 'text-[#A855F7]')}`}>
+                        {bookedNights === trip?.num_days ? 'Fully Secured' : `${trip?.num_days - bookedNights} Day(s) Remaining`}
+                     </p>
+                  </div>
+               </div>
+
+               <RealStaySearch 
+                  options={stayOptions} 
+                  tripData={trip} 
+                  numDays={trip?.num_days || 1} 
+                  onSelect={(opt) => { 
+                     const nightsAfter = bookedNights + (opt.nights || 1);
+                     if (nightsAfter > (trip?.num_days || 1)) {
+                        toast.warning(`Temporal Violation: Your mission only allows ${trip?.num_days} days. This stay exceeds the remaining time.`, {
+                           style: { background: '#1a0b2e', color: '#fff', border: '1px solid #A855F7' }
+                        });
+                        return;
+                     }
+                     setSelectedStays(prev => [...prev, opt]); 
+                  }} 
+               />
+               
+               <div className="flex justify-center pt-8">
+                  <Button 
+                    onClick={() => setStep(4)} 
+                    disabled={selectedStays.length === 0}
+                    className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-20 px-12 font-black text-xl shadow-2xl transition-all disabled:opacity-30"
+                  >
+                    Mission HQ Secured: Continue
+                  </Button>
+               </div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-12">
+               <div className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
+                <div className="flex items-center gap-6 mb-12">
+                  <div className="w-16 h-16 rounded-[2rem] bg-[#A855F7] flex items-center justify-center shadow-lg shadow-[#A855F7]/30">
+                    <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-[#1a0b2e] tracking-tight">Vector Identity Matrix</h3>
-                    <p className="text-[10px] font-black uppercase text-[#A855F7]/60 tracking-widest">Metadata Synchronization Required</p>
+                    <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tighter italic">Vector Identity Matrix</h2>
+                    <p className="text-gray-400 font-bold">Capture the mission logistics before synthesis</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Transit Reference (PNR/Flight No.)</Label>
+                    <Label className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest ml-4">Onward Vector (PNR/Flight No.)</Label>
                     <Input 
-                      value={pnrDetails} 
-                      onChange={(e) => setPnrDetails(e.target.value)} 
+                      value={onwardTransit} 
+                      onChange={(e) => setOnwardTransit(e.target.value)} 
                       className="glass-input h-14 px-5 font-bold border-[#A855F7]/20 focus:border-[#A855F7]" 
-                      placeholder="e.g. 6E-201 / PNR: 49AAB378" 
+                      placeholder="e.g. 2341675271 / AI-101" 
                     />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-[#A855F7]/60">Stay Mission HQ Name</Label>
+                    <Label className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest ml-4">Return Vector (PNR/Flight No.)</Label>
                     <Input 
-                      value={hqStayName} 
-                      onChange={(e) => setHqStayName(e.target.value)} 
+                      value={returnTransit} 
+                      onChange={(e) => setReturnTransit(e.target.value)} 
                       className="glass-input h-14 px-5 font-bold border-[#A855F7]/20 focus:border-[#A855F7]" 
-                      placeholder="e.g. Radisson Blu / Hilton HQ" 
+                      placeholder="e.g. PNR: 49AAB378 / 6E-202" 
                     />
                   </div>
+                </div>
+                
+                <div className="space-y-3">
+                   <Label className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest ml-4">Mission HQ (Stay Reference)</Label>
+                   <Input 
+                     value={hqStayName} 
+                     onChange={(e) => setHqStayName(e.target.value)} 
+                     className="glass-input h-14 px-5 font-bold border-[#A855F7]/20 focus:border-[#A855F7]" 
+                     placeholder="e.g. Radisson Blu / Hilton HQ" 
+                   />
                 </div>
               </div>
 
-              <RealStaySearch options={stayOptions} tripData={trip} numDays={trip?.num_days || 1} onSelect={(opt) => { setSelectedStays(prev => [...prev, opt]); }} />
-              
-              <div className="flex justify-center pt-16">
+              <div className="flex justify-center pt-8">
                  <Button 
                    onClick={async () => {
                      try {
                         setLoading(true);
                         const res = await tripAPI.generateItinerary(tripId, {
-                           pnr_details: pnrDetails || 'Hub Transit Protocol',
+                           onward_pnr: onwardTransit || 'Hub Transit Protocol',
+                           return_pnr: returnTransit || 'Return Protocol',
                            stay_name: hqStayName || selectedStays[0]?.name || 'Mission Genesis HQ',
                            transport: selectedTransport,
                            stays: selectedStays
                         });
-                        setItinerary(res.itinerary || []);
-                        setStep(4);
+                        setItinerary(res.itinerary?.days || res.itinerary || []);
+                        setStep(5);
                      } catch (err) {
                         toast.error("AI Strategic Refusal: Check identifiers.");
                      } finally {
                         setLoading(false);
                      }
                    }} 
-                   disabled={selectedStays.length === 0 || loading}
+                   disabled={loading}
                    className="bg-[#1a0b2e] text-white hover:bg-[#A855F7] rounded-full h-24 px-20 font-black text-2xl shadow-2xl transition-all disabled:opacity-30"
                  >
                    {loading ? 'Orchestrating Blueprint...' : 'Mission Ready: Generate Plan'}
                  </Button>
-                 {selectedStays.length === 0 && (
-                   <p className="absolute mt-28 text-[10px] font-black uppercase text-[#A855F7]/40">At least one Stay HQ required to initiate Plan</p>
-                 )}
-              </div>
-            </motion.div>
-          )}
-
-          {step === 4 && (
-            <motion.div key="step4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
-              <div className="grid grid-cols-1 gap-8">
-                {itinerary.map((day, idx) => (
-                  <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
-                    <div className="flex items-start justify-between mb-8">
-                      <div>
-                        <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-2">Day {idx + 1}</h3>
-                        <h4 className="text-3xl font-black text-[#1a0b2e] tracking-tight">{day.title}</h4>
-                      </div>
-                      <div className="w-16 h-16 rounded-3xl bg-[#A855F7]/10 flex items-center justify-center">
-                        <Calendar className="w-8 h-8 text-[#A855F7]" />
-                      </div>
-                    </div>
-                    <div className="space-y-6">
-                      {day.activities.map((activity, aIdx) => (
-                        <div key={aIdx} className="flex items-start gap-4 p-4 rounded-2xl bg-[#1a0b2e]/[0.02] border border-[#1a0b2e]/5">
-                          <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2.5 shrink-0" />
-                          <p className="text-[#1a0b2e] font-bold leading-relaxed">{activity}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-center pt-20">
-                <Button onClick={() => setStep(5)} className="bg-[#1a0b2e] text-white rounded-full h-24 px-20 font-black text-2xl">Next: Passenger Details</Button>
               </div>
             </motion.div>
           )}
 
           {step === 5 && (
             <motion.div key="step5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
+               <div className="grid grid-cols-1 gap-8">
+                 {(Array.isArray(itinerary) ? itinerary : itinerary?.days || []).map((day, idx) => (
+                   <div key={idx} className="glass-card rounded-[3.5rem] p-12 border-white/50 shadow-2xl">
+                     <div className="flex items-start justify-between mb-8">
+                       <div>
+                         <h3 className="text-[10px] font-black uppercase text-[#A855F7] tracking-widest mb-2">Day {idx + 1}</h3>
+                         <h4 className="text-3xl font-black text-[#1a0b2e] tracking-tight">{day.title}</h4>
+                       </div>
+                       <div className="w-16 h-16 rounded-3xl bg-[#A855F7]/10 flex items-center justify-center">
+                         <Calendar className="w-8 h-8 text-[#A855F7]" />
+                       </div>
+                     </div>
+                     <div className="space-y-6">
+                       {(day.activities || []).map((activity, aIdx) => (
+                         <div key={aIdx} className="flex items-start gap-4 p-4 rounded-2xl bg-[#1a0b2e]/[0.02] border border-[#1a0b2e]/5">
+                           <div className="w-2 h-2 rounded-full bg-[#A855F7] mt-2.5 shrink-0" />
+                           <p className="text-[#1a0b2e] font-bold leading-relaxed">{activity}</p>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 ))}
+               </div>
+               <div className="flex justify-center pt-20">
+                 <Button onClick={() => setStep(6)} className="bg-[#1a0b2e] text-white rounded-full h-24 px-20 font-black text-2xl">Next: Passenger Details</Button>
+               </div>
+            </motion.div>
+          )}
+
+          {step === 6 && (
+            <motion.div key="step6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {passengers.map((p, idx) => (
                   <div key={idx} className="glass-card rounded-[2rem] p-8 border-white/50 bg-white/30 relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-[#A855F7]/10">
@@ -385,7 +439,6 @@ const TripPlanner = () => {
                         onChange={(e) => {
                           const newP = [...passengers];
                           newP[idx].is_primary = e.target.checked;
-                          // If this one is primary, set its phone as lead
                           setPassengers(newP);
                         }}
                       />
@@ -401,40 +454,15 @@ const TripPlanner = () => {
 
                       <AnimatePresence>
                         {p.is_primary && (
-                          <motion.div 
-                            initial={{ height: 0, opacity: 0 }} 
-                            animate={{ height: 'auto', opacity: 1 }} 
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden space-y-4 pt-4 border-t border-[#A855F7]/10"
-                          >
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-4 pt-4 border-t border-[#A855F7]/10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1.5">
                                 <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Mobile (Req)</label>
-                                <input 
-                                  type="text"
-                                  placeholder="+91 XXXX"
-                                  className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
-                                  value={p.phone || ''}
-                                  onChange={(e) => {
-                                    const newP = [...passengers];
-                                    newP[idx].phone = e.target.value;
-                                    setPassengers(newP);
-                                  }}
-                                />
+                                <input type="text" placeholder="+91 XXXX" className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all" value={p.phone || ''} onChange={(e) => { const newP = [...passengers]; newP[idx].phone = e.target.value; setPassengers(newP); }} />
                               </div>
                               <div className="space-y-1.5">
                                 <label className="text-[9px] font-black uppercase text-[#A855F7] tracking-widest ml-1">Official Email (Opt)</label>
-                                <input 
-                                  type="email"
-                                  placeholder="email@agency.com"
-                                  className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all"
-                                  value={p.email || ''}
-                                  onChange={(e) => {
-                                    const newP = [...passengers];
-                                    newP[idx].email = e.target.value;
-                                    setPassengers(newP);
-                                  }}
-                                />
+                                <input type="email" placeholder="email@agency.com" className="w-full bg-[#A855F7]/5 border border-[#A855F7]/20 text-[#1a0b2e] rounded-xl h-12 px-5 font-bold text-sm focus:border-[#A855F7] transition-all" value={p.email || ''} onChange={(e) => { const newP = [...passengers]; newP[idx].email = e.target.value; setPassengers(newP); }} />
                               </div>
                             </div>
                           </motion.div>
@@ -452,16 +480,11 @@ const TripPlanner = () => {
                       toast.error("Identity Protocol Required: Mark one 'Official Primary' with a phone number.");
                       return;
                     }
-
                     try {
                       setLoading(true);
                        await tripAPI.updateTouristDetails(tripId, { 
                          tourists: passengers.map(p => ({
-                           name: p.name,
-                           age: parseInt(p.age) || 0,
-                           gender: p.gender,
-                           proof: p.proof,
-                           is_primary: p.is_primary || false
+                           name: p.name, age: parseInt(p.age) || 0, gender: p.gender, proof: p.proof, is_primary: p.is_primary || false
                          })),
                          contact_phone: primary.phone,
                          contact_email: primary.email || "",
@@ -471,9 +494,9 @@ const TripPlanner = () => {
                          number_plate: selectedTransport.number_plate || ""
                        }); 
                        toast.success('Explorer Matrix Synchronized');
-                       setStep(6); 
+                       setStep(7); 
                     } catch(err) {
-                       toast.error('Matrix Synchronization Failed (422 Schema)');
+                       toast.error('Matrix Synchronization Failed');
                     } finally {
                        setLoading(false);
                     }
@@ -487,8 +510,8 @@ const TripPlanner = () => {
             </motion.div>
           )}
 
-          {step === 6 && (
-            <motion.div key="step6" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+          {step === 7 && (
+            <motion.div key="step7" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
               <div className="mb-12">
                 <h2 className="text-4xl font-black text-[#1a0b2e] tracking-tight mb-8">Checkout Manifest</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -551,14 +574,14 @@ const TripPlanner = () => {
                   });
                   const freshTrip = await tripAPI.getTrip(tripId);
                   setTrip(freshTrip);
-                  setStep(7);
+                  setStep(8);
                 }}
               />
             </motion.div>
           )}
 
-          {step === 7 && (
-            <motion.div key="step7" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
+          {step === 8 && (
+            <motion.div key="step8" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h2 className="text-5xl font-black text-[#1a0b2e] tracking-tighter mb-2">Mission Settlement</h2>
