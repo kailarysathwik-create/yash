@@ -164,13 +164,36 @@ const TripPlanner = () => {
     let currentStream = null;
     const startCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        // Multi-layered hardware authorization sweep
+        const constraints = { 
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        };
+        
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (firstErr) {
+          console.warn("Primary vision constraints failed, falling back to basic stream:", firstErr);
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+
         currentStream = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          // Ensure hardware starts immediately
+          try {
+            await videoRef.current.play();
+          } catch (playErr) {
+            console.error("Auto-play hardware malfunction:", playErr);
+          }
         }
       } catch (err) {
-        console.error("Hardware Vision Malfunction:", err);
+        console.error("Hardware Vision Exhaustive Failure:", err);
+        toast.error("Camera detection offline. Check system-level permissions.");
       }
     };
 
@@ -503,10 +526,13 @@ const TripPlanner = () => {
                              <h3 className="text-5xl font-black italic tracking-tighter uppercase">Voyager Blueprint</h3>
                              <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Official Travel Authorization</p>
                           </div>
-                          <div className="text-right">
-                             <p className="text-[10px] font-black uppercase opacity-40 mb-2">Destination Vector</p>
-                             <p className="text-4xl font-black italic">{trip?.destination || 'HYP-X'}</p>
-                          </div>
+                           <div className="text-right flex items-center gap-6">
+                              {capturedImage && <img src={capturedImage} className="w-20 h-20 rounded-2xl border-4 border-white/20 object-cover shadow-2xl" />}
+                              <div>
+                                 <p className="text-[10px] font-black uppercase opacity-40 mb-2">Destination Vector</p>
+                                 <p className="text-4xl font-black italic">{trip?.destination || 'HYP-X'}</p>
+                              </div>
+                           </div>
                        </div>
                        <div className="p-16 space-y-16">
                           <div className="grid grid-cols-2 gap-12">
