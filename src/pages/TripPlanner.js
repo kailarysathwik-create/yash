@@ -159,6 +159,32 @@ const TripPlanner = () => {
     syncData();
   }, [step, tripId, transportOptions.onward.length, orchestrating]);
 
+  // Camera Sector Controller: Authorize hardware vision for Phase 5
+  useEffect(() => {
+    let currentStream = null;
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        currentStream = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Hardware Vision Malfunction:", err);
+      }
+    };
+
+    if (step === 5 && !capturedImage) {
+      startCamera();
+    }
+
+    return () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [step, capturedImage]);
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa]">
       <div className="text-center">
@@ -385,7 +411,7 @@ const TripPlanner = () => {
                        <Button onClick={async () => { 
                          const lead = passengers.find(px => px.is_primary);
                          if (!lead || !lead.phone) { toast.error("Primary Vector Unidentified"); return; }
-                         try { setLoading(true); await tripAPI.updateTouristDetails(tripId, { tourists: passengers, contact_phone: lead.phone, contact_email: lead.email }); setStep(faceCaptureEnabled ? 5 : 6); } catch(e) { toast.error("Hub Sync Failed"); } finally { setLoading(false); }
+                         try { setLoading(true); await tripAPI.updateTouristDetails(tripId, { tourists: passengers, contact_phone: lead.phone, contact_email: lead.email || '' }); setStep(faceCaptureEnabled ? 5 : 6); } catch(e) { toast.error("Hub Sync Failed"); } finally { setLoading(false); }
                        }} disabled={loading} className={`rounded-full h-24 px-20 font-black text-2xl transition-all hover:scale-105 ${theme.btn} text-white`}>
                           {loading ? 'Authorizing Matrix...' : 'Proceed to Mission Finalization'}
                        </Button>
