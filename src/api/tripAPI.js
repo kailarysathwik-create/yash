@@ -213,7 +213,8 @@ export const tripAPI = {
     getMe: async () => {
       try {
         const response = await apiClient.get('/auth/me');
-        return response.data;
+        // Unwrapping the user context from the backend envelope
+        return response.data.user;
       } catch (error) {
         console.error('Failed to get user:', error.message);
         throw error;
@@ -269,6 +270,27 @@ export const tripAPI = {
       return response.data;
     } catch (error) {
       console.error('Failed to dispatch manifest:', error.message);
+      throw error;
+    }
+  },
+
+  // Master Overwatch Methods
+  getMasterDashboard: async () => {
+    try {
+      const response = await apiClient.get('/master/agencies');
+      return response.data;
+    } catch (error) {
+      console.error('Master Overwatch Sync Failed:', error.message);
+      throw error;
+    }
+  },
+
+  toggleAgency: async (userId) => {
+    try {
+      const response = await apiClient.post(`/master/agency/${userId}/toggle`);
+      return response.data;
+    } catch (error) {
+      console.error('Agency Access Protocol Failed:', error.message);
       throw error;
     }
   },
